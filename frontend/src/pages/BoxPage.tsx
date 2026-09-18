@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import type { CardDto } from '../interfaces/generated.ts'
 import type { BoxDto } from '../interfaces/generated.ts'
 import type { GroupedCardDto } from '../interfaces/generated.ts'
+import RLPopup from '../components/Popups/RightLongPopup.tsx'
 
 export default function BoxPage() {
     const { id } = useParams<{ id: string }>()
     const [cards, setCards] = useState<GroupedCardDto[]>([])
     const [box, setBox] = useState<BoxDto>()
     const [loading, setLoading] = useState(true)
+    //const [selectedCard, setSelectedCard] = useState<GroupedCardDto[]>([])
+    const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -25,6 +27,11 @@ export default function BoxPage() {
     return loading ? 
     (<div className="p-8">Loading...</div>) : 
     (
+        <>
+        {showRightPanel && (
+            <RLPopup context={<p> Hellow</p>} />
+        )}
+        
         <div className="p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
             <h1 className="text-2xl font-bold mb-6">{box?.name}</h1>
@@ -36,6 +43,7 @@ export default function BoxPage() {
                                 src={`https://api.scryfall.com/cards/${c.scryfallId}?format=image&version=normal`}
                                 alt={c.name ?? ''}
                                 className="w-full rounded-lg shadow"
+                                onClick={() => setShowRightPanel(!showRightPanel)}
                             />
                             {Number(c.count) > 1 && (
                                 <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
@@ -48,5 +56,6 @@ export default function BoxPage() {
                 </div>
             </div>
         </div>
+        </>
     )
 }
