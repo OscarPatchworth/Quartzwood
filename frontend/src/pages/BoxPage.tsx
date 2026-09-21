@@ -5,6 +5,8 @@ import type { BoxDto } from '../interfaces/generated.ts'
 import type { GroupedCardDto } from '../interfaces/generated.ts'
 import RLPopup from '../components/Popups/RightLongPopup.tsx'
 
+
+
 export default function BoxPage() {
     const { id } = useParams<{ id: string }>()
     const [cards, setCards] = useState<GroupedCardDto[]>([])
@@ -13,6 +15,10 @@ export default function BoxPage() {
     //const [selectedCard, setSelectedCard] = useState<GroupedCardDto[]>([])
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
     const navigate = useNavigate()
+
+    function selectCard(){
+        setShowRightPanel(!showRightPanel)
+    }
 
     useEffect(() => {
         Promise.all([
@@ -29,7 +35,9 @@ export default function BoxPage() {
     (
         <>
         {showRightPanel && (
-            <RLPopup context={<p> Hellow</p>} />
+            <RLPopup 
+            context={<p> Hellow</p>}
+            onClose={() => setShowRightPanel(false)}/>
         )}
         
         <div className="p-8">
@@ -43,7 +51,7 @@ export default function BoxPage() {
                                 src={`https://api.scryfall.com/cards/${c.scryfallId}?format=image&version=normal`}
                                 alt={c.name ?? ''}
                                 className="w-full rounded-lg shadow"
-                                onClick={() => setShowRightPanel(!showRightPanel)}
+                                onClick={() => selectCard()}
                             />
                             {Number(c.count) > 1 && (
                                 <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
