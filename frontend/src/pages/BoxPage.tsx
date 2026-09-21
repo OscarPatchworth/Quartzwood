@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import type { BoxDto } from '../interfaces/generated.ts'
+import { type CardDto, type BoxDto } from '../interfaces/generated.ts'
 import type { GroupedCardDto } from '../interfaces/generated.ts'
 import RLPopup from '../components/Popups/RightLongPopup.tsx'
+import { CardDetails } from '../components/Cards/CardDetails.tsx'
 
 
 
@@ -12,12 +13,20 @@ export default function BoxPage() {
     const [cards, setCards] = useState<GroupedCardDto[]>([])
     const [box, setBox] = useState<BoxDto>()
     const [loading, setLoading] = useState(true)
-    //const [selectedCard, setSelectedCard] = useState<GroupedCardDto[]>([])
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
     const navigate = useNavigate()
+    const [selectedCard, setSelectedCard] = useState<CardDto>()
 
-    function selectCard(){
-        setShowRightPanel(!showRightPanel)
+    function selectCard(groupedCard: GroupedCardDto){
+        setSelectedCard(undefined)
+        if(groupedCard.ids.length == 1){
+            client.get<CardDto>(`/cards/${groupedCard.ids[0]}`)
+            .then((res) => {
+                setSelectedCard(res.data)
+                setShowRightPanel(true);
+                }
+            )
+        } else {setShowRightPanel(true);}
     }
 
     useEffect(() => {
@@ -36,7 +45,7 @@ export default function BoxPage() {
         <>
         {showRightPanel && (
             <RLPopup 
-            context={<p> Hellow</p>}
+            context={selectedCard ? <CardDetails card={selectedCard} /> : <p>Hello</p>}
             onClose={() => setShowRightPanel(false)}/>
         )}
         
@@ -51,7 +60,7 @@ export default function BoxPage() {
                                 src={`https://api.scryfall.com/cards/${c.scryfallId}?format=image&version=normal`}
                                 alt={c.name ?? ''}
                                 className="w-full rounded-lg shadow"
-                                onClick={() => selectCard()}
+                                onClick={() => selectCard(c)}
                             />
                             {Number(c.count) > 1 && (
                                 <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
