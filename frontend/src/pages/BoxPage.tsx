@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import { type CardDto, type BoxDto } from '../interfaces/generated.ts'
 import type { GroupedCardDto } from '../interfaces/generated.ts'
-import RLPopup from '../components/Popups/RightLongPopup.tsx'
 import { CardDetails } from '../components/Cards/CardDetails.tsx'
+import { withPopup } from '../components/hocs/withPopup.tsx'
+import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 
+const CardDetailsPopup = withPopup(CardDetails, RightLongPopupShape)
 
 
 export default function BoxPage() {
@@ -19,14 +21,13 @@ export default function BoxPage() {
 
     function selectCard(groupedCard: GroupedCardDto){
         setSelectedCard(undefined)
-        if(groupedCard.ids.length == 1){
+        if(groupedCard.ids.length > 0){
             client.get<CardDto>(`/cards/${groupedCard.ids[0]}`)
             .then((res) => {
                 setSelectedCard(res.data)
-                setShowRightPanel(true);
-                }
-            )
-        } else {setShowRightPanel(true);}
+                })
+            setShowRightPanel(true)
+        }
     }
 
     useEffect(() => {
@@ -44,10 +45,12 @@ export default function BoxPage() {
     (
         <>
         {showRightPanel && (
-            <RLPopup 
-            context={selectedCard ? <CardDetails card={selectedCard} /> : <p>Hello</p>}
-            onClose={() => setShowRightPanel(false)}/>
-        )}
+            <CardDetailsPopup
+                show={showRightPanel}
+                onClose={() => setShowRightPanel(false)}
+                card={selectedCard}
+            />
+        )}    
         
         <div className="p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>

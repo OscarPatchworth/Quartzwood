@@ -61,7 +61,8 @@ public class CardQueryService : ICardQueryService
             c.ScryfallId,
             c.Condition,
             c.FoilType,
-            c.StampType
+            c.StampType,
+            c.Notes,
         })
         .Select(g => new GroupedCardDto(
             g.Key.Name,
