@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import { type CardDto, type BoxDto } from '../interfaces/generated.ts'
+import { type BoxDto } from '../interfaces/generated.ts'
 import type { GroupedCardDto } from '../interfaces/generated.ts'
-import { CardDetails } from '../components/Cards/CardDetails.tsx'
 import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
+import { CardEditController } from '../components/Cards/CardEditController.tsx'
 
-const CardDetailsPopup = withPopup(CardDetails, RightLongPopupShape)
+const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
 
 export default function BoxPage() {
@@ -17,15 +17,12 @@ export default function BoxPage() {
     const [loading, setLoading] = useState(true)
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
     const navigate = useNavigate()
-    const [selectedCard, setSelectedCard] = useState<CardDto>()
+    const [selectedCards, setSelectedCards] = useState<GroupedCardDto>()
 
     function selectCard(groupedCard: GroupedCardDto){
-        setSelectedCard(undefined)
+        setSelectedCards(undefined)
         if(groupedCard.ids.length > 0){
-            client.get<CardDto>(`/cards/${groupedCard.ids[0]}`)
-            .then((res) => {
-                setSelectedCard(res.data)
-                })
+            setSelectedCards(groupedCard)
             setShowRightPanel(true)
         }
     }
@@ -48,7 +45,7 @@ export default function BoxPage() {
             <CardDetailsPopup
                 show={showRightPanel}
                 onClose={() => setShowRightPanel(false)}
-                card={selectedCard}
+                cards={selectedCards}
             />
         )}    
         
