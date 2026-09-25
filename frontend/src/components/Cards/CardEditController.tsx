@@ -4,6 +4,7 @@ import type { CardDto } from "../../interfaces/generated.ts"
 import client from "../../api/client"
 import { CardDetails } from "./CardDetails"
 import { ButtonBasic } from "../Buttons/ButtonBasic.tsx"
+import { ButtonRange } from "../Buttons/ButtonRange.tsx"
 
 interface CECProps {
   cards?: GroupedCardDto
@@ -39,8 +40,8 @@ export function CardEditController({cards: cards}: CECProps){
         }
             
         <div className=" ml-3 mr-4 flex justify-between" >
-        <ButtonBasic label="Update" color="008080" />
-        <ButtonBasic label="Delete" color="800080"/>    
+        <ButtonRange label="Update" color="008080" />
+        <ButtonRange label="Delete" color="800080"/>    
         </div>    
         
         
