@@ -3,6 +3,8 @@ import type { GroupedCardDto } from "../../interfaces/generated.ts"
 import type { CardDto } from "../../interfaces/generated.ts"
 import client from "../../api/client"
 import { CardDetails } from "./CardDetails"
+import { CardEditForm } from "./CardEditForm"
+import { CardDuplicateListSelect } from "./CardDuplicateListSelect.tsx"
 
 interface CECProps {
   cards?: GroupedCardDto
@@ -30,7 +32,7 @@ export function CardEditController({cards: cards}: CECProps){
 
             setGroupedCardsAmount(cards.ids.length)
         }
-    })
+    }, [cards])
 
     return(
         <>
@@ -45,7 +47,7 @@ export function CardEditController({cards: cards}: CECProps){
         </div>
 
         {editMode ?
-            <p> Editing Cards</p> :
+            <CardEditForm card={displayCard} onChange={setDisplayCard} /> :
             <CardDetails card={displayCard} />
         }
             
@@ -90,7 +92,12 @@ export function CardEditController({cards: cards}: CECProps){
             >
                 Update
             </button>
-        </div>                       
+        </div>                
+        {cards &&
+            <CardDuplicateListSelect
+                groupedCards={cards}
+            />
+        }
         </>
     )
     
