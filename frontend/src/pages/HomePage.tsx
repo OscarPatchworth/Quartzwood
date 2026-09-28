@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import client from '../api/client'
+import { LoadingIndicator } from '../components/misc/loadingIndicator'
 
 // Shape of data coming from API
 interface Entity {
@@ -22,7 +23,7 @@ export default function HomePage() {
             .finally(() => setLoading(false))
     }, [])
 
-    if (loading) return <div className="p-8">Loading...</div>
+    if (loading) return <LoadingIndicator />
 
     return (
         <div className="p-8">

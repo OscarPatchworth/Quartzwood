@@ -6,6 +6,7 @@ import type { GroupedCardDto } from '../interfaces/generated.ts'
 import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
+import { LoadingIndicator } from '../components/misc/loadingIndicator.tsx'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -38,7 +39,7 @@ export default function BoxPage() {
     }, [id])
 
     return loading ? 
-    (<div className="p-8">Loading...</div>) : 
+    (<LoadingIndicator />) : 
     (
         <>
         {showRightPanel && (

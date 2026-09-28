@@ -1,4 +1,5 @@
 import type { CardDto } from '../../interfaces/generated.ts'
+import { LoadingIndicator } from '../misc/loadingIndicator.tsx'
 
 interface CardDetailsProps {
     card?: CardDto
@@ -7,9 +8,7 @@ interface CardDetailsProps {
 export function CardDetails({card: card}: CardDetailsProps) {
     if(card == null){
         return(
-            <>
-            <p> loading ...</p>
-            </>
+            <LoadingIndicator />
         )
     }else{   
         return (

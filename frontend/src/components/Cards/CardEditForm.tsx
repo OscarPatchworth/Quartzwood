@@ -1,4 +1,5 @@
 import type { CardDto } from '../../interfaces/generated.ts'
+import { LoadingIndicator } from '../misc/loadingIndicator.tsx'
 
 interface CardEditFormProps {
     card?: CardDto
@@ -9,7 +10,7 @@ const inputClassName = "w-full rounded-md border border-stone-300 bg-white px-2 
 
 export function CardEditForm({ card, onChange }: CardEditFormProps) {
     if (!card) {
-        return <p className="p-4 text-sm text-stone-500">Loading card...</p>
+        return <LoadingIndicator />
     }
 
     function updateField<K extends keyof CardDto>(field: K, value: CardDto[K]) {

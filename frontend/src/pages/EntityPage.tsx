@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
 import type { GroupDto } from '../interfaces/generated.ts/types.gen'
+import { LoadingIndicator } from '../components/misc/loadingIndicator'
 
 export default function EntityPage() {
     const { id } = useParams<{ id: string }>()
@@ -15,7 +16,7 @@ export default function EntityPage() {
             .finally(() => setLoading(false))
     }, [id])
 
-    if (loading) return <div className="p-8">Loading...</div>
+    if (loading) return <LoadingIndicator />
 
     return (
         <div className="p-8">
