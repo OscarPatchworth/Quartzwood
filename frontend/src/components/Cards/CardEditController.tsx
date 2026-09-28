@@ -69,14 +69,16 @@ export function CardEditController({cards: cards}: CECProps){
                 <div className="flex justify-center">
                     <button
                         type="button"
-                        className="rounded-xl border border-olive-300 bg-olive-100 px-4 py-2 text-sm font-semibold text-olive-900 shadow-sm transition hover:bg-olive-200 focus:outline-none focus:ring-2 focus:ring-olive-400"
+                        className="rounded-xl border border-olive-300 bg-olive-100 px-4 py-2 text-sm font-semibold text-olive-900 shadow-sm transition 
+                        hover:bg-olive-200 focus:outline-none focus:ring-2 focus:ring-olive-400"
                         onClick={() => adjustEditCardAmout(-1)}
                     >
                         ▼
                     </button>
                     <button
                         type="button"
-                        className="rounded-xl border border-olive-300 bg-olive-100 px-4 py-2 text-sm font-semibold text-olive-900 shadow-sm transition hover:bg-olive-200 focus:outline-none focus:ring-2 focus:ring-olive-400"
+                        className="rounded-xl border border-olive-300 bg-olive-100 px-4 py-2 text-sm font-semibold text-olive-900 shadow-sm transition 
+                        hover:bg-olive-200 focus:outline-none focus:ring-2 focus:ring-olive-400"
                         onClick={() => adjustEditCardAmout(1)}
                     >
                     ▲
@@ -87,16 +89,18 @@ export function CardEditController({cards: cards}: CECProps){
 
             <button
                 type="button"
-                className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-900 shadow-sm transition hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-900 shadow-sm transition 
+                hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
                 onClick={() => setEditMode(!editMode)}
             >
                 Update
             </button>
         </div>                
         {cards &&
-            <CardDuplicateListSelect
-                groupedCards={cards}
-            />
+            <div className="pt-4">
+                <CardDuplicateListSelect
+                    groupedCards={cards} />
+            </div>
         }
         </>
     )
