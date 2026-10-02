@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import type { GroupedCardDto, UpdateCardDto } from "../../interfaces/generated.ts"
+import type { AddCardDto, GroupedCardDto, UpdateCardDto } from "../../interfaces/generated.ts"
 import type { CardDto } from "../../interfaces/generated.ts"
 import client from "../../api/client"
 import { CardDetails } from "./CardDetails"
@@ -108,6 +108,42 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
         setIsSaving(false)
     }
 
+    async function addCardCopy() {
+        if (!displayCard || isSaving) return
+
+        const addDto: AddCardDto = {
+            setCode: displayCard.setCode,
+            setNumber: displayCard.setNumber,
+            name: displayCard.name,
+            condition: displayCard.condition,
+            foilType: displayCard.foilType,
+            stampType: displayCard.stampType,
+            language: displayCard.language,
+            isProxy: displayCard.isProxy,
+            isSigned: displayCard.isSigned,
+            alterArtist: displayCard.alterArtist,
+            notes: displayCard.notes,
+            boxId: displayCard.boxId,
+        }
+
+        setIsSaving(true)
+        setActionError(undefined)
+        try {
+            await client.post<CardDto>("/cards", addDto)
+        } catch {
+            setActionError("Could not add a copy of this card. Please try again.")
+            setIsSaving(false)
+            return
+        }
+
+        try {
+            await onMutationComplete?.()
+        } catch {
+            setActionError("The card was added, but the box list could not be refreshed.")
+        }
+        setIsSaving(false)
+    }
+
     return(
         <>
         <div className="relative mr-5 mt-2">
@@ -147,6 +183,19 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
                     <CardDetails card={displayCard} />
                 }
                 {actionError && <p className="px-2 pb-2 text-sm text-rose-700" role="alert">{actionError}</p>}
+                
+                {editMode &&
+                    <button
+                        type="button"
+                        aria-label="Add a copy of this card"
+                        title="Add a copy"
+                        className="absolute bottom-2 right-2 z-30 flex h-10 w-10 translate-x-1/2 translate-y-1/2 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-100 text-2xl font-semibold leading-none text-emerald-900 shadow-sm transition hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:cursor-wait disabled:opacity-60"
+                        disabled={isSaving}
+                        onClick={addCardCopy}
+                    >
+                        +
+                    </button>
+                }
             </div>
             
         </div>
