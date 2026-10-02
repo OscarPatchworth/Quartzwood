@@ -12,7 +12,7 @@ export function CardDetails({card: card}: CardDetailsProps) {
         )
     }else{   
         return (
-            <div className="p-2">
+            <div className="p-1">
                 <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4 shadow-[0_2px_8px_rgba(120,53,15,0.12)]">
                     <div className="mb-3 border-b border-amber-200 pb-3">
                         <p className="text-lg font-bold uppercase tracking-wide text-stone-800">{card.name}</p>

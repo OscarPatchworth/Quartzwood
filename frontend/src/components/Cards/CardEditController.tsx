@@ -14,16 +14,8 @@ export function CardEditController({cards: cards}: CECProps){
 
     const [displayCard, setDisplayCard] = useState<CardDto>();
     const [editMode, setEditMode] = useState<Boolean>(false);
-    const [editCardAmount, setEditCardAmount] = useState<number>(1)
     const [groupedCardsAmount, setGroupedCardsAmount]  = useState<number>(0)
-
-    function adjustEditCardAmout(amount: number){
-        var newAmount = editCardAmount + amount
-        const minEditableCards = 1
-        if (newAmount >= minEditableCards && newAmount <= groupedCardsAmount)
-            {setEditCardAmount(editCardAmount+amount)}
-    }
-
+    const [selectedGroupedCardIds, setSelectedGroupedCardIds] = useState<string[]>([])
 
     useEffect(() =>{
         if(cards && cards.ids.length > 0){
@@ -36,70 +28,49 @@ export function CardEditController({cards: cards}: CECProps){
 
     return(
         <>
-         <div className="flex justify-end float-right">
+        <div className="relative mr-5 mt-2">
             <button
                 type="button"
-                className="rounded-xl border border-amber-300 bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            className="absolute right-2 top-2 z-30 translate-x-1/2 -translate-y-1/2 rounded-xl border border-amber-300 bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400"
                 onClick={() => setEditMode(!editMode)}
             >
                 Edit
             </button>
-        </div>
 
-        {editMode ?
-            <CardEditForm card={displayCard} onChange={setDisplayCard} /> :
-            <CardDetails card={displayCard} />
-        }
-            
-        <div className=" ml-3 mr-4 flex justify-between" >
+            <div className="absolute left-full top-12 z-10 flex -translate-x-2 flex-col gap-2">
+                <button
+                    type="button"
+                    className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-sky-300 bg-sky-100 text-sm font-semibold text-sky-900 shadow-sm transition hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    onClick={() => setEditMode(!editMode)}
+                >
+                    <span className="-rotate-90 whitespace-nowrap">Update</span>
+                </button>
 
-            <button
-                type="button"
-                className="rounded-xl border border-rose-300 bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-900 shadow-sm transition hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400"
-                onClick={() => setEditMode(!editMode)}
-            >
-                Delete
-            </button>
-
-            {cards && cards.ids.length > 1 &&
-            <div className="flex flex-col justify-center">
-                <div>
-                    <label>Editing {editCardAmount} cards</label>
-                </div>
-                <div className="flex justify-center">
-                    <button
-                        type="button"
-                        className="rounded-xl border border-olive-300 bg-olive-100 px-4 py-2 text-sm font-semibold text-olive-900 shadow-sm transition 
-                        hover:bg-olive-200 focus:outline-none focus:ring-2 focus:ring-olive-400"
-                        onClick={() => adjustEditCardAmout(-1)}
-                    >
-                        ▼
-                    </button>
-                    <button
-                        type="button"
-                        className="rounded-xl border border-olive-300 bg-olive-100 px-4 py-2 text-sm font-semibold text-olive-900 shadow-sm transition 
-                        hover:bg-olive-200 focus:outline-none focus:ring-2 focus:ring-olive-400"
-                        onClick={() => adjustEditCardAmout(1)}
-                    >
-                    ▲
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-rose-300 bg-rose-100 text-sm font-semibold text-rose-900 shadow-sm transition hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                    onClick={() => setEditMode(!editMode)}
+                >
+                    <span className="-rotate-90 whitespace-nowrap">Delete</span>
+                </button>
             </div>
-            }
 
-            <button
-                type="button"
-                className="rounded-xl border border-sky-300 bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-900 shadow-sm transition 
-                hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-                onClick={() => setEditMode(!editMode)}
-            >
-                Update
-            </button>
-        </div>                
+            <div className="relative z-20">
+                {editMode ?
+                    <CardEditForm card={displayCard} onChange={setDisplayCard} /> :
+                    <CardDetails card={displayCard} />
+                }
+            </div>
+            
+        </div>
+            
+                
         {cards &&
             <div className="pt-4">
                 <CardDuplicateListSelect
-                    groupedCards={cards} />
+                    groupedCards={cards} 
+                    setSelectedCards={setSelectedGroupedCardIds}
+                    />
             </div>
         }
         </>
