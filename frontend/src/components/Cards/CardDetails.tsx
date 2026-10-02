@@ -19,7 +19,8 @@ export function CardDetails({card: card}: CardDetailsProps) {
                         <p className="text-sm text-stone-600">{card.setNumber}-{card.setCode}</p>
                     </div>
 
-                    <dl className="space-y-2 text-sm text-stone-700">
+                    <dl className="space-y-2 text-sm text-stone-700 
+                    mb-3 border-b border-amber-200 pb-3">
                         <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
                             <dt className="font-semibold text-stone-600">Condition</dt>
                             <dd className="text-right">{card.condition}</dd>
@@ -36,6 +37,43 @@ export function CardDetails({card: card}: CardDetailsProps) {
                             <dt className="font-semibold text-stone-600">Language</dt>
                             <dd className="text-right">{card.language ?? "N/A"}</dd>
                         </div>
+                    </dl>
+
+                      <dl className="space-y-2 text-sm text-stone-700 
+                    mb-3 border-b border-amber-200 pb-3">
+                        <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
+                            <dt className="font-semibold text-stone-600">Proxy</dt>
+                            <dd className="text-right">{String(card.isProxy)}</dd>
+                        </div>
+                        <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
+                            <dt className="font-semibold text-stone-600">Signed</dt>
+                            <dd className="text-right">{String(card.isSigned)}</dd>
+                        </div>
+                        <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
+                            <dt className="font-semibold text-stone-600">Alter</dt>
+                            <dd className="text-right">{String(card.alterArtist !== null)}</dd>
+                        </div>
+                        {card.alterArtist &&
+                            <div className="flex justify-between gap-4 border-b border-amber-100 pb-1 ml-5">
+                                <dt className="font-semibold text-stone-600">Alter Artist</dt>
+                                <dd className="text-right">{String(card.alterArtist)}</dd>
+                            </div>
+                        }
+                    </dl>
+
+                     <dl className="space-y-2 text-sm text-stone-700 
+                    mb-3 border-b border-amber-200 pb-3">
+                        <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
+                            <dt className="font-semibold text-stone-600">Notes</dt>
+                            <dd className="text-right">{card.notes && String(card.notes)}</dd>
+                        </div>
+                        {card.tags.length > 0 &&
+                            <div className="flex justify-between gap-4 border-b border-amber-100 pb-1 ml-5">
+                                <dt className="font-semibold text-stone-600">Tags</dt>
+                                <dd className="text-right">{String(card.tags)}</dd>
+                            </div>
+                        }
+
                     </dl>
                 </div>
                 

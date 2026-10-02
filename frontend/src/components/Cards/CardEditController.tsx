@@ -13,16 +13,24 @@ interface CECProps {
 export function CardEditController({cards: cards}: CECProps){
 
     const [displayCard, setDisplayCard] = useState<CardDto>();
-    const [editMode, setEditMode] = useState<Boolean>(false);
-    const [groupedCardsAmount, setGroupedCardsAmount]  = useState<number>(0)
+    const [editMode, setEditMode] = useState<boolean>(false);
     const [selectedGroupedCardIds, setSelectedGroupedCardIds] = useState<string[]>([])
+
+    function updateSelectedGroupedCards(cardIds: string[])
+    {
+        setSelectedGroupedCardIds(cardIds)
+
+        if (selectedGroupedCardIds[0] != displayCard?.id)
+        {
+            client.get<CardDto>(`/cards/${selectedGroupedCardIds[0]}`)
+            .then((res) => { setDisplayCard(res.data) })
+        }
+    }
 
     useEffect(() =>{
         if(cards && cards.ids.length > 0){
             client.get<CardDto>(`/cards/${cards.ids[0]}`)
             .then((res) => { setDisplayCard(res.data) })
-
-            setGroupedCardsAmount(cards.ids.length)
         }
     }, [cards])
 
@@ -71,7 +79,7 @@ export function CardEditController({cards: cards}: CECProps){
             <div className="pt-4">
                 <CardDuplicateListSelect
                     groupedCards={cards} 
-                    setSelectedCards={setSelectedGroupedCardIds}
+                    setSelectedCards={updateSelectedGroupedCards}
                     />
             </div>
         }

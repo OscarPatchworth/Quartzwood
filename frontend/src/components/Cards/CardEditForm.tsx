@@ -44,7 +44,8 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                 </div>
             </div>
             <table className="w-full border-collapse text-left text-sm text-stone-700">
-                <tbody className="divide-y divide-amber-100">
+                <tbody className="divide-y divide-amber-100
+                mb-3 border-b border-amber-200 pb-3">
                     <tr>
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Condition</th>
                         <td className="px-3 py-2">
@@ -73,6 +74,58 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Language</th>
                         <td className="px-3 py-2">
                             <input aria-label="Language" className={inputClassName} value={card.language} onChange={event => updateField("language", event.target.value)} />
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody className="divide-y divide-amber-100
+                mb-3 border-b border-amber-200 pb-3">
+                    <tr>
+                        <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Proxy</th>
+                        <td className="px-3 py-2">
+                            <input
+                                aria-label="Proxy"
+                                type="checkbox"
+                                className="h-4 w-4 accent-amber-600 focus:ring-amber-500"
+                                checked={card.isProxy}
+                                onChange={event => updateField("isProxy", event.target.checked)}
+                            />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Alter</th>
+                        <td className="px-3 py-2">
+                            <input
+                                aria-label="Alter"
+                                type="checkbox"
+                                className="h-4 w-4 accent-amber-600 focus:ring-amber-500"
+                                checked={card.alterArtist !== null}
+                                onChange={event => updateField("alterArtist", event.target.checked ? card.alterArtist || "unknown" : null)}
+                            />
+                        </td>
+                    </tr>
+                    {card.alterArtist !== null && (
+                        <tr>
+                            <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Alter artist</th>
+                            <td className="px-3 py-2">
+                                <input
+                                    aria-label="Alter artist"
+                                    className={inputClassName}
+                                    value={card.alterArtist}
+                                    onChange={event => updateField("alterArtist", event.target.value)}
+                                />
+                            </td>
+                        </tr>
+                    )}
+                    <tr>
+                        <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Notes</th>
+                        <td className="px-3 py-2">
+                            <textarea
+                                aria-label="Notes"
+                                className={inputClassName}
+                                rows={3}
+                                value={card.notes ?? ""}
+                                onChange={event => updateField("notes", event.target.value)}
+                            />
                         </td>
                     </tr>
                 </tbody>
