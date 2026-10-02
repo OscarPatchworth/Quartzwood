@@ -37,23 +37,25 @@ export function CardEditController({cards: cards}: CECProps){
                 Edit
             </button>
 
-            <div className="absolute left-full top-12 z-10 flex -translate-x-2 flex-col gap-2">
-                <button
-                    type="button"
-                    className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-sky-300 bg-sky-100 text-sm font-semibold text-sky-900 shadow-sm transition hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
-                    onClick={() => setEditMode(!editMode)}
-                >
-                    <span className="-rotate-90 whitespace-nowrap">Update</span>
-                </button>
+            {editMode &&
+                <div className="absolute left-full top-12 z-10 flex -translate-x-2 flex-col gap-2">
+                    <button
+                        type="button"
+                        className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-sky-300 bg-sky-100 text-sm font-semibold text-sky-900 shadow-sm transition hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                        onClick={() => setEditMode(!editMode)}
+                    >
+                        <span className="-rotate-90 whitespace-nowrap">Update</span>
+                    </button>
 
-                <button
-                    type="button"
-                    className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-rose-300 bg-rose-100 text-sm font-semibold text-rose-900 shadow-sm transition hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400"
-                    onClick={() => setEditMode(!editMode)}
-                >
-                    <span className="-rotate-90 whitespace-nowrap">Delete</span>
-                </button>
-            </div>
+                    <button
+                        type="button"
+                        className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-rose-300 bg-rose-100 text-sm font-semibold text-rose-900 shadow-sm transition hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                        onClick={() => setEditMode(!editMode)}
+                    >
+                        <span className="-rotate-90 whitespace-nowrap">Delete</span>
+                    </button>
+                </div>
+            }
 
             <div className="relative z-20">
                 {editMode ?
