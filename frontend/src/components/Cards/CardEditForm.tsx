@@ -98,12 +98,12 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                                 aria-label="Alter"
                                 type="checkbox"
                                 className="h-4 w-4 accent-amber-600 focus:ring-amber-500"
-                                checked={card.alterArtist !== null}
+                                checked={Boolean(card.alterArtist)}
                                 onChange={event => updateField("alterArtist", event.target.checked ? card.alterArtist || "unknown" : null)}
                             />
                         </td>
                     </tr>
-                    {card.alterArtist !== null && (
+                    {card.alterArtist && (
                         <tr>
                             <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Alter artist</th>
                             <td className="px-3 py-2">

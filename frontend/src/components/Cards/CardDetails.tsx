@@ -51,7 +51,7 @@ export function CardDetails({card: card}: CardDetailsProps) {
                         </div>
                         <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
                             <dt className="font-semibold text-stone-600">Alter</dt>
-                            <dd className="text-right">{String(card.alterArtist !== null)}</dd>
+                            <dd className="text-right">{String(Boolean(card.alterArtist))}</dd>
                         </div>
                         {card.alterArtist &&
                             <div className="flex justify-between gap-4 border-b border-amber-100 pb-1 ml-5">

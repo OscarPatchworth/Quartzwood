@@ -28,6 +28,13 @@ export default function BoxPage() {
         }
     }
 
+    async function refreshCardsAfterMutation() {
+        const response = await client.get<GroupedCardDto[]>(`/cards/by-box/${id}/grouped`)
+        setCards([...response.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
+        setSelectedCards(undefined)
+        setShowRightPanel(false)
+    }
+
     useEffect(() => {
         Promise.all([
             client.get<GroupedCardDto[]>(`/cards/by-box/${id}/grouped`),
@@ -47,6 +54,7 @@ export default function BoxPage() {
                 show={showRightPanel}
                 onClose={() => setShowRightPanel(false)}
                 cards={selectedCards}
+                onMutationComplete={refreshCardsAfterMutation}
             />
         )}    
         
