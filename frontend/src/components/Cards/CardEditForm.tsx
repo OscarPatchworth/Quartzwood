@@ -1,5 +1,6 @@
 import type { CardDto } from '../../interfaces/generated.ts'
 import { LoadingIndicator } from '../misc/loadingIndicator.tsx'
+import { ConditionOptions, FoilTypeOptions, LanguageOptions, StampTypeOptions } from '../../utils/Enum.tsx'
 
 interface CardEditFormProps {
     card?: CardDto
@@ -7,7 +8,6 @@ interface CardEditFormProps {
 }
 
 const inputClassName = "w-full rounded-md border border-stone-300 bg-white px-2 py-1.5 text-sm text-stone-800 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
-
 export function CardEditForm({ card, onChange }: CardEditFormProps) {
     if (!card) {
         return <LoadingIndicator />
@@ -50,7 +50,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Condition</th>
                         <td className="px-3 py-2">
                             <select aria-label="Condition" className={inputClassName} value={card.condition} onChange={event => updateField("condition", event.target.value)}>
-                                {["NM", "LP", "MP", "HP", "DMG"].map(value => <option key={value}>{value}</option>)}
+                                {ConditionOptions.map(value => <option key={value}>{value}</option>)}
                             </select>
                         </td>
                     </tr>
@@ -58,7 +58,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Foil</th>
                         <td className="px-3 py-2">
                             <select aria-label="Foil type" className={inputClassName} value={card.foilType} onChange={event => updateField("foilType", event.target.value)}>
-                                {["None", "Traditional", "Etched", "Other"].map(value => <option key={value}>{value}</option>)}
+                                {FoilTypeOptions.map(value => <option key={value}>{value}</option>)}
                             </select>
                         </td>
                     </tr>
@@ -66,14 +66,16 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Stamp</th>
                         <td className="px-3 py-2">
                             <select aria-label="Stamp type" className={inputClassName} value={card.stampType} onChange={event => updateField("stampType", event.target.value)}>
-                                {["None", "Promo", "Prerelease"].map(value => <option key={value}>{value}</option>)}
+                                {StampTypeOptions.map(value => <option key={value}>{value}</option>)}
                             </select>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Language</th>
                         <td className="px-3 py-2">
-                            <input aria-label="Language" className={inputClassName} value={card.language} onChange={event => updateField("language", event.target.value)} />
+                            <select aria-label="Language" className={inputClassName} value={card.language} onChange={event => updateField("language", event.target.value)}>
+                                {LanguageOptions.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}
+                            </select>
                         </td>
                     </tr>
                 </tbody>
