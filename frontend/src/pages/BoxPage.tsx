@@ -7,6 +7,7 @@ import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
 import { LoadingIndicator } from '../components/misc/loadingIndicator.tsx'
+import { AddNewCardTextBar } from '../components/AddNewCardTextBar.tsx'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -60,7 +61,17 @@ export default function BoxPage() {
         
         <div className="p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
-            <h1 className="text-2xl font-bold mb-6">{box?.name}</h1>
+            <div className='flex justify-between'>
+                <h1 className="text-2xl font-bold mb-6 mt-4">{box?.name}</h1>
+                <div className='flex justify-end pt-[-10] pb-5'>
+                    <AddNewCardTextBar
+                    //onSuccess={() => ()}
+                    />
+                </div>
+
+            </div>
+
+
             <div className="pl-8">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                     {cards.map(c => (
