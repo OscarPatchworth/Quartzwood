@@ -38,6 +38,7 @@ builder.Services.AddScoped<IEntityQueryService, EntityQueryService>();
 builder.Services.AddScoped<IGroupQueryService, GroupQueryService>();
 builder.Services.AddScoped<IBoxQueryService, BoxQueryService>();
 
+
 // Command Services
 builder.Services.AddScoped<ICardCommandService, CardCommandService>();
 builder.Services.AddScoped<IEntityCommandService, EntityCommandService>();
