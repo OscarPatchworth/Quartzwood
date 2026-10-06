@@ -53,21 +53,29 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
 {
     var query = $"!\"{name}\"";
     if (year.HasValue) query += $" year={year}";
+    query += " include:extras";
 
-    var url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}";
-    Console.WriteLine($"Scryfall search: {url}");
-    
-    var response = await _http.GetAsync(url);
-    Console.WriteLine($"Scryfall response: {response.StatusCode}");
+    string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released";
+    var cards = new List<ScryfallCard>();
 
-    if (!response.IsSuccessStatusCode) {return null;}
+    while (url is not null)
+    {
+        Console.WriteLine($"Scryfall search: {url}");
+        var response = await _http.GetAsync(url);
+        Console.WriteLine($"Scryfall response: {response.StatusCode}");
 
-    var json = await response.Content.ReadFromJsonAsync<ScryfallSearchResponse>();
-    if (json is null) return null;
-    
-    return json.data.Select(c => new ScryfallCard(c.id, c.name, c.set, c.collector_number));
+        if (!response.IsSuccessStatusCode) return null;
+
+        var json = await response.Content.ReadFromJsonAsync<ScryfallSearchResponse>();
+        if (json is null) return null;
+
+        cards.AddRange(json.data.Select(c => new ScryfallCard(c.id, c.name, c.set, c.collector_number)));
+        url = json.has_more ? json.next_page : null;
+    }
+
+    return cards;
 }
 
     private record ScryfallResponse(string id, string name, string set, string collector_number);
-    private record ScryfallSearchResponse(IEnumerable<ScryfallResponse> data);
+    private record ScryfallSearchResponse(IEnumerable<ScryfallResponse> data, bool has_more, string? next_page);
 }
