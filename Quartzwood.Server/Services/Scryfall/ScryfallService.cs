@@ -1,3 +1,6 @@
+using Quartzwood.Server.DTOs;
+using Quartzwood.Server.Models;
+
 namespace Quartzwood.Server.Services.Scryfall;
 
 public record ScryfallCard(
@@ -16,6 +19,8 @@ public interface IScryfallService
 {
     Task<ScryfallCard?> GetCardAsync(string setCode, string setNumber);
     Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year);
+
+    Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, string? cardName);
 }
 
 public class ScryfallService : IScryfallService
@@ -75,6 +80,36 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
 
     return cards;
 }
+
+public async Task<string?> GetScryfallId(string setCode, string setNumber, string? stampType, string? cardName)
+    {
+
+        var scryfallSetCode = setCode;
+        var scryfallSetNumber = setNumber;
+
+        // Scryfall alters setCodes of:
+        // 1| Stamped cards: planeswalker & pre-release
+        // 2| Event Promo cards i.e. Japan Standard Cup: PRM => PJSC
+
+        switch (stampType){
+            case nameof(StampType.None):
+                break;
+            case nameof(StampType.Promo):
+                scryfallSetCode = "p" + scryfallSetCode;
+                scryfallSetNumber = scryfallSetNumber + "p";
+                break;
+            case nameof(StampType.Prerelease):
+                scryfallSetCode = "p" + scryfallSetCode;
+                scryfallSetNumber = scryfallSetNumber + "s";
+                break;
+            default:    // If null
+                break;                      
+        }
+
+        var responce = await GetCardAsync(scryfallSetCode, scryfallSetNumber);
+        return responce?.Id;
+    }
+
 
     private record ScryfallResponse(string id, string name, string set, string collector_number);
     private record ScryfallSearchResponse(IEnumerable<ScryfallResponse> data, bool has_more, string? next_page);

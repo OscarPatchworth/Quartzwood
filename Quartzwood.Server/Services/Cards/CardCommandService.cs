@@ -44,25 +44,25 @@ public class CardCommandService : ICardCommandService
         {
             nameSource = NameSource.Manual;
         }
-var card = new CardInstance
-{
-    SetCode = dto.SetCode,
-    SetNumber = dto.SetNumber,
-    Name = name,                  // ← local variable from Scryfall
-    NameSource = nameSource,      // ← local variable from Scryfall
-    ScryfallId = scryfallId,      
-    Condition = condition,
-    FoilType = foilType,
-    StampType = stampType,
-    Language = dto.Language,
-    IsProxy = dto.IsProxy,
-    IsSigned = dto.IsSigned,
-    AlterArtist = dto.AlterArtist,
-    Notes = dto.Notes,
-    BoxId = dto.BoxId,
-    AcquiredDate = dto.AcquiredDate,
-    PurchasePrice = dto.PurchasePrice,
-};
+        var card = new CardInstance
+        {
+            SetCode = dto.SetCode,
+            SetNumber = dto.SetNumber,
+            Name = name,                  // ← local variable from Scryfall
+            NameSource = nameSource,      // ← local variable from Scryfall
+            ScryfallId = scryfallId,      
+            Condition = condition,
+            FoilType = foilType,
+            StampType = stampType,
+            Language = dto.Language,
+            IsProxy = dto.IsProxy,
+            IsSigned = dto.IsSigned,
+            AlterArtist = dto.AlterArtist,
+            Notes = dto.Notes,
+            BoxId = dto.BoxId,
+            AcquiredDate = dto.AcquiredDate,
+            PurchasePrice = dto.PurchasePrice,
+        };
 
         var created = await _cards.AddAsync(card);
         return ToDto(created);
@@ -73,14 +73,17 @@ var card = new CardInstance
         var card = await _cards.GetByIdAsync(id);
         if (card is null) return null;
 
+        var updateImage = false;
+
         if (dto.Condition != null && Enum.TryParse<Condition>(dto.Condition, true, out var condition))
             card.Condition = condition;
         if (dto.FoilType != null && Enum.TryParse<FoilType>(dto.FoilType, true, out var foilType))
             card.FoilType = foilType;
         if (dto.StampType != null && Enum.TryParse<StampType>(dto.StampType, true, out var stampType))
-            card.StampType = stampType;
-        if (dto.SetCode != null) card.SetCode = dto.SetCode;
-        if (dto.SetNumber != null) card.SetNumber = dto.SetNumber;
+            {card.StampType = stampType;
+            updateImage = true;}
+        if (dto.SetCode != null) {card.SetCode = dto.SetCode; updateImage = true;}
+        if (dto.SetNumber != null) {card.SetNumber = dto.SetNumber; updateImage = true;}
         if (dto.Name != null) { card.Name = dto.Name; card.NameSource = NameSource.Manual; }
         if (dto.Language != null) card.Language = dto.Language;
         if (dto.IsProxy.HasValue) card.IsProxy = dto.IsProxy.Value;
@@ -90,6 +93,12 @@ var card = new CardInstance
         if (dto.BoxId.HasValue) card.BoxId = dto.BoxId.Value;
         if (dto.AcquiredDate.HasValue) card.AcquiredDate = dto.AcquiredDate.Value;
         if (dto.PurchasePrice.HasValue) card.PurchasePrice = dto.PurchasePrice.Value;
+
+        if(updateImage){
+            card.ScryfallId = await _scryfall.GetScryfallId(
+                card.SetCode, card.SetNumber, card.StampType.ToString(), card.Name
+            );
+        }
 
         var updated = await _cards.UpdateAsync(card);
         return ToDto(updated);
