@@ -65,7 +65,8 @@ export default function BoxPage() {
                 <h1 className="text-2xl font-bold mb-6 mt-4">{box?.name}</h1>
                 <div className='flex justify-end pt-[-10] pb-5'>
                     <AddNewCardTextBar
-                    //onSuccess={() => ()}
+                        boxId={id}
+                        onSuccess={refreshCardsAfterMutation}
                     />
                 </div>
 
