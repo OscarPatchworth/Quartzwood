@@ -1,5 +1,6 @@
 
 import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
+import { ConditionOptions, FoilFlagOptions } from "./Enum"
 
 const patterns = {
     quantity:     /^(\d{1,3})$/,
@@ -10,12 +11,14 @@ const patterns = {
     flagProxy:    /^-p$/i,
     flagSigned:   /^-s$/i,
     alterArtist:  /^-a$/i,
+    flagCondition: /^-c$/i
 }
 
 export function parseCardInput(input: string): IParsedCardInput {
     const result: IParsedCardInput = {
         quantity: 1,
-        foil: false,
+        foilType: "None",
+        condition: "NM",
         isProxy: false,
         isNameLookup: false,
         errors: []
@@ -57,7 +60,12 @@ export function parseCardInput(input: string): IParsedCardInput {
         }
 
         // flags
-        if (patterns.flagFoil.test(token))  { result.foil = true; i++; continue }
+        if (patterns.flagFoil.test(token)) {
+            const foilType = FoilFlagOptions.find(option => option.toLowerCase() === tokens[i + 1]?.toLowerCase())
+            result.foilType = foilType ?? "Traditional"
+            i += foilType ? 2 : 1
+            continue
+        }
         if (patterns.flagProxy.test(token)) { result.isProxy = true; i++; continue }
 
         // alter artist — next token(s) are the name (handles quoted strings)
@@ -68,6 +76,19 @@ export function parseCardInput(input: string): IParsedCardInput {
             result.alterArtist = quoted ? quoted[1] : tokens[i + 1]
             i += quoted ? tokens.slice(i + 1).findIndex((_, j) => 
                 tokens.slice(i + 1, i + 1 + j + 1).join(' ').includes(result.alterArtist!)) + 2 : 2
+            continue
+        }
+
+
+        // Condition is a single token after -c.
+        if (patterns.flagCondition.test(token)) {
+            const condition = ConditionOptions.find(option => option === tokens[i + 1]?.toUpperCase())
+            if (condition) {
+                result.condition = condition
+            } else {
+                result.errors.push(`Invalid condition: ${tokens[i + 1] ?? "missing value"}`)
+            }
+            i += tokens[i + 1] ? 2 : 1
             continue
         }
 
