@@ -1,6 +1,7 @@
 import { parseCardInput } from "../utils/addCardParser"
 import { useState } from "react"
 import client from "../api/client"
+import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 
 interface TextBarProps {
   onSuccess?: () => Promise<void>
@@ -17,11 +18,12 @@ export function AddNewCardTextBar({ } : TextBarProps){
 
     const [cardInput, setCardInput] = useState<string>(" ");
     const [scryfallCardMatches, setScryfallCardMatches] = useState<ScryfallCardMatch[]>([])
+    const [parsedCardObject, setParsedCardObject] = useState<IParsedCardInput>()
 
-
-    async function addSearchCard(input: string){
+    async function searchCard(input: string){
         setScryfallCardMatches([])
         const parsedCard = parseCardInput(input)
+        setParsedCardObject(parsedCard)
 
         if(parsedCard.isNameLookup && parsedCard.name){
             try {
@@ -32,15 +34,28 @@ export function AddNewCardTextBar({ } : TextBarProps){
             } catch (error) {
                 console.error("Scryfall search failed", error)
             }
-        }
+        }else{addNewCard()}
+    }
 
+    function setParsedCardToSelectedSetCode(setCode: string, setNumber: string){
+        setParsedCardObject(current => current ? {
+            ...current,
+            setCode,
+            setNumber,
+            isNameLookup: false
+        } : current)
+        addNewCard()
+    }
+
+    function addNewCard(){
+        console.log("... Adding New Card to DB ...")
     }
 
     return(
         <div className="relative w-full max-w-2xl">
             <form onSubmit={event => {
                 event.preventDefault()
-                addSearchCard(cardInput)
+                searchCard(cardInput)
             }}>
                 <label htmlFor="new-card-search" className="sr-only">Card name</label>
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm transition focus-within:border-fuchsia-700 focus-within:ring-4 focus-within:ring-fuchsia-700/10">
@@ -68,10 +83,12 @@ export function AddNewCardTextBar({ } : TextBarProps){
                 rounded-lg border border-slate-200 bg-white shadow-lg">
                     {scryfallCardMatches.map(card => (
                         <li key={card.scryfallId}>
-                            <a
-                                href={`https://scryfall.com/card/${encodeURIComponent(card.setCode.toLowerCase())}/${encodeURIComponent(card.setNumber)}`}
-                                target="_blank"
-                                rel="noreferrer"
+                            <button
+                                onClick={() => {
+                                    if (parsedCardObject) {
+                                        setParsedCardToSelectedSetCode(card.setCode, card.setNumber)
+                                    }
+                                }}
                                 className="flex items-center justify-between gap-4 px-4 py-3 text-sm hover:bg-slate-50"
                             >
                                 <span className="flex min-w-0 flex-col">
@@ -84,7 +101,7 @@ export function AddNewCardTextBar({ } : TextBarProps){
                                     loading="lazy"
                                     className="h-auto w-auto shrink-0 rounded"
                                 />
-                            </a>
+                            </button>
                         </li>
                     ))}
                 </ul>

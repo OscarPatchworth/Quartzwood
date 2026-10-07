@@ -1,15 +1,5 @@
-interface ParsedCardInput {
-    quantity: number
-    setCode?: string
-    setNumber?: string
-    name?: string
-    year?: number
-    foil: boolean
-    isProxy: boolean
-    alterArtist?: string
-    isNameLookup: boolean
-    errors: string[]
-}
+
+import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 
 const patterns = {
     quantity:     /^(\d{1,3})$/,
@@ -22,8 +12,8 @@ const patterns = {
     alterArtist:  /^-a$/i,
 }
 
-export function parseCardInput(input: string): ParsedCardInput {
-    const result: ParsedCardInput = {
+export function parseCardInput(input: string): IParsedCardInput {
+    const result: IParsedCardInput = {
         quantity: 1,
         foil: false,
         isProxy: false,
