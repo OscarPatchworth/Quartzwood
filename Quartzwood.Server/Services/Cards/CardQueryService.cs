@@ -43,6 +43,7 @@ public class CardQueryService : ICardQueryService
         c.Language,
         c.IsProxy,
         c.IsSigned,
+        c.IsList,
         c.AlterArtist,
         c.Notes,
         c.BoxId,

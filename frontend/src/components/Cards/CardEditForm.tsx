@@ -94,6 +94,18 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         </td>
                     </tr>
                     <tr>
+                        <th scope="row" className="px-3 py-2 font-semibold text-stone-600">List</th>
+                        <td className="px-3 py-2">
+                            <input
+                                aria-label="List"
+                                type="checkbox"
+                                className="h-4 w-4 accent-amber-600 focus:ring-amber-500"
+                                checked={card.isList}
+                                onChange={event => updateField("isList", event.target.checked)}
+                            />
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row" className="px-3 py-2 font-semibold text-stone-600">Alter</th>
                         <td className="px-3 py-2">
                             <input

@@ -50,6 +50,10 @@ export function CardDetails({card: card}: CardDetailsProps) {
                             <dd className="text-right">{String(card.isSigned)}</dd>
                         </div>
                         <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
+                            <dt className="font-semibold text-stone-600">List</dt>
+                            <dd className="text-right">{String(card.isList)}</dd>
+                        </div>
+                        <div className="flex justify-between gap-4 border-b border-amber-100 pb-1">
                             <dt className="font-semibold text-stone-600">Alter</dt>
                             <dd className="text-right">{String(Boolean(card.alterArtist))}</dd>
                         </div>

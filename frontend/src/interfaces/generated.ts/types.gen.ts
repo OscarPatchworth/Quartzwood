@@ -19,6 +19,7 @@ export type AddCardDto = {
     language?: string;
     isProxy?: boolean;
     isSigned?: boolean;
+    isList?: boolean;
     alterArtist?: null | string;
     notes?: null | string;
     boxId?: null | string;
@@ -70,6 +71,7 @@ export type CardDto = {
     language: string;
     isProxy: boolean;
     isSigned: boolean;
+    isList: boolean;
     alterArtist: null | string;
     notes: null | string;
     boxId: null | string;
@@ -121,6 +123,7 @@ export type UpdateCardDto = {
     language: null | string;
     isProxy: null | boolean;
     isSigned: null | boolean;
+    isList: null | boolean;
     alterArtist: null | string;
     notes: null | string;
     boxId: null | string;

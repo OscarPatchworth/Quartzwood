@@ -30,6 +30,7 @@ public class CardInstance
     // Alteration
     public bool IsProxy { get; set; } = false;
     public bool IsSigned { get; set; } = false;
+    public bool IsList { get; set; } = false;
     public string? AlterArtist { get; set; }
     public string? AlterDescription { get; set; }
     public string? AlterPhotoPath { get; set; }

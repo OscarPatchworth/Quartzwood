@@ -23,6 +23,7 @@ class CardInstance(SQLModel, table=True):
     storage_id: Optional[int] = Field(default=None, foreign_key="storage.id")
 
     # Extra
+    is_list: bool = False
     notes: Optional[str] = None
     acquired_date: Optional[date] = None
     purchase_price: Optional[float] = None

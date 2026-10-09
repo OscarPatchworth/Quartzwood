@@ -87,6 +87,7 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
             language: "en",
             isProxy: parsedCard.isProxy,
             isSigned: false,
+            isList: parsedCard.isList,
             alterArtist: parsedCard.alterArtist ?? null,
             boxId: boxId ?? null
         }

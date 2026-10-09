@@ -6,6 +6,7 @@ export interface IParsedCardInput {
     year?: number
     foil: boolean
     isProxy: boolean
+    isList: boolean
     alterArtist?: string
     isNameLookup: boolean
     isPRM: boolean

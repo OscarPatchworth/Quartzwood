@@ -9,6 +9,7 @@ const patterns = {
     flagFoil:     /^-f$/i,
     flagProxy:    /^-p$/i,
     flagSigned:   /^-s$/i,
+    flagList:     /^-l$/i,
     alterArtist:  /^-a$/i,
 }
 
@@ -17,6 +18,7 @@ export function parseCardInput(input: string): IParsedCardInput {
         quantity: 1,
         foil: false,
         isProxy: false,
+        isList: false,
         isNameLookup: false,
         isPRM: false,
         errors: []
@@ -60,6 +62,7 @@ export function parseCardInput(input: string): IParsedCardInput {
         // flags
         if (patterns.flagFoil.test(token))  { result.foil = true; i++; continue }
         if (patterns.flagProxy.test(token)) { result.isProxy = true; i++; continue }
+        if (patterns.flagList.test(token)) { result.isList = true; i++; continue }
 
         // alter artist — next token(s) are the name (handles quoted strings)
         if (patterns.alterArtist.test(token)) {

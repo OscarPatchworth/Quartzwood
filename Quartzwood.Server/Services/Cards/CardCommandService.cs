@@ -48,15 +48,16 @@ public class CardCommandService : ICardCommandService
         {
             SetCode = dto.SetCode,
             SetNumber = dto.SetNumber,
-            Name = name,                  // ← local variable from Scryfall
-            NameSource = nameSource,      // ← local variable from Scryfall
-            ScryfallId = scryfallId,      
+            Name = name,
+            NameSource = nameSource,
+            ScryfallId = scryfallId,
             Condition = condition,
             FoilType = foilType,
             StampType = stampType,
             Language = dto.Language,
             IsProxy = dto.IsProxy,
             IsSigned = dto.IsSigned,
+            IsList = dto.IsList,
             AlterArtist = dto.AlterArtist,
             Notes = dto.Notes,
             BoxId = dto.BoxId,
@@ -90,6 +91,7 @@ public class CardCommandService : ICardCommandService
         if (dto.Language != null) card.Language = dto.Language;
         if (dto.IsProxy.HasValue) card.IsProxy = dto.IsProxy.Value;
         if (dto.IsSigned.HasValue) card.IsSigned = dto.IsSigned.Value;
+        if (dto.IsList.HasValue) card.IsList = dto.IsList.Value;
         if (dto.AlterArtist != null) card.AlterArtist = dto.AlterArtist;
         if (dto.Notes != null) card.Notes = dto.Notes;
         if (dto.BoxId.HasValue) card.BoxId = dto.BoxId.Value;
@@ -126,6 +128,7 @@ public class CardCommandService : ICardCommandService
         c.Language,
         c.IsProxy,
         c.IsSigned,
+        c.IsList,
         c.AlterArtist,
         c.Notes,
         c.BoxId,
