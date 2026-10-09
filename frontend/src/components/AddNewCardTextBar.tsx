@@ -35,6 +35,7 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                 const response = await client.get<ScryfallCardMatch[]>("scryfall/search", {
                     params: { name: parsedCard.name, year: parsedCard.year }
                 })
+                console.log(scryfallCardMatches)
                 setScryfallCardMatches(response.data)
             } else {
                 await addNewCard(parsedCard)
@@ -159,6 +160,16 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                         </li>
                     ))}
                 </ul>
+            }
+            {!isLoading && cardInput.trim() !== "" && parsedCardObject?.name && scryfallCardMatches.length === 0 &&
+                <div className="absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-amber-200 bg-white shadow-lg shadow-slate-200/80">
+                    <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="ml-3">
+                            <p className="text-sm font-semibold text-slate-900">Card not found</p>
+                            <p className="truncate text-xs text-slate-600 ml-2">{parsedCardObject.name}</p>
+                        </div>
+                    </div>
+                </div>
             }
 
         </div>

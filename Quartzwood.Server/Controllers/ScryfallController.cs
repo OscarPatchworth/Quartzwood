@@ -19,10 +19,13 @@ public class ScryfallController : ControllerBase
     [HttpGet("search")]
     [ProducesResponseType(typeof(IEnumerable<ScryfallSearchResultDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> Search([FromQuery] string name, [FromQuery] int? year)
+    public async Task<IActionResult?> Search([FromQuery] string name, [FromQuery] int? year)
     {
         var results = await _scryfall.SearchAsync(name, year);
-        if (results is null) return NotFound();
+        if (results is null)
+        {
+            return Ok(null);    
+        } 
 
         return Ok(results.Select(c => new ScryfallSearchResultDto(
             c.Name,
