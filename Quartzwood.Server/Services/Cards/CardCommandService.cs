@@ -70,6 +70,8 @@ public class CardCommandService : ICardCommandService
 
     public async Task<CardDto?> UpdateAsync(Guid id, UpdateCardDto dto)
     {
+        //TODO: Check is valid card -> i.e. Can this be a Stamped Card ?
+        // if (fasle):{Return -> not valid card update}
         var card = await _cards.GetByIdAsync(id);
         if (card is null) return null;
 

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Quartzwood.Server.Models;
 
 public enum Condition { NM, LP, MP, HP, DMG }
-public enum FoilType { None, Traditional, Etched, Other }
+public enum FoilType { None, Traditional, Other }
 public enum StampType { None, Promo, Prerelease }
 public enum NameSource { Scryfall, Manual, Unknown }
 

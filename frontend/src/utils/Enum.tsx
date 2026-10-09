@@ -1,6 +1,6 @@
 export const ConditionOptions = ["NM", "LP", "MP", "HP", "DMG"] as const
 
-export const FoilTypeOptions = ["None", "Traditional", "Etched", "Other"] as const
+export const FoilTypeOptions = ["None", "Traditional", "Other"] as const
 
 export const StampTypeOptions = ["None", "Promo", "Prerelease"] as const
 

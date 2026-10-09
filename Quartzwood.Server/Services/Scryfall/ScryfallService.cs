@@ -1,5 +1,7 @@
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
+using System.Linq;
+
 
 namespace Quartzwood.Server.Services.Scryfall;
 
@@ -19,8 +21,8 @@ public interface IScryfallService
 {
     Task<ScryfallCard?> GetCardAsync(string setCode, string setNumber);
     Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year);
-
     Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, string? cardName);
+    Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber);
 }
 
 public class ScryfallService : IScryfallService
@@ -109,6 +111,34 @@ public async Task<string?> GetScryfallId(string setCode, string setNumber, strin
         var responce = await GetCardAsync(scryfallSetCode, scryfallSetNumber);
         return responce?.Id;
     }
+
+public async Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber)
+{
+    var query = "is:promo not:prerelease not:stamped -set:PRM";
+    if(cardName != null && !cardName.IsWhiteSpace()){ query += $" !\"{cardName}\"";}
+    if(setNumber != null && !setNumber.IsWhiteSpace() && setNumber.All(char.IsDigit)){ query += $" cn:{setNumber}";}
+    if (year.HasValue) query += $" year={year}";
+
+    string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released";
+    var cards = new List<ScryfallCard>();
+
+    while (url is not null)
+    {
+        Console.WriteLine($"Scryfall search: {url}");
+        var response = await _http.GetAsync(url);
+        Console.WriteLine($"Scryfall response: {response.StatusCode}");
+
+        if (!response.IsSuccessStatusCode) return null;
+
+        var json = await response.Content.ReadFromJsonAsync<ScryfallSearchResponse>();
+        if (json is null) return null;
+
+        cards.AddRange(json.data.Select(c => new ScryfallCard(c.id, c.name, c.set, c.collector_number)));
+        url = json.has_more ? json.next_page : null;
+    }
+
+    return cards;
+}
 
 
     private record ScryfallResponse(string id, string name, string set, string collector_number);

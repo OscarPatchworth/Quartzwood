@@ -31,9 +31,16 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
             const parsedCard = parseCardInput(input)
             setParsedCardObject(parsedCard)
 
-            if(parsedCard.isNameLookup && parsedCard.name){
+            console.log(parsedCard.isPRM)
+            if(parsedCard.isNameLookup && parsedCard.name && !parsedCard.isPRM){
                 const response = await client.get<ScryfallCardMatch[]>("scryfall/search", {
                     params: { name: parsedCard.name, year: parsedCard.year }
+                })
+                console.log(scryfallCardMatches)
+                setScryfallCardMatches(response.data)
+            } else if (parsedCard.isPRM){
+                const response = await client.get<ScryfallCardMatch[]>("scryfall/search/promo", {
+                    params: { name: parsedCard.name, year: parsedCard.year, setNumber: parsedCard.setNumber}
                 })
                 console.log(scryfallCardMatches)
                 setScryfallCardMatches(response.data)

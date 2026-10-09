@@ -8,5 +8,6 @@ export interface IParsedCardInput {
     isProxy: boolean
     alterArtist?: string
     isNameLookup: boolean
+    isPRM: boolean
     errors: string[]
 }

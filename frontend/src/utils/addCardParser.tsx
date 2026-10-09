@@ -18,6 +18,7 @@ export function parseCardInput(input: string): IParsedCardInput {
         foil: false,
         isProxy: false,
         isNameLookup: false,
+        isPRM: false,
         errors: []
     }
 
@@ -74,6 +75,11 @@ export function parseCardInput(input: string): IParsedCardInput {
         // anything else is part of the card name
         nameTokens.push(token)
         i++
+    }
+
+    // Is PRM set card (PRM-1 != scryfall PRM)
+    if (result.setCode != null && result.setCode == 'PRM'){
+        result.isPRM = true;
     }
 
     if (nameTokens.length > 0) {
