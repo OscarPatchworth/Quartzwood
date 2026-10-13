@@ -97,8 +97,9 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                 await client.post("/cards", newCard)
             }
             setCardInput("")
-            await onSuccess?.()
+            setParsedCardObject(undefined)
             setScryfallCardMatches([])
+            await onSuccess?.()
         } catch (error) {
             console.error("Adding card failed", error)
         }
