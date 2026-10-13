@@ -71,7 +71,7 @@ export default function GroupPage() {
                             <h2 className="text-lg font-semibold">{b.name}</h2>
                             <p className="text-sm text-gray-500">{b.cardCount} cards</p>
                         </div>
-                        <div className="self-stretch">
+                        <div className="flex self-stretch items-center">
                             <button
                                 type="button"
                                 onClick={event => {
@@ -80,9 +80,9 @@ export default function GroupPage() {
                                 }}
                                 aria-label={`Delete ${b.name}`}
                                 disabled={deletingBoxId === b.id}
-                                className="h-full rounded-3xl bg-amber-100 px-5 text-3xl text-rose-700 transition-colors hover:bg-amber-200 hover:text-rose-500 disabled:cursor-wait disabled:opacity-50"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 bg-red-50 text-2xl font-bold leading-none text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                ✘
+                                ×
                             </button>
                         </div>
                     </div>
