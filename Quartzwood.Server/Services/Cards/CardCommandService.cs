@@ -16,7 +16,7 @@ public class CardCommandService : ICardCommandService
         _scryfall = scryfall;
     }
 
-    public async Task<CardDto> AddAsync(AddCardDto dto)
+    public async Task<CardDto?> AddAsync(AddCardDto dto)
     {
         if (!Enum.TryParse<Condition>(dto.Condition, true, out var condition))
             throw new ArgumentException($"Invalid condition: {dto.Condition}");
@@ -37,12 +37,11 @@ public class CardCommandService : ICardCommandService
                 dto = dto with { SetNumber = dto.SetCode + "-" + dto.SetNumber, SetCode = "PLST" };
             }
             var scryfallCard = await _scryfall.GetCardAsync(dto.SetCode, dto.SetNumber);
-            if (scryfallCard != null)
-            {
-                name = scryfallCard.Name;
-                scryfallId = scryfallCard.Id;
-                nameSource = NameSource.Scryfall;
-            }
+            if (scryfallCard is null) return null;
+
+            name = scryfallCard.Name;
+            scryfallId = scryfallCard.Id;
+            nameSource = NameSource.Scryfall;
         }
         else if (dto.Name != null)
         {

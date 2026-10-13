@@ -1,5 +1,6 @@
 import { parseCardInput } from "../utils/addCardParser"
 import { useState } from "react"
+import axios from "axios"
 import client from "../api/client"
 import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 import type { AddCardDto } from "../interfaces/generated.ts"
@@ -17,15 +18,34 @@ interface ScryfallCardMatch {
     scryfallId: string
 }
 
+function getErrorMessage(error: unknown, fallback: string): string {
+    if (axios.isAxiosError<unknown>(error)) {
+        const data = error.response?.data
+        if (typeof data === "string" && data.trim()) return data
+        if (data && typeof data === "object") {
+            const response = data as Record<string, unknown>
+            if (typeof response.detail === "string") return response.detail
+            if (typeof response.message === "string") return response.message
+            if (typeof response.title === "string") return response.title
+        }
+    }
+    return fallback
+}
+
 export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
 
     const [cardInput, setCardInput] = useState<string>("");
     const [scryfallCardMatches, setScryfallCardMatches] = useState<ScryfallCardMatch[]>([])
     const [parsedCardObject, setParsedCardObject] = useState<IParsedCardInput>()
     const [isLoading, setIsLoading] = useState(false)
+    const [addFailureLabel, setAddFailureLabel] = useState<string>()
+    const [failureMessage, setFailureMessage] = useState<string>()
+    const notFoundLabel = addFailureLabel ?? parsedCardObject?.name
 
     async function searchCard(input: string){
         setScryfallCardMatches([])
+        setAddFailureLabel(undefined)
+        setFailureMessage(undefined)
         setIsLoading(true)
         try {
             const parsedCard = parseCardInput(input)
@@ -48,7 +68,7 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                 await addNewCard(parsedCard)
             }
         } catch (error) {
-            console.error("Card search failed", error)
+            setFailureMessage(getErrorMessage(error, "Unable to search for this card."))
         } finally {
             setIsLoading(false)
         }
@@ -96,12 +116,20 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
             for (let index = 0; index < parsedCard.quantity; index++) {
                 await client.post("/cards", newCard)
             }
-            setCardInput("")
-            setParsedCardObject(undefined)
-            setScryfallCardMatches([])
+        } catch (error) {
+            const label = `${parsedCard.setCode}-${parsedCard.setNumber}`
+            setAddFailureLabel(label)
+            setFailureMessage(getErrorMessage(error, `Unable to add ${label}.`))
+            return
+        }
+
+        setCardInput("")
+        setParsedCardObject(undefined)
+        setScryfallCardMatches([])
+        try {
             await onSuccess?.()
         } catch (error) {
-            console.error("Adding card failed", error)
+            console.error("Refreshing cards failed", error)
         }
     }
 
@@ -124,7 +152,11 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                         placeholder="Search cards by name or set..."
                         className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
                         value={cardInput}
-                        onChange={event => setCardInput(event.target.value)}
+                        onChange={event => {
+                            setCardInput(event.target.value)
+                            setAddFailureLabel(undefined)
+                            setFailureMessage(undefined)
+                        }}
                     />
                     <button
                         type="submit"
@@ -170,12 +202,15 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                     ))}
                 </ul>
             }
-            {!isLoading && cardInput.trim() !== "" && parsedCardObject?.name && scryfallCardMatches.length === 0 &&
+            {!isLoading && scryfallCardMatches.length === 0 &&
+                (failureMessage || (cardInput.trim() !== "" && notFoundLabel)) &&
                 <div className="absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-amber-200 bg-white shadow-lg shadow-slate-200/80">
                     <div className="flex items-center gap-3 px-4 py-3">
                         <div className="ml-3">
-                            <p className="text-sm font-semibold text-slate-900">Card not found</p>
-                            <p className="truncate text-xs text-slate-600 ml-2">{parsedCardObject.name}</p>
+                            <p className="text-sm font-semibold text-slate-900">{failureMessage ?? "Card not found"}</p>
+                            {(addFailureLabel || (!failureMessage && notFoundLabel)) &&
+                                <p className="truncate text-xs text-slate-600 ml-2">{addFailureLabel ?? notFoundLabel}</p>
+                            }
                         </div>
                     </div>
                 </div>

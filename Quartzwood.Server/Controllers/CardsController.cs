@@ -49,6 +49,7 @@ public class CardsController : ControllerBase
         try
         {
             var created = await _command.AddAsync(dto);
+            if (created is null) return BadRequest("Card was not found on Scryfall.");
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (ArgumentException ex)
