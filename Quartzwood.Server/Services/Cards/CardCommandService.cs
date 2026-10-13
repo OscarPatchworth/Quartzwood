@@ -32,6 +32,10 @@ public class CardCommandService : ICardCommandService
 
         if (dto.SetCode != null && dto.SetNumber != null)
         {
+            if (dto.IsList && dto.SetCode != "PLST")
+            {
+                dto = dto with { SetNumber = dto.SetCode + "-" + dto.SetNumber, SetCode = "PLST" };
+            }
             var scryfallCard = await _scryfall.GetCardAsync(dto.SetCode, dto.SetNumber);
             if (scryfallCard != null)
             {
