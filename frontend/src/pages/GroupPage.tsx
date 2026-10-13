@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import client from '../api/client'
-import type { BoxDto } from '../interfaces/generated.ts/types.gen'
+import type { BoxDto, GroupDto } from '../interfaces/generated.ts/types.gen'
 import { LoadingIndicator } from '../components/misc/loadingIndicator'
 import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupController'
 
@@ -9,13 +9,39 @@ export default function GroupPage() {
     const { id } = useParams<{ id: string }>()
     const [boxes, setBoxes] = useState<BoxDto[]>([])
     const [loading, setLoading] = useState(true)
+    const [deletingBoxId, setDeletingBoxId] = useState<string>()
+    const [deleteError, setDeleteError] = useState<string>()
     const navigate = useNavigate()
 
     useEffect(() => {
+        setLoading(true)
         client.get<BoxDto[]>(`/boxes/by-group/${id}`)
             .then(res => setBoxes(res.data))
             .finally(() => setLoading(false))
     }, [id])
+
+    async function deleteBox(box: BoxDto) {
+        if (!window.confirm(`Delete "${box.name}"? This cannot be undone.`)) return
+
+        setDeletingBoxId(box.id)
+        setDeleteError(undefined)
+        try {
+            await client.delete(`/boxes/${box.id}`)
+            setBoxes(currentBoxes => currentBoxes.filter(currentBox => currentBox.id !== box.id))
+        } catch (error) {
+            setDeleteError(error instanceof Error ? error.message : `Unable to delete ${box.name}.`)
+        } finally {
+            setDeletingBoxId(undefined)
+        }
+    }
+
+    function handleBoxCreated(box: BoxDto) {
+        setBoxes(currentBoxes => [...currentBoxes, box])
+    }
+
+    function handleGroupCreated(group: GroupDto) {
+        navigate(`/group/${group.id}`)
+    }
 
     if (loading) return <LoadingIndicator />
 
@@ -25,15 +51,21 @@ export default function GroupPage() {
             
             <div className='flex items-start justify-between align-top'>
                 <h1 className="text-2xl font-bold">Boxes</h1>
-                <AddBoxGroupController/>
+                <AddBoxGroupController
+                    groupId={id}
+                    onBoxCreated={handleBoxCreated}
+                    onGroupCreated={handleGroupCreated}
+                />
             </div>
+
+            {deleteError && <p role="alert" className="mb-4 text-sm text-rose-700">{deleteError}</p>}
 
             <div className="grid grid-cols-1 gap-4">
                 {boxes.map(b => (
                     <div
                         key={b.id}
                         onClick={() => navigate(`/box/${b.id}`)}
-                        className="flex items-center justify-between rounded border p-4 cursor-pointer hover:bg-gray-100"
+                        className="flex w-80/100 items-center align-center justify-between rounded border p-4 cursor-pointer hover:bg-gray-100"
                     >
                         <div>
                             <h2 className="text-lg font-semibold">{b.name}</h2>
@@ -42,9 +74,13 @@ export default function GroupPage() {
                         <div className="self-stretch">
                             <button
                                 type="button"
-                                onClick={event => event.stopPropagation()}
+                                onClick={event => {
+                                    event.stopPropagation()
+                                    void deleteBox(b)
+                                }}
                                 aria-label={`Delete ${b.name}`}
-                                className="h-full rounded-3xl bg-amber-100 px-5 text-3xl text-rose-700 transition-colors hover:bg-amber-200 hover:text-rose-500"
+                                disabled={deletingBoxId === b.id}
+                                className="h-full rounded-3xl bg-amber-100 px-5 text-3xl text-rose-700 transition-colors hover:bg-amber-200 hover:text-rose-500 disabled:cursor-wait disabled:opacity-50"
                             >
                                 ✘
                             </button>
