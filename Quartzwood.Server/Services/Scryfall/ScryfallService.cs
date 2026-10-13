@@ -21,7 +21,7 @@ public interface IScryfallService
 {
     Task<ScryfallCard?> GetCardAsync(string setCode, string setNumber);
     Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year);
-    Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, string? cardName);
+    Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, bool isList, string? cardName);
     Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber);
 }
 
@@ -83,7 +83,7 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
     return cards;
 }
 
-public async Task<string?> GetScryfallId(string setCode, string setNumber, string? stampType, string? cardName)
+public async Task<string?> GetScryfallId(string setCode, string setNumber, string? stampType, bool isList, string? cardName)
     {
 
         var scryfallSetCode = setCode;
@@ -91,21 +91,35 @@ public async Task<string?> GetScryfallId(string setCode, string setNumber, strin
 
         // Scryfall alters setCodes of:
         // 1| Stamped cards: planeswalker & pre-release
-        // 2| Event Promo cards i.e. Japan Standard Cup: PRM => PJSC
+        // 2| List & Promo cards i.e. Japan Standard Cup: PRM => PJSC
 
-        switch (stampType){
-            case nameof(StampType.None):
-                break;
-            case nameof(StampType.Promo):
-                scryfallSetCode = "p" + scryfallSetCode;
-                scryfallSetNumber = scryfallSetNumber + "p";
-                break;
-            case nameof(StampType.Prerelease):
-                scryfallSetCode = "p" + scryfallSetCode;
-                scryfallSetNumber = scryfallSetNumber + "s";
-                break;
-            default:    // If null
-                break;                      
+        // Using If/Else prevents a stamped List card from being processed
+        if(stampType != nameof(StampType.None))
+        {
+            switch (stampType){
+                case nameof(StampType.None):
+                    break;
+                case nameof(StampType.Promo):
+                    scryfallSetCode = "p" + scryfallSetCode;
+                    scryfallSetNumber = scryfallSetNumber + "p";
+                    break;
+                case nameof(StampType.Prerelease):
+                    scryfallSetCode = "p" + scryfallSetCode;
+                    scryfallSetNumber = scryfallSetNumber + "s";
+                    break;
+                default:    // If null
+                    break;                      
+            }   
+        }else if (isList && scryfallSetCode != "PLST")
+        {
+                scryfallSetNumber = scryfallSetCode + "-" + scryfallSetNumber;
+                scryfallSetCode = "PLST";
+        }
+        else if (!isList && scryfallSetCode == "PLST")
+        {
+            var parseSetId = scryfallSetNumber.Split("-");
+            scryfallSetCode = parseSetId[0];
+            scryfallSetNumber = parseSetId[1];
         }
 
         var responce = await GetCardAsync(scryfallSetCode, scryfallSetNumber);

@@ -65,6 +65,14 @@ public class CardCommandService : ICardCommandService
             PurchasePrice = dto.PurchasePrice,
         };
 
+        if (dto.SetCode == "PLST" && dto.SetNumber != null)
+        {
+            var parsedSetCode = dto.SetNumber.Split("-");
+            card.SetCode = parsedSetCode[0];
+            card.SetNumber = parsedSetCode[1];
+            card.IsList = true;            
+        }
+
         var created = await _cards.AddAsync(card);
         return ToDto(created);
     }
@@ -91,7 +99,8 @@ public class CardCommandService : ICardCommandService
         if (dto.Language != null) card.Language = dto.Language;
         if (dto.IsProxy.HasValue) card.IsProxy = dto.IsProxy.Value;
         if (dto.IsSigned.HasValue) card.IsSigned = dto.IsSigned.Value;
-        if (dto.IsList.HasValue) card.IsList = dto.IsList.Value;
+        //TODO: Only update image on List:bool IF bool has changed value
+        if (dto.IsList.HasValue) {card.IsList = dto.IsList.Value; updateImage = true;}
         if (dto.AlterArtist != null) card.AlterArtist = dto.AlterArtist;
         if (dto.Notes != null) card.Notes = dto.Notes;
         if (dto.BoxId.HasValue) card.BoxId = dto.BoxId.Value;
@@ -100,7 +109,7 @@ public class CardCommandService : ICardCommandService
 
         if(updateImage){
             card.ScryfallId = await _scryfall.GetScryfallId(
-                card.SetCode, card.SetNumber, card.StampType.ToString(), card.Name
+                card.SetCode, card.SetNumber, card.StampType.ToString(), card.IsList, card.Name
             );
         }
 
