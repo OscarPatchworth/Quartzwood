@@ -60,7 +60,7 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
 {
     var query = $"!\"{name}\"";
     if (year.HasValue) query += $" year={year}";
-    query += " include:extras";
+    query += " include:extras (game:paper)";
 
     string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released";
     var cards = new List<ScryfallCard>();
