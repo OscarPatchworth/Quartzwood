@@ -3,8 +3,8 @@ import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 
 const patterns = {
     quantity:     /^(\d{1,3})$/,
-    dashedSet:    /^(?:(\d{1,3})-([A-Z]{2,4})|([A-Z]{2,4})-(\d{1,3}))$/i,
-    compactSet:   /^(?:(\d{1,3})([A-Z]{2,4})|([A-Z]{2,4})(\d{1,3}))$/i,
+    dashedSet:    /^(?:(\d{1,3})-([A-Z0-9]{2,5})|([A-Z0-9]{2,5})-(\d{1,3}))$/i,
+    compactSet:   /^(?:(\d{1,3})([A-Z0-9]{2,5})|([A-Z0-9]{2,5})(\d{1,3}))$/i,
     year:         /^\d{4}$/,
     flagFoil:     /^-f$/i,
     flagProxy:    /^-p$/i,
