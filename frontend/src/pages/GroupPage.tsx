@@ -7,6 +7,8 @@ import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupControl
 
 export default function GroupPage() {
     const { id } = useParams<{ id: string }>()
+    const [activeGroup, setActiveGroup] = useState<GroupDto>()
+    const [groups, setGroups] = useState<GroupDto[]>([])
     const [boxes, setBoxes] = useState<BoxDto[]>([])
     const [loading, setLoading] = useState(true)
     const [deletingBoxId, setDeletingBoxId] = useState<string>()
@@ -15,9 +17,18 @@ export default function GroupPage() {
 
     useEffect(() => {
         setLoading(true)
-        client.get<BoxDto[]>(`/boxes/by-group/${id}`)
-            .then(res => setBoxes(res.data))
+        Promise.all([
+            client.get<BoxDto[]>(`/boxes/by-group/${id}`)
+                .then(res => setBoxes(res.data)),
+            
+            client.get<GroupDto>(`/groups/${id}`)
+                .then(res => setActiveGroup(res.data)),
+
+            client.get<GroupDto[]>(`/groups/by-parent/${id}`)
+                .then(res => setGroups(res.data))
+        ])
             .finally(() => setLoading(false))
+
     }, [id])
 
     async function deleteBox(box: BoxDto) {
@@ -50,7 +61,7 @@ export default function GroupPage() {
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
             
             <div className='flex items-start justify-between align-top'>
-                <h1 className="text-2xl font-bold">Boxes</h1>
+                <h1 className="text-2xl font-bold">{activeGroup?.name}</h1>
                 <AddBoxGroupController
                     groupId={id}
                     onBoxCreated={handleBoxCreated}
@@ -60,35 +71,71 @@ export default function GroupPage() {
 
             {deleteError && <p role="alert" className="mb-4 text-sm text-rose-700">{deleteError}</p>}
 
-            <div className="grid grid-cols-1 gap-4">
-                {boxes.map(b => (
-                    <div
-                        key={b.id}
-                        onClick={() => navigate(`/box/${b.id}`)}
-                        className="flex w-80/100 items-center align-center justify-between rounded border p-4 cursor-pointer hover:bg-gray-100"
-                    >
-                        <div>
-                            <h2 className="text-lg font-semibold">{b.name}</h2>
-                            <p className="text-sm text-gray-500">{b.cardCount} cards</p>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
+                    <h2 className="mb-1 ml-3 text-lg font-bold uppercase tracking-wide text-slate-700">Groups</h2>
+                    {groups.map(g => (
+                        <div
+                            key={g.id}
+                            onClick={() => navigate(`/box/${g.id}`)}
+                            className="flex w-80/100 items-center align-center justify-between rounded border p-4 cursor-pointer hover:bg-gray-100"
+                        >
+                            <div>
+                                <h2 className="text-lg font-semibold">{g.name}</h2>
+                                <p className="text-sm text-gray-500">{g.childGroupNames.length} items</p>
+                            </div>
+                            <div className="flex self-stretch items-center">
+                                <button
+                                    type="button"
+                                    onClick={event => {
+                                        event.stopPropagation()
+                                        //void deleteBox(b)
+                                    }}
+                                    aria-label={`Delete ${g.name}`}
+                                    disabled={deletingBoxId === g.id}
+                                    className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 bg-red-50 text-2xl font-bold leading-none text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    ×
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex self-stretch items-center">
-                            <button
-                                type="button"
-                                onClick={event => {
-                                    event.stopPropagation()
-                                    void deleteBox(b)
-                                }}
-                                aria-label={`Delete ${b.name}`}
-                                disabled={deletingBoxId === b.id}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 bg-red-50 text-2xl font-bold leading-none text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                ×
-                            </button>
+                    ))}
+                    {groups.length === 0 && <p className="text-gray-500">No Goups found.</p>}
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                    <h2 className="mb-1 ml-3 text-lg font-bold uppercase tracking-wide text-slate-700">Boxes</h2>
+                    {boxes.map(b => (
+                        <div
+                            key={b.id}
+                            onClick={() => navigate(`/box/${b.id}`)}
+                            className="flex w-80/100 items-center align-center justify-between rounded border p-4 cursor-pointer hover:bg-gray-100"
+                        >
+                            <div>
+                                <h2 className="text-lg font-semibold">{b.name}</h2>
+                                <p className="text-sm text-gray-500">{b.cardCount} cards</p>
+                            </div>
+                            <div className="flex self-stretch items-center">
+                                <button
+                                    type="button"
+                                    onClick={event => {
+                                        event.stopPropagation()
+                                        void deleteBox(b)
+                                    }}
+                                    aria-label={`Delete ${b.name}`}
+                                    disabled={deletingBoxId === b.id}
+                                    className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 bg-red-50 text-2xl font-bold leading-none text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    ×
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
-                {boxes.length === 0 && <p className="text-gray-500">No boxes found.</p>}
+                    ))}
+                    {boxes.length === 0 && <p className="text-gray-500">No boxes found.</p>}
+                </div>
+
             </div>
+            
         </div>
     )
 }
