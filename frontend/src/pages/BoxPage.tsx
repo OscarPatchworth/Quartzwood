@@ -18,8 +18,14 @@ export default function BoxPage() {
     const [box, setBox] = useState<BoxDto>()
     const [loading, setLoading] = useState(true)
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
+    const [isEditingName, setIsEditingName] = useState(false)
+    const [draftName, setDraftName] = useState(box?.name ?? '')
     const navigate = useNavigate()
     const [selectedCards, setSelectedCards] = useState<GroupedCardDto>()
+
+    useEffect(() => {
+        setDraftName(box?.name ?? '')
+    }, [box?.name])
 
     function selectCard(groupedCard: GroupedCardDto){
         setSelectedCards(undefined)
@@ -34,6 +40,31 @@ export default function BoxPage() {
         setCards([...response.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
         setSelectedCards(undefined)
         setShowRightPanel(false)
+    }
+
+    async function saveBoxName() {
+        if (!box) return
+
+        const nextName = draftName.trim()
+        if (!nextName || nextName === box.name) {
+            setIsEditingName(false)
+            setDraftName(box.name)
+            return
+        }
+
+        try {
+            const res = await client.put<BoxDto>(`/boxes/${box.id}`, {
+                name: nextName,
+                groupId: box.groupId ?? null,
+            })
+            setBox(res.data)
+            setDraftName(res.data.name)
+        } catch (error) {
+            setDraftName(box.name)
+            console.error('Failed to rename box:', error)
+        } finally {
+            setIsEditingName(false)
+        }
     }
 
     useEffect(() => {
@@ -62,7 +93,33 @@ export default function BoxPage() {
         <div className="p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
             <div className='flex justify-between'>
-                <h1 className="text-2xl font-bold mb-6 mt-4">{box?.name}</h1>
+                {isEditingName ? (
+                    <input
+                        autoFocus
+                        value={draftName}
+                        onChange={event => setDraftName(event.target.value)}
+                        onBlur={saveBoxName}
+                        onKeyDown={event => {
+                            if (event.key === 'Enter') {
+                                event.preventDefault()
+                                void saveBoxName()
+                            }
+                            if (event.key === 'Escape') {
+                                setIsEditingName(false)
+                                setDraftName(box?.name ?? '')
+                            }
+                        }}
+                        className="mb-6 mt-4 rounded border border-slate-300 bg-white px-2 py-1 text-2xl font-bold outline-none ring-2 ring-blue-200"
+                    />
+                ) : (
+                    <h1
+                        className="mb-6 mt-4 text-2xl font-bold cursor-text"
+                        onDoubleClick={() => setIsEditingName(true)}
+                        title="Double-click to rename"
+                    >
+                        {box?.name}
+                    </h1>
+                )}
                 <div className='flex justify-end pt-[-10] pb-5'>
                     <AddNewCardTextBar
                         boxId={id}

@@ -13,7 +13,13 @@ export default function GroupPage() {
     const [loading, setLoading] = useState(true)
     const [deletingBoxId, setDeletingBoxId] = useState<string>()
     const [deleteError, setDeleteError] = useState<string>()
+    const [isEditingName, setIsEditingName] = useState(false)
+    const [draftName, setDraftName] = useState(activeGroup?.name ?? '')
     const navigate = useNavigate()
+
+    useEffect(() => {
+        setDraftName(activeGroup?.name ?? '')
+    }, [activeGroup?.name])
 
     useEffect(() => {
         setLoading(true)
@@ -61,6 +67,32 @@ export default function GroupPage() {
         }
     }
 
+    async function saveGroupName() {
+        if (!activeGroup) return
+
+        const nextName = draftName.trim()
+        if (!nextName || nextName === activeGroup.name) {
+            setIsEditingName(false)
+            setDraftName(activeGroup.name)
+            return
+        }
+
+        try {
+            const res = await client.put<GroupDto>(`/groups/${activeGroup.id}`, {
+                name: nextName,
+                description: activeGroup.description ?? null,
+                entityId: activeGroup.entityId ?? null,
+                parentGroupId: activeGroup.parentGroupId ?? null,
+            })
+            setActiveGroup(res.data)
+            setDraftName(res.data.name)
+        } catch (error) {
+            setDeleteError(error instanceof Error ? error.message : 'Unable to update group name.')
+        } finally {
+            setIsEditingName(false)
+        }
+    }
+
     function handleBoxCreated(box: BoxDto) {
         setBoxes(currentBoxes => [...currentBoxes, box])
     }
@@ -76,7 +108,33 @@ export default function GroupPage() {
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
             
             <div className='flex items-start justify-between align-top'>
-                <h1 className="text-2xl font-bold">{activeGroup?.name}</h1>
+                {isEditingName ? (
+                    <input
+                        autoFocus
+                        value={draftName}
+                        onChange={event => setDraftName(event.target.value)}
+                        onBlur={saveGroupName}
+                        onKeyDown={event => {
+                            if (event.key === 'Enter') {
+                                event.preventDefault()
+                                void saveGroupName()
+                            }
+                            if (event.key === 'Escape') {
+                                setIsEditingName(false)
+                                setDraftName(activeGroup?.name ?? '')
+                            }
+                        }}
+                        className="mb-4 mt-3 rounded border border-slate-300 bg-white px-2 py-1 text-2xl font-bold outline-none ring-2 ring-blue-200"
+                    />
+                ) : (
+                    <h1
+                        className="mb-4 mt-3 text-2xl font-bold cursor-text"
+                        onDoubleClick={() => setIsEditingName(true)}
+                        title="Double-click to rename"
+                    >
+                        {activeGroup?.name}
+                    </h1>
+                )}
                 <AddBoxGroupController
                     groupId={id}
                     onBoxCreated={handleBoxCreated}
