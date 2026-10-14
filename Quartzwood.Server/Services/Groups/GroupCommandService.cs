@@ -1,16 +1,19 @@
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
+using Quartzwood.Server.Services.Boxs;
 
 namespace Quartzwood.Server.Services.Groups;
 
 public class GroupCommandService : IGroupCommandService
 {
     private readonly IGroupRepository _groups;
+    private readonly IBoxCommandService _boxCommand;
 
-    public GroupCommandService(IGroupRepository groups)
+    public GroupCommandService(IGroupRepository groups, IBoxCommandService boxCommand)
     {
         _groups = groups;
+        _boxCommand = boxCommand;
     }
 
     public async Task<GroupDto> AddAsync(AddGroupDto dto)
@@ -47,13 +50,23 @@ public class GroupCommandService : IGroupCommandService
         return ToDto(updated);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
-    {
-        var group = await _groups.GetByIdAsync(id);
-        if (group is null) return false;
-        await _groups.DeleteAsync(id);
-        return true;
-    }
+public async Task<bool> DeleteAsync(Guid id)
+{
+    var group = await _groups.GetByIdAsync(id);
+    if (group is null) return false;
+
+    // Delete child groups recursively first
+    foreach (var childGroup in group.ChildGroups.ToList())
+        await DeleteAsync(childGroup.Id);
+
+    // Delete child boxes
+    foreach (var box in group.Boxes.ToList())
+        await _boxCommand.DeleteAsync(box.Id);
+
+    // Now safe to delete the group itself
+    await _groups.DeleteAsync(id);
+    return true;
+}
 
     private static GroupDto ToDto(Group g) => new(
         g.Id,
