@@ -46,6 +46,21 @@ export default function GroupPage() {
         }
     }
 
+    async function deleteGroup(group: GroupDto) {
+        if (!window.confirm(`Delete "${group.name}"? This cannot be undone.`)) return
+
+        setDeletingBoxId(group.id)
+        setDeleteError(undefined)
+        try {
+            await client.delete(`/groups/${group.id}`)
+            setGroups(currentGroups => currentGroups.filter(currentGroup => currentGroup.id !== group.id))
+        } catch (error) {
+            setDeleteError(error instanceof Error ? error.message : `Unable to delete ${group.name}.`)
+        } finally {
+            setDeletingBoxId(undefined)
+        }
+    }
+
     function handleBoxCreated(box: BoxDto) {
         setBoxes(currentBoxes => [...currentBoxes, box])
     }
@@ -80,7 +95,7 @@ export default function GroupPage() {
                                 {groups.map(g => (
                                     <div
                                         key={g.id}
-                                        onClick={() => navigate(`/box/${g.id}`)}
+                                        onClick={() => navigate(`/group/${g.id}`)}
                                         className="flex w-full items-center justify-between rounded border p-4 shadow-sm transition cursor-pointer hover:bg-gray-100"
                                     >
                                         <div>
@@ -92,7 +107,7 @@ export default function GroupPage() {
                                                 type="button"
                                                 onClick={event => {
                                                     event.stopPropagation()
-                                                    //void deleteBox(b)
+                                                    void deleteGroup(g)
                                                 }}
                                                 aria-label={`Delete ${g.name}`}
                                                 disabled={deletingBoxId === g.id}
