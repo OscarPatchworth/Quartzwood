@@ -4,6 +4,8 @@ import client from '../api/client'
 import type { BoxDto, GroupDto } from '../interfaces/generated.ts/types.gen'
 import { LoadingIndicator } from '../components/misc/loadingIndicator'
 import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupController'
+import GroupBoxListCard from '../components/BoxGroup/GroupBoxListCard'
+import EditableTitle from '../components/misc/EditableTitle'
 
 export default function GroupPage() {
     const { id } = useParams<{ id: string }>()
@@ -108,33 +110,15 @@ export default function GroupPage() {
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
             
             <div className='flex items-start justify-between align-top'>
-                {isEditingName ? (
-                    <input
-                        autoFocus
-                        value={draftName}
-                        onChange={event => setDraftName(event.target.value)}
-                        onBlur={saveGroupName}
-                        onKeyDown={event => {
-                            if (event.key === 'Enter') {
-                                event.preventDefault()
-                                void saveGroupName()
-                            }
-                            if (event.key === 'Escape') {
-                                setIsEditingName(false)
-                                setDraftName(activeGroup?.name ?? '')
-                            }
-                        }}
-                        className="mb-4 mt-3 rounded border border-slate-300 bg-white px-2 py-1 text-2xl font-bold outline-none ring-2 ring-blue-200"
-                    />
-                ) : (
-                    <h1
-                        className="mb-4 mt-3 text-2xl font-bold cursor-text"
-                        onDoubleClick={() => setIsEditingName(true)}
-                        title="Double-click to rename"
-                    >
-                        {activeGroup?.name}
-                    </h1>
-                )}
+                <EditableTitle
+                    name={activeGroup?.name ?? ''}
+                    draftName={draftName}
+                    isEditing={isEditingName}
+                    onDraftChange={setDraftName}
+                    onSave={() => void saveGroupName()}
+                    onCancel={() => { setIsEditingName(false); setDraftName(activeGroup?.name ?? '') }}
+                    onStartEdit={() => setIsEditingName(true)}
+                />
                 <AddBoxGroupController
                     groupId={id}
                     onBoxCreated={handleBoxCreated}
@@ -146,79 +130,34 @@ export default function GroupPage() {
 
             <div className='flex justify-center'>
                 <div className="flex gap-8 px-4 w-[75%] justify-between">
-                    <div className="grid min-w-0 w-[45%] grid-cols-1 content-start gap-4">
-                        <h2 className="mb-1 ml-3 text-lg font-bold uppercase tracking-wide text-slate-700">Groups</h2>
-                        <div className="max-h-[60vh] overflow-y-auto pr-2">
-                            <div className="grid grid-cols-1 content-start gap-4">
-                                {groups.map(g => (
-                                    <div
-                                        key={g.id}
-                                        onClick={() => navigate(`/group/${g.id}`)}
-                                        className="flex w-full items-center justify-between rounded border p-4 shadow-sm transition cursor-pointer hover:bg-gray-100"
-                                    >
-                                        <div>
-                                            <h2 className="text-lg font-semibold">{g.name}</h2>
-                                            <p className="text-sm text-gray-500">{g.childGroupNames.length} items</p>
-                                        </div>
-                                        <div className="flex self-stretch items-center">
-                                            <button
-                                                type="button"
-                                                onClick={event => {
-                                                    event.stopPropagation()
-                                                    void deleteGroup(g)
-                                                }}
-                                                aria-label={`Delete ${g.name}`}
-                                                disabled={deletingBoxId === g.id}
-                                                className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 bg-red-50 text-2xl font-bold leading-none text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {groups.length === 0 && <p className="text-gray-500">No Goups found.</p>}
-                            </div>
-                        </div>
-                    </div>
+                   
+                    <GroupBoxListCard
+                        title="Groups"
+                        items={groups}
+                        getId={g => g.id}
+                        getName={g => g.name}
+                        getSubtitle={g => `${g.childGroupNames.length} items`}
+                        onNavigate={g => navigate(`/group/${g.id}`)}
+                        onDelete={g => void deleteGroup(g)}
+                        deletingId={deletingBoxId}
+                        emptyMessage="No groups found."
+                    />
 
-                    <div className="grid min-w-0 w-[45%] grid-cols-1 content-start gap-4 justify-self-end">
-                        <h2 className="mb-1 ml-3 text-lg font-bold uppercase tracking-wide text-slate-700">Boxes</h2>
-                        <div className="max-h-[60vh] overflow-y-auto pr-2">
-                            <div className="grid grid-cols-1 content-start gap-4">
-                                {boxes.map(b => (
-                                    <div
-                                        key={b.id}
-                                        onClick={() => navigate(`/box/${b.id}`)}
-                                        className="flex w-full items-center justify-between rounded border p-4 shadow-sm transition cursor-pointer hover:bg-gray-100"
-                                    >
-                                        <div>
-                                            <h2 className="text-lg font-semibold">{b.name}</h2>
-                                            <p className="text-sm text-gray-500">{b.cardCount} cards</p>
-                                        </div>
-                                        <div className="flex self-stretch items-center">
-                                            <button
-                                                type="button"
-                                                onClick={event => {
-                                                    event.stopPropagation()
-                                                    void deleteBox(b)
-                                                }}
-                                                aria-label={`Delete ${b.name}`}
-                                                disabled={deletingBoxId === b.id}
-                                                className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 bg-red-50 text-2xl font-bold leading-none text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {boxes.length === 0 && <p className="text-gray-500">No boxes found.</p>}
-                            </div>
-                        </div>
-                    </div>
+                    <GroupBoxListCard
+                        title="Boxes"
+                        items={boxes}
+                        getId={b => b.id}
+                        getName={b => b.name}
+                        getSubtitle={b => `${b.cardCount} cards`}
+                        onNavigate={b => navigate(`/box/${b.id}`)}
+                        onDelete={b => void deleteBox(b)}
+                        deletingId={deletingBoxId}
+                        emptyMessage="No boxes found."
+                        className="justify-self-end"
+                    />
 
                 </div>
-            </div>
-            
+            </div>           
         </div>
     )
 }

@@ -8,6 +8,7 @@ import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongP
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
 import { LoadingIndicator } from '../components/misc/loadingIndicator.tsx'
 import { AddNewCardTextBar } from '../components/AddNewCardTextBar.tsx'
+import EditableTitle from '../components/misc/EditableTitle.tsx'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -93,33 +94,16 @@ export default function BoxPage() {
         <div className="p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
             <div className='flex justify-between'>
-                {isEditingName ? (
-                    <input
-                        autoFocus
-                        value={draftName}
-                        onChange={event => setDraftName(event.target.value)}
-                        onBlur={saveBoxName}
-                        onKeyDown={event => {
-                            if (event.key === 'Enter') {
-                                event.preventDefault()
-                                void saveBoxName()
-                            }
-                            if (event.key === 'Escape') {
-                                setIsEditingName(false)
-                                setDraftName(box?.name ?? '')
-                            }
-                        }}
-                        className="mb-6 mt-4 rounded border border-slate-300 bg-white px-2 py-1 text-2xl font-bold outline-none ring-2 ring-blue-200"
-                    />
-                ) : (
-                    <h1
-                        className="mb-6 mt-4 text-2xl font-bold cursor-text"
-                        onDoubleClick={() => setIsEditingName(true)}
-                        title="Double-click to rename"
-                    >
-                        {box?.name}
-                    </h1>
-                )}
+                <EditableTitle
+                    name={box?.name ?? ''}
+                    draftName={draftName}
+                    isEditing={isEditingName}
+                    onDraftChange={setDraftName}
+                    onSave={() => void saveBoxName()}
+                    onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
+                    onStartEdit={() => setIsEditingName(true)}
+                    className="mb-6 mt-4"
+                />
                 <div className='flex justify-end pt-[-10] pb-5'>
                     <AddNewCardTextBar
                         boxId={id}
