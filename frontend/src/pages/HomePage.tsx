@@ -1,24 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import client from '../api/client'
-import { LoadingIndicator } from '../components/misc/loadingIndicator'
-
-// Shape of data coming from API
-interface Entity {
-    id: string
-    name: string
-    type: string
-    location: string | null
-}
+import { getApiEntities, type EntityDto } from '../interfaces/generated.ts'
+import { LoadingIndicator } from '../components/misc/LoadingIndicator'
 
 export default function HomePage() {
-    const [entities, setEntities] = useState<Entity[]>([])
+    const [entities, setEntities] = useState<EntityDto[]>([])
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
     // Runs once on mount — fetches data
     useEffect(() => {
-        client.get<Entity[]>('/entities')
+        getApiEntities()
             .then(res => setEntities(res.data))
             .finally(() => setLoading(false))
     }, [])

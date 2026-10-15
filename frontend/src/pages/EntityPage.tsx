@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import client from '../api/client'
-import type { GroupDto } from '../interfaces/generated.ts/types.gen'
-import { LoadingIndicator } from '../components/misc/loadingIndicator'
+import { getApiGroupsByEntityByEntityId, type GroupDto } from '../interfaces/generated.ts'
+import { LoadingIndicator } from '../components/misc/LoadingIndicator'
 
 export default function EntityPage() {
     const { id } = useParams<{ id: string }>()
@@ -11,7 +10,8 @@ export default function EntityPage() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        client.get<GroupDto[]>(`/groups/by-entity/${id}`)
+        if (!id) return
+        getApiGroupsByEntityByEntityId({ path: { entityId: id } })
             .then(res => setGroups(res.data))
             .finally(() => setLoading(false))
     }, [id])

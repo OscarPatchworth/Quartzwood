@@ -78,6 +78,14 @@ export type CardDto = {
     tags: Array<string>;
 };
 
+export type EntityDto = {
+    id: string;
+    name: string;
+    type: string;
+    location: null | string;
+    groupNames: Array<string>;
+};
+
 export type GroupDto = {
     id: string;
     name: string;
@@ -106,6 +114,13 @@ export type ProblemDetails = {
     status?: null | number | string;
     detail?: null | string;
     instance?: null | string;
+};
+
+export type ScryfallSearchResultDto = {
+    name: string;
+    setCode: string;
+    setNumber: string;
+    scryfallId: string;
 };
 
 export type UpdateBoxDto = {
@@ -471,8 +486,10 @@ export type GetApiEntitiesResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: Array<EntityDto>;
 };
+
+export type GetApiEntitiesResponse = GetApiEntitiesResponses[keyof GetApiEntitiesResponses];
 
 export type PostApiEntitiesData = {
     body: AddEntityDto;
@@ -513,12 +530,23 @@ export type GetApiEntitiesByIdData = {
     url: '/api/entities/{id}';
 };
 
+export type GetApiEntitiesByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiEntitiesByIdError = GetApiEntitiesByIdErrors[keyof GetApiEntitiesByIdErrors];
+
 export type GetApiEntitiesByIdResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: EntityDto;
 };
+
+export type GetApiEntitiesByIdResponse = GetApiEntitiesByIdResponses[keyof GetApiEntitiesByIdResponses];
 
 export type PutApiEntitiesByIdData = {
     body: UpdateEntityDto;
@@ -684,3 +712,60 @@ export type GetApiGroupsByParentByParentIdResponses = {
 };
 
 export type GetApiGroupsByParentByParentIdResponse = GetApiGroupsByParentByParentIdResponses[keyof GetApiGroupsByParentByParentIdResponses];
+
+export type GetApiScryfallSearchData = {
+    body?: never;
+    path?: never;
+    query?: {
+        name?: string;
+        year?: number | string;
+    };
+    url: '/api/scryfall/search';
+};
+
+export type GetApiScryfallSearchErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiScryfallSearchError = GetApiScryfallSearchErrors[keyof GetApiScryfallSearchErrors];
+
+export type GetApiScryfallSearchResponses = {
+    /**
+     * OK
+     */
+    200: Array<ScryfallSearchResultDto>;
+};
+
+export type GetApiScryfallSearchResponse = GetApiScryfallSearchResponses[keyof GetApiScryfallSearchResponses];
+
+export type GetApiScryfallSearchPromoData = {
+    body?: never;
+    path?: never;
+    query?: {
+        name?: string;
+        year?: number | string;
+        setNumber?: string;
+    };
+    url: '/api/scryfall/search/promo';
+};
+
+export type GetApiScryfallSearchPromoErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiScryfallSearchPromoError = GetApiScryfallSearchPromoErrors[keyof GetApiScryfallSearchPromoErrors];
+
+export type GetApiScryfallSearchPromoResponses = {
+    /**
+     * OK
+     */
+    200: Array<ScryfallSearchResultDto>;
+};
+
+export type GetApiScryfallSearchPromoResponse = GetApiScryfallSearchPromoResponses[keyof GetApiScryfallSearchPromoResponses];

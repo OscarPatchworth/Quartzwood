@@ -8,11 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "generate-types": "openapi-ts --input http://localhost:5163/openapi/v1.json --output src/interfaces/generated.ts"
+    "generate-types": "openapi-ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "axios": "^1.20.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3",

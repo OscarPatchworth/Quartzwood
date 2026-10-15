@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import client from '../api/client'
-import type { BoxDto, GroupDto } from '../interfaces/generated.ts/types.gen'
-import { LoadingIndicator } from '../components/misc/loadingIndicator'
+import { getErrorMessage } from '../api/getErrorMessage'
+import {
+    deleteApiBoxesById,
+    deleteApiGroupsById,
+    getApiBoxesByGroupByGroupId,
+    getApiGroupsById,
+    getApiGroupsByParentByParentId,
+    putApiGroupsById,
+    type BoxDto,
+    type GroupDto,
+} from '../interfaces/generated.ts'
+import { LoadingIndicator } from '../components/misc/LoadingIndicator'
 import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupController'
 import GroupBoxListCard from '../components/BoxGroup/GroupBoxListCard'
 import EditableTitle from '../components/misc/EditableTitle'
@@ -24,15 +33,16 @@ export default function GroupPage() {
     }, [activeGroup?.name])
 
     useEffect(() => {
+        if (!id) return
         setLoading(true)
         Promise.all([
-            client.get<BoxDto[]>(`/boxes/by-group/${id}`)
+            getApiBoxesByGroupByGroupId({ path: { groupId: id } })
                 .then(res => setBoxes(res.data)),
-            
-            client.get<GroupDto>(`/groups/${id}`)
+
+            getApiGroupsById({ path: { id } })
                 .then(res => setActiveGroup(res.data)),
 
-            client.get<GroupDto[]>(`/groups/by-parent/${id}`)
+            getApiGroupsByParentByParentId({ path: { parentId: id } })
                 .then(res => setGroups(res.data))
         ])
             .finally(() => setLoading(false))
@@ -45,10 +55,10 @@ export default function GroupPage() {
         setDeletingBoxId(box.id)
         setDeleteError(undefined)
         try {
-            await client.delete(`/boxes/${box.id}`)
+            await deleteApiBoxesById({ path: { id: box.id } })
             setBoxes(currentBoxes => currentBoxes.filter(currentBox => currentBox.id !== box.id))
         } catch (error) {
-            setDeleteError(error instanceof Error ? error.message : `Unable to delete ${box.name}.`)
+            setDeleteError(getErrorMessage(error, `Unable to delete ${box.name}.`))
         } finally {
             setDeletingBoxId(undefined)
         }
@@ -60,10 +70,10 @@ export default function GroupPage() {
         setDeletingBoxId(group.id)
         setDeleteError(undefined)
         try {
-            await client.delete(`/groups/${group.id}`)
+            await deleteApiGroupsById({ path: { id: group.id } })
             setGroups(currentGroups => currentGroups.filter(currentGroup => currentGroup.id !== group.id))
         } catch (error) {
-            setDeleteError(error instanceof Error ? error.message : `Unable to delete ${group.name}.`)
+            setDeleteError(getErrorMessage(error, `Unable to delete ${group.name}.`))
         } finally {
             setDeletingBoxId(undefined)
         }
@@ -80,16 +90,19 @@ export default function GroupPage() {
         }
 
         try {
-            const res = await client.put<GroupDto>(`/groups/${activeGroup.id}`, {
-                name: nextName,
-                description: activeGroup.description ?? null,
-                entityId: activeGroup.entityId ?? null,
-                parentGroupId: activeGroup.parentGroupId ?? null,
+            const res = await putApiGroupsById({
+                path: { id: activeGroup.id },
+                body: {
+                    name: nextName,
+                    description: activeGroup.description ?? null,
+                    entityId: activeGroup.entityId ?? null,
+                    parentGroupId: activeGroup.parentGroupId ?? null,
+                },
             })
             setActiveGroup(res.data)
             setDraftName(res.data.name)
         } catch (error) {
-            setDeleteError(error instanceof Error ? error.message : 'Unable to update group name.')
+            setDeleteError(getErrorMessage(error, 'Unable to update group name.'))
         } finally {
             setIsEditingName(false)
         }

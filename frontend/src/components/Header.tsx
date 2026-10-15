@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
-import client from '../api/client'
-import type { BreadcrumbDto } from '../interfaces/generated.ts'
+import { getApiBreadcrumbById, type BreadcrumbDto } from '../interfaces/generated.ts'
 
 export default function Header() {
     const location = useLocation()
@@ -14,7 +13,7 @@ export default function Header() {
             setBreadcrumb(null)
             return
         }
-        client.get<BreadcrumbDto>(`/breadcrumb/${id}`)
+        getApiBreadcrumbById({ path: { id } })
             .then(res => setBreadcrumb(res.data))
             .catch(() => setBreadcrumb(null))
     }, [id, location.pathname])

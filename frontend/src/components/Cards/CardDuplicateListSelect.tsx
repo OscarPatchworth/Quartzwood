@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
-import type { GroupedCardDto, CardDto } from "../../interfaces/generated.ts"
-import client from "../../api/client.ts"
+import { getApiCardsById, type GroupedCardDto, type CardDto } from "../../interfaces/generated.ts"
 
 interface CardDuplicateListSelectProps {
     groupedCards: GroupedCardDto,
@@ -30,7 +29,7 @@ export function CardDuplicateListSelect({ groupedCards, setSelectedCards }: Card
     useEffect(() => {
         var isCurrent = true
 
-        Promise.all(groupedCards.ids.map(cardId => client.get<CardDto>(`/cards/${cardId}`)))
+        Promise.all(groupedCards.ids.map(cardId => getApiCardsById({ path: { id: cardId } })))
             .then(responses => {
                 if (isCurrent) {
                     const loadedCards = responses.map(response => response.data)

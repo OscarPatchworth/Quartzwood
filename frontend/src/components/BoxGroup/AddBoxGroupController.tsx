@@ -1,7 +1,6 @@
-import axios from "axios"
 import { useState, type FormEvent } from "react"
-import client from "../../api/client"
-import type { BoxDto, GroupDto } from "../../interfaces/generated.ts/types.gen"
+import { getErrorMessage } from "../../api/getErrorMessage"
+import { postApiBoxes, postApiGroups, type BoxDto, type GroupDto } from "../../interfaces/generated.ts"
 
 interface ABGCProps {
     groupId?: string
@@ -10,20 +9,6 @@ interface ABGCProps {
 }
 
 type CreateType = "group" | "box"
-
-function getErrorMessage(error: unknown, fallback: string): string {
-    if (axios.isAxiosError<unknown>(error)) {
-        const data = error.response?.data
-        if (typeof data === "string" && data.trim()) return data
-        if (data && typeof data === "object") {
-            const response = data as Record<string, unknown>
-            if (typeof response.detail === "string") return response.detail
-            if (typeof response.message === "string") return response.message
-            if (typeof response.title === "string") return response.title
-        }
-    }
-    return fallback
-}
 
 export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }: ABGCProps){
     const [createType, setCreateType] = useState<CreateType>()
@@ -45,15 +30,13 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
         setErrorMessage(undefined)
         try {
             if (createType === "group") {
-                const response = await client.post<GroupDto>("/groups", {
-                    name: name.trim(),
-                    parentGroupId: groupId,
+                const response = await postApiGroups({
+                    body: { name: name.trim(), parentGroupId: groupId },
                 })
                 onGroupCreated(response.data)
             } else {
-                const response = await client.post<BoxDto>("/boxes", {
-                    name: name.trim(),
-                    groupId,
+                const response = await postApiBoxes({
+                    body: { name: name.trim(), groupId },
                 })
                 onBoxCreated(response.data)
             }

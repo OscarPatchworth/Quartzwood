@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import client from '../api/client'
-import { type BoxDto } from '../interfaces/generated.ts'
-import type { GroupedCardDto } from '../interfaces/generated.ts'
+import {
+    getApiBoxesById,
+    getApiCardsByBoxByBoxIdGrouped,
+    putApiBoxesById,
+    type BoxDto,
+    type GroupedCardDto,
+} from '../interfaces/generated.ts'
 import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
-import { LoadingIndicator } from '../components/misc/loadingIndicator.tsx'
+import { LoadingIndicator } from '../components/misc/LoadingIndicator.tsx'
 import { AddNewCardTextBar } from '../components/AddNewCardTextBar.tsx'
 import EditableTitle from '../components/misc/EditableTitle.tsx'
 
@@ -37,7 +41,8 @@ export default function BoxPage() {
     }
 
     async function refreshCardsAfterMutation() {
-        const response = await client.get<GroupedCardDto[]>(`/cards/by-box/${id}/grouped`)
+        if (!id) return
+        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id } })
         setCards([...response.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
         setSelectedCards(undefined)
         setShowRightPanel(false)
@@ -54,9 +59,9 @@ export default function BoxPage() {
         }
 
         try {
-            const res = await client.put<BoxDto>(`/boxes/${box.id}`, {
-                name: nextName,
-                groupId: box.groupId ?? null,
+            const res = await putApiBoxesById({
+                path: { id: box.id },
+                body: { name: nextName, groupId: box.groupId ?? null },
             })
             setBox(res.data)
             setDraftName(res.data.name)
@@ -69,9 +74,10 @@ export default function BoxPage() {
     }
 
     useEffect(() => {
+        if (!id) return
         Promise.all([
-            client.get<GroupedCardDto[]>(`/cards/by-box/${id}/grouped`),
-            client.get<BoxDto>(`/boxes/${id}`)
+            getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id } }),
+            getApiBoxesById({ path: { id } })
         ]).then(([cardsRes, boxRes]) => {
             setCards([...cardsRes.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
             setBox(boxRes.data)

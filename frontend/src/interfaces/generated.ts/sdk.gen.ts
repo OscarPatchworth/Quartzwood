@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiBoxesByIdData, DeleteApiBoxesByIdErrors, DeleteApiBoxesByIdResponses, DeleteApiCardsByIdData, DeleteApiCardsByIdErrors, DeleteApiCardsByIdResponses, DeleteApiEntitiesByIdData, DeleteApiEntitiesByIdResponses, DeleteApiGroupsByIdData, DeleteApiGroupsByIdErrors, DeleteApiGroupsByIdResponses, GetApiBoxesByGroupByGroupIdData, GetApiBoxesByGroupByGroupIdResponses, GetApiBoxesByIdData, GetApiBoxesByIdErrors, GetApiBoxesByIdResponses, GetApiBoxesData, GetApiBoxesResponses, GetApiBreadcrumbByIdData, GetApiBreadcrumbByIdErrors, GetApiBreadcrumbByIdResponses, GetApiCardsByBoxByBoxIdData, GetApiCardsByBoxByBoxIdGroupedData, GetApiCardsByBoxByBoxIdGroupedResponses, GetApiCardsByBoxByBoxIdResponses, GetApiCardsByIdData, GetApiCardsByIdErrors, GetApiCardsByIdResponses, GetApiCardsData, GetApiCardsResponses, GetApiEntitiesByIdData, GetApiEntitiesByIdResponses, GetApiEntitiesData, GetApiEntitiesResponses, GetApiGroupsByEntityByEntityIdData, GetApiGroupsByEntityByEntityIdResponses, GetApiGroupsByIdData, GetApiGroupsByIdErrors, GetApiGroupsByIdResponses, GetApiGroupsByParentByParentIdData, GetApiGroupsByParentByParentIdResponses, GetApiGroupsData, GetApiGroupsResponses, PostApiBoxesData, PostApiBoxesResponses, PostApiCardsData, PostApiCardsErrors, PostApiCardsResponses, PostApiEntitiesData, PostApiEntitiesResponses, PostApiGroupsData, PostApiGroupsResponses, PutApiBoxesByIdData, PutApiBoxesByIdErrors, PutApiBoxesByIdResponses, PutApiCardsByIdData, PutApiCardsByIdErrors, PutApiCardsByIdResponses, PutApiEntitiesByIdData, PutApiEntitiesByIdResponses, PutApiGroupsByIdData, PutApiGroupsByIdErrors, PutApiGroupsByIdResponses } from './types.gen';
+import type { DeleteApiBoxesByIdData, DeleteApiBoxesByIdErrors, DeleteApiBoxesByIdResponses, DeleteApiCardsByIdData, DeleteApiCardsByIdErrors, DeleteApiCardsByIdResponses, DeleteApiEntitiesByIdData, DeleteApiEntitiesByIdResponses, DeleteApiGroupsByIdData, DeleteApiGroupsByIdErrors, DeleteApiGroupsByIdResponses, GetApiBoxesByGroupByGroupIdData, GetApiBoxesByGroupByGroupIdResponses, GetApiBoxesByIdData, GetApiBoxesByIdErrors, GetApiBoxesByIdResponses, GetApiBoxesData, GetApiBoxesResponses, GetApiBreadcrumbByIdData, GetApiBreadcrumbByIdErrors, GetApiBreadcrumbByIdResponses, GetApiCardsByBoxByBoxIdData, GetApiCardsByBoxByBoxIdGroupedData, GetApiCardsByBoxByBoxIdGroupedResponses, GetApiCardsByBoxByBoxIdResponses, GetApiCardsByIdData, GetApiCardsByIdErrors, GetApiCardsByIdResponses, GetApiCardsData, GetApiCardsResponses, GetApiEntitiesByIdData, GetApiEntitiesByIdErrors, GetApiEntitiesByIdResponses, GetApiEntitiesData, GetApiEntitiesResponses, GetApiGroupsByEntityByEntityIdData, GetApiGroupsByEntityByEntityIdResponses, GetApiGroupsByIdData, GetApiGroupsByIdErrors, GetApiGroupsByIdResponses, GetApiGroupsByParentByParentIdData, GetApiGroupsByParentByParentIdResponses, GetApiGroupsData, GetApiGroupsResponses, GetApiScryfallSearchData, GetApiScryfallSearchErrors, GetApiScryfallSearchPromoData, GetApiScryfallSearchPromoErrors, GetApiScryfallSearchPromoResponses, GetApiScryfallSearchResponses, PostApiBoxesData, PostApiBoxesResponses, PostApiCardsData, PostApiCardsErrors, PostApiCardsResponses, PostApiEntitiesData, PostApiEntitiesResponses, PostApiGroupsData, PostApiGroupsResponses, PutApiBoxesByIdData, PutApiBoxesByIdErrors, PutApiBoxesByIdResponses, PutApiCardsByIdData, PutApiCardsByIdErrors, PutApiCardsByIdResponses, PutApiEntitiesByIdData, PutApiEntitiesByIdResponses, PutApiGroupsByIdData, PutApiGroupsByIdErrors, PutApiGroupsByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -18,9 +18,9 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const getApiBoxes = <ThrowOnError extends boolean = false>(options?: Options<GetApiBoxesData, ThrowOnError>): RequestResult<GetApiBoxesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiBoxesResponses, unknown, ThrowOnError>({ url: '/api/boxes', ...options });
+export const getApiBoxes = <ThrowOnError extends boolean = true>(options?: Options<GetApiBoxesData, ThrowOnError>): RequestResult<GetApiBoxesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiBoxesResponses, unknown, ThrowOnError>({ url: '/api/boxes', ...options });
 
-export const postApiBoxes = <ThrowOnError extends boolean = false>(options: Options<PostApiBoxesData, ThrowOnError>): RequestResult<PostApiBoxesResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiBoxesResponses, unknown, ThrowOnError>({
+export const postApiBoxes = <ThrowOnError extends boolean = true>(options: Options<PostApiBoxesData, ThrowOnError>): RequestResult<PostApiBoxesResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiBoxesResponses, unknown, ThrowOnError>({
     url: '/api/boxes',
     ...options,
     headers: {
@@ -29,11 +29,11 @@ export const postApiBoxes = <ThrowOnError extends boolean = false>(options: Opti
     }
 });
 
-export const deleteApiBoxesById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiBoxesByIdData, ThrowOnError>): RequestResult<DeleteApiBoxesByIdResponses, DeleteApiBoxesByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiBoxesByIdResponses, DeleteApiBoxesByIdErrors, ThrowOnError>({ url: '/api/boxes/{id}', ...options });
+export const deleteApiBoxesById = <ThrowOnError extends boolean = true>(options: Options<DeleteApiBoxesByIdData, ThrowOnError>): RequestResult<DeleteApiBoxesByIdResponses, DeleteApiBoxesByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiBoxesByIdResponses, DeleteApiBoxesByIdErrors, ThrowOnError>({ url: '/api/boxes/{id}', ...options });
 
-export const getApiBoxesById = <ThrowOnError extends boolean = false>(options: Options<GetApiBoxesByIdData, ThrowOnError>): RequestResult<GetApiBoxesByIdResponses, GetApiBoxesByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiBoxesByIdResponses, GetApiBoxesByIdErrors, ThrowOnError>({ url: '/api/boxes/{id}', ...options });
+export const getApiBoxesById = <ThrowOnError extends boolean = true>(options: Options<GetApiBoxesByIdData, ThrowOnError>): RequestResult<GetApiBoxesByIdResponses, GetApiBoxesByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiBoxesByIdResponses, GetApiBoxesByIdErrors, ThrowOnError>({ url: '/api/boxes/{id}', ...options });
 
-export const putApiBoxesById = <ThrowOnError extends boolean = false>(options: Options<PutApiBoxesByIdData, ThrowOnError>): RequestResult<PutApiBoxesByIdResponses, PutApiBoxesByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiBoxesByIdResponses, PutApiBoxesByIdErrors, ThrowOnError>({
+export const putApiBoxesById = <ThrowOnError extends boolean = true>(options: Options<PutApiBoxesByIdData, ThrowOnError>): RequestResult<PutApiBoxesByIdResponses, PutApiBoxesByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiBoxesByIdResponses, PutApiBoxesByIdErrors, ThrowOnError>({
     url: '/api/boxes/{id}',
     ...options,
     headers: {
@@ -42,13 +42,13 @@ export const putApiBoxesById = <ThrowOnError extends boolean = false>(options: O
     }
 });
 
-export const getApiBoxesByGroupByGroupId = <ThrowOnError extends boolean = false>(options: Options<GetApiBoxesByGroupByGroupIdData, ThrowOnError>): RequestResult<GetApiBoxesByGroupByGroupIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiBoxesByGroupByGroupIdResponses, unknown, ThrowOnError>({ url: '/api/boxes/by-group/{groupId}', ...options });
+export const getApiBoxesByGroupByGroupId = <ThrowOnError extends boolean = true>(options: Options<GetApiBoxesByGroupByGroupIdData, ThrowOnError>): RequestResult<GetApiBoxesByGroupByGroupIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiBoxesByGroupByGroupIdResponses, unknown, ThrowOnError>({ url: '/api/boxes/by-group/{groupId}', ...options });
 
-export const getApiBreadcrumbById = <ThrowOnError extends boolean = false>(options: Options<GetApiBreadcrumbByIdData, ThrowOnError>): RequestResult<GetApiBreadcrumbByIdResponses, GetApiBreadcrumbByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiBreadcrumbByIdResponses, GetApiBreadcrumbByIdErrors, ThrowOnError>({ url: '/api/breadcrumb/{id}', ...options });
+export const getApiBreadcrumbById = <ThrowOnError extends boolean = true>(options: Options<GetApiBreadcrumbByIdData, ThrowOnError>): RequestResult<GetApiBreadcrumbByIdResponses, GetApiBreadcrumbByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiBreadcrumbByIdResponses, GetApiBreadcrumbByIdErrors, ThrowOnError>({ url: '/api/breadcrumb/{id}', ...options });
 
-export const getApiCards = <ThrowOnError extends boolean = false>(options?: Options<GetApiCardsData, ThrowOnError>): RequestResult<GetApiCardsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiCardsResponses, unknown, ThrowOnError>({ url: '/api/cards', ...options });
+export const getApiCards = <ThrowOnError extends boolean = true>(options?: Options<GetApiCardsData, ThrowOnError>): RequestResult<GetApiCardsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiCardsResponses, unknown, ThrowOnError>({ url: '/api/cards', ...options });
 
-export const postApiCards = <ThrowOnError extends boolean = false>(options: Options<PostApiCardsData, ThrowOnError>): RequestResult<PostApiCardsResponses, PostApiCardsErrors, ThrowOnError> => (options.client ?? client).post<PostApiCardsResponses, PostApiCardsErrors, ThrowOnError>({
+export const postApiCards = <ThrowOnError extends boolean = true>(options: Options<PostApiCardsData, ThrowOnError>): RequestResult<PostApiCardsResponses, PostApiCardsErrors, ThrowOnError> => (options.client ?? client).post<PostApiCardsResponses, PostApiCardsErrors, ThrowOnError>({
     url: '/api/cards',
     ...options,
     headers: {
@@ -57,11 +57,11 @@ export const postApiCards = <ThrowOnError extends boolean = false>(options: Opti
     }
 });
 
-export const deleteApiCardsById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiCardsByIdData, ThrowOnError>): RequestResult<DeleteApiCardsByIdResponses, DeleteApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiCardsByIdResponses, DeleteApiCardsByIdErrors, ThrowOnError>({ url: '/api/cards/{id}', ...options });
+export const deleteApiCardsById = <ThrowOnError extends boolean = true>(options: Options<DeleteApiCardsByIdData, ThrowOnError>): RequestResult<DeleteApiCardsByIdResponses, DeleteApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiCardsByIdResponses, DeleteApiCardsByIdErrors, ThrowOnError>({ url: '/api/cards/{id}', ...options });
 
-export const getApiCardsById = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByIdData, ThrowOnError>): RequestResult<GetApiCardsByIdResponses, GetApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiCardsByIdResponses, GetApiCardsByIdErrors, ThrowOnError>({ url: '/api/cards/{id}', ...options });
+export const getApiCardsById = <ThrowOnError extends boolean = true>(options: Options<GetApiCardsByIdData, ThrowOnError>): RequestResult<GetApiCardsByIdResponses, GetApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiCardsByIdResponses, GetApiCardsByIdErrors, ThrowOnError>({ url: '/api/cards/{id}', ...options });
 
-export const putApiCardsById = <ThrowOnError extends boolean = false>(options: Options<PutApiCardsByIdData, ThrowOnError>): RequestResult<PutApiCardsByIdResponses, PutApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiCardsByIdResponses, PutApiCardsByIdErrors, ThrowOnError>({
+export const putApiCardsById = <ThrowOnError extends boolean = true>(options: Options<PutApiCardsByIdData, ThrowOnError>): RequestResult<PutApiCardsByIdResponses, PutApiCardsByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiCardsByIdResponses, PutApiCardsByIdErrors, ThrowOnError>({
     url: '/api/cards/{id}',
     ...options,
     headers: {
@@ -70,13 +70,13 @@ export const putApiCardsById = <ThrowOnError extends boolean = false>(options: O
     }
 });
 
-export const getApiCardsByBoxByBoxId = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByBoxByBoxIdData, ThrowOnError>): RequestResult<GetApiCardsByBoxByBoxIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByBoxByBoxIdResponses, unknown, ThrowOnError>({ url: '/api/cards/by-box/{boxId}', ...options });
+export const getApiCardsByBoxByBoxId = <ThrowOnError extends boolean = true>(options: Options<GetApiCardsByBoxByBoxIdData, ThrowOnError>): RequestResult<GetApiCardsByBoxByBoxIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByBoxByBoxIdResponses, unknown, ThrowOnError>({ url: '/api/cards/by-box/{boxId}', ...options });
 
-export const getApiCardsByBoxByBoxIdGrouped = <ThrowOnError extends boolean = false>(options: Options<GetApiCardsByBoxByBoxIdGroupedData, ThrowOnError>): RequestResult<GetApiCardsByBoxByBoxIdGroupedResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByBoxByBoxIdGroupedResponses, unknown, ThrowOnError>({ url: '/api/cards/by-box/{boxId}/grouped', ...options });
+export const getApiCardsByBoxByBoxIdGrouped = <ThrowOnError extends boolean = true>(options: Options<GetApiCardsByBoxByBoxIdGroupedData, ThrowOnError>): RequestResult<GetApiCardsByBoxByBoxIdGroupedResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiCardsByBoxByBoxIdGroupedResponses, unknown, ThrowOnError>({ url: '/api/cards/by-box/{boxId}/grouped', ...options });
 
-export const getApiEntities = <ThrowOnError extends boolean = false>(options?: Options<GetApiEntitiesData, ThrowOnError>): RequestResult<GetApiEntitiesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiEntitiesResponses, unknown, ThrowOnError>({ url: '/api/entities', ...options });
+export const getApiEntities = <ThrowOnError extends boolean = true>(options?: Options<GetApiEntitiesData, ThrowOnError>): RequestResult<GetApiEntitiesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiEntitiesResponses, unknown, ThrowOnError>({ url: '/api/entities', ...options });
 
-export const postApiEntities = <ThrowOnError extends boolean = false>(options: Options<PostApiEntitiesData, ThrowOnError>): RequestResult<PostApiEntitiesResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiEntitiesResponses, unknown, ThrowOnError>({
+export const postApiEntities = <ThrowOnError extends boolean = true>(options: Options<PostApiEntitiesData, ThrowOnError>): RequestResult<PostApiEntitiesResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiEntitiesResponses, unknown, ThrowOnError>({
     url: '/api/entities',
     ...options,
     headers: {
@@ -85,11 +85,11 @@ export const postApiEntities = <ThrowOnError extends boolean = false>(options: O
     }
 });
 
-export const deleteApiEntitiesById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiEntitiesByIdData, ThrowOnError>): RequestResult<DeleteApiEntitiesByIdResponses, unknown, ThrowOnError> => (options.client ?? client).delete<DeleteApiEntitiesByIdResponses, unknown, ThrowOnError>({ url: '/api/entities/{id}', ...options });
+export const deleteApiEntitiesById = <ThrowOnError extends boolean = true>(options: Options<DeleteApiEntitiesByIdData, ThrowOnError>): RequestResult<DeleteApiEntitiesByIdResponses, unknown, ThrowOnError> => (options.client ?? client).delete<DeleteApiEntitiesByIdResponses, unknown, ThrowOnError>({ url: '/api/entities/{id}', ...options });
 
-export const getApiEntitiesById = <ThrowOnError extends boolean = false>(options: Options<GetApiEntitiesByIdData, ThrowOnError>): RequestResult<GetApiEntitiesByIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiEntitiesByIdResponses, unknown, ThrowOnError>({ url: '/api/entities/{id}', ...options });
+export const getApiEntitiesById = <ThrowOnError extends boolean = true>(options: Options<GetApiEntitiesByIdData, ThrowOnError>): RequestResult<GetApiEntitiesByIdResponses, GetApiEntitiesByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiEntitiesByIdResponses, GetApiEntitiesByIdErrors, ThrowOnError>({ url: '/api/entities/{id}', ...options });
 
-export const putApiEntitiesById = <ThrowOnError extends boolean = false>(options: Options<PutApiEntitiesByIdData, ThrowOnError>): RequestResult<PutApiEntitiesByIdResponses, unknown, ThrowOnError> => (options.client ?? client).put<PutApiEntitiesByIdResponses, unknown, ThrowOnError>({
+export const putApiEntitiesById = <ThrowOnError extends boolean = true>(options: Options<PutApiEntitiesByIdData, ThrowOnError>): RequestResult<PutApiEntitiesByIdResponses, unknown, ThrowOnError> => (options.client ?? client).put<PutApiEntitiesByIdResponses, unknown, ThrowOnError>({
     url: '/api/entities/{id}',
     ...options,
     headers: {
@@ -98,9 +98,9 @@ export const putApiEntitiesById = <ThrowOnError extends boolean = false>(options
     }
 });
 
-export const getApiGroups = <ThrowOnError extends boolean = false>(options?: Options<GetApiGroupsData, ThrowOnError>): RequestResult<GetApiGroupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiGroupsResponses, unknown, ThrowOnError>({ url: '/api/groups', ...options });
+export const getApiGroups = <ThrowOnError extends boolean = true>(options?: Options<GetApiGroupsData, ThrowOnError>): RequestResult<GetApiGroupsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiGroupsResponses, unknown, ThrowOnError>({ url: '/api/groups', ...options });
 
-export const postApiGroups = <ThrowOnError extends boolean = false>(options: Options<PostApiGroupsData, ThrowOnError>): RequestResult<PostApiGroupsResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiGroupsResponses, unknown, ThrowOnError>({
+export const postApiGroups = <ThrowOnError extends boolean = true>(options: Options<PostApiGroupsData, ThrowOnError>): RequestResult<PostApiGroupsResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiGroupsResponses, unknown, ThrowOnError>({
     url: '/api/groups',
     ...options,
     headers: {
@@ -109,11 +109,11 @@ export const postApiGroups = <ThrowOnError extends boolean = false>(options: Opt
     }
 });
 
-export const deleteApiGroupsById = <ThrowOnError extends boolean = false>(options: Options<DeleteApiGroupsByIdData, ThrowOnError>): RequestResult<DeleteApiGroupsByIdResponses, DeleteApiGroupsByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiGroupsByIdResponses, DeleteApiGroupsByIdErrors, ThrowOnError>({ url: '/api/groups/{id}', ...options });
+export const deleteApiGroupsById = <ThrowOnError extends boolean = true>(options: Options<DeleteApiGroupsByIdData, ThrowOnError>): RequestResult<DeleteApiGroupsByIdResponses, DeleteApiGroupsByIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiGroupsByIdResponses, DeleteApiGroupsByIdErrors, ThrowOnError>({ url: '/api/groups/{id}', ...options });
 
-export const getApiGroupsById = <ThrowOnError extends boolean = false>(options: Options<GetApiGroupsByIdData, ThrowOnError>): RequestResult<GetApiGroupsByIdResponses, GetApiGroupsByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiGroupsByIdResponses, GetApiGroupsByIdErrors, ThrowOnError>({ url: '/api/groups/{id}', ...options });
+export const getApiGroupsById = <ThrowOnError extends boolean = true>(options: Options<GetApiGroupsByIdData, ThrowOnError>): RequestResult<GetApiGroupsByIdResponses, GetApiGroupsByIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiGroupsByIdResponses, GetApiGroupsByIdErrors, ThrowOnError>({ url: '/api/groups/{id}', ...options });
 
-export const putApiGroupsById = <ThrowOnError extends boolean = false>(options: Options<PutApiGroupsByIdData, ThrowOnError>): RequestResult<PutApiGroupsByIdResponses, PutApiGroupsByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiGroupsByIdResponses, PutApiGroupsByIdErrors, ThrowOnError>({
+export const putApiGroupsById = <ThrowOnError extends boolean = true>(options: Options<PutApiGroupsByIdData, ThrowOnError>): RequestResult<PutApiGroupsByIdResponses, PutApiGroupsByIdErrors, ThrowOnError> => (options.client ?? client).put<PutApiGroupsByIdResponses, PutApiGroupsByIdErrors, ThrowOnError>({
     url: '/api/groups/{id}',
     ...options,
     headers: {
@@ -122,6 +122,10 @@ export const putApiGroupsById = <ThrowOnError extends boolean = false>(options: 
     }
 });
 
-export const getApiGroupsByEntityByEntityId = <ThrowOnError extends boolean = false>(options: Options<GetApiGroupsByEntityByEntityIdData, ThrowOnError>): RequestResult<GetApiGroupsByEntityByEntityIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiGroupsByEntityByEntityIdResponses, unknown, ThrowOnError>({ url: '/api/groups/by-entity/{entityId}', ...options });
+export const getApiGroupsByEntityByEntityId = <ThrowOnError extends boolean = true>(options: Options<GetApiGroupsByEntityByEntityIdData, ThrowOnError>): RequestResult<GetApiGroupsByEntityByEntityIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiGroupsByEntityByEntityIdResponses, unknown, ThrowOnError>({ url: '/api/groups/by-entity/{entityId}', ...options });
 
-export const getApiGroupsByParentByParentId = <ThrowOnError extends boolean = false>(options: Options<GetApiGroupsByParentByParentIdData, ThrowOnError>): RequestResult<GetApiGroupsByParentByParentIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiGroupsByParentByParentIdResponses, unknown, ThrowOnError>({ url: '/api/groups/by-parent/{parentId}', ...options });
+export const getApiGroupsByParentByParentId = <ThrowOnError extends boolean = true>(options: Options<GetApiGroupsByParentByParentIdData, ThrowOnError>): RequestResult<GetApiGroupsByParentByParentIdResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetApiGroupsByParentByParentIdResponses, unknown, ThrowOnError>({ url: '/api/groups/by-parent/{parentId}', ...options });
+
+export const getApiScryfallSearch = <ThrowOnError extends boolean = true>(options?: Options<GetApiScryfallSearchData, ThrowOnError>): RequestResult<GetApiScryfallSearchResponses, GetApiScryfallSearchErrors, ThrowOnError> => (options?.client ?? client).get<GetApiScryfallSearchResponses, GetApiScryfallSearchErrors, ThrowOnError>({ url: '/api/scryfall/search', ...options });
+
+export const getApiScryfallSearchPromo = <ThrowOnError extends boolean = true>(options?: Options<GetApiScryfallSearchPromoData, ThrowOnError>): RequestResult<GetApiScryfallSearchPromoResponses, GetApiScryfallSearchPromoErrors, ThrowOnError> => (options?.client ?? client).get<GetApiScryfallSearchPromoResponses, GetApiScryfallSearchPromoErrors, ThrowOnError>({ url: '/api/scryfall/search/promo', ...options });

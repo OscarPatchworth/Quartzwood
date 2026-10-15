@@ -1,35 +1,19 @@
 import { parseCardInput } from "../utils/addCardParser"
 import { useState } from "react"
-import axios from "axios"
-import client from "../api/client"
+import { getErrorMessage } from "../api/getErrorMessage"
 import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
-import type { AddCardDto } from "../interfaces/generated.ts"
-import { LoadingIndicator } from "./misc/loadingIndicator"
+import {
+    getApiScryfallSearch,
+    getApiScryfallSearchPromo,
+    postApiCards,
+    type AddCardDto,
+    type ScryfallSearchResultDto as ScryfallCardMatch,
+} from "../interfaces/generated.ts"
+import { LoadingIndicator } from "./misc/LoadingIndicator"
 
 interface TextBarProps {
     boxId?: string
   onSuccess?: () => Promise<void>
-}
-
-interface ScryfallCardMatch {
-    name: string
-    setCode: string
-    setNumber: string
-    scryfallId: string
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-    if (axios.isAxiosError<unknown>(error)) {
-        const data = error.response?.data
-        if (typeof data === "string" && data.trim()) return data
-        if (data && typeof data === "object") {
-            const response = data as Record<string, unknown>
-            if (typeof response.detail === "string") return response.detail
-            if (typeof response.message === "string") return response.message
-            if (typeof response.title === "string") return response.title
-        }
-    }
-    return fallback
 }
 
 export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
@@ -53,17 +37,17 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
 
             console.log(parsedCard.isPRM)
             if(parsedCard.isNameLookup && parsedCard.name && !parsedCard.isPRM){
-                const response = await client.get<ScryfallCardMatch[]>("scryfall/search", {
-                    params: { name: parsedCard.name, year: parsedCard.year }
+                const response = await getApiScryfallSearch({
+                    query: { name: parsedCard.name, year: parsedCard.year }
                 })
                 console.log(scryfallCardMatches)
-                setScryfallCardMatches(response.data)
+                setScryfallCardMatches(response.data ?? [])
             } else if (parsedCard.isPRM){
-                const response = await client.get<ScryfallCardMatch[]>("scryfall/search/promo", {
-                    params: { name: parsedCard.name, year: parsedCard.year, setNumber: parsedCard.setNumber}
+                const response = await getApiScryfallSearchPromo({
+                    query: { name: parsedCard.name, year: parsedCard.year, setNumber: parsedCard.setNumber}
                 })
                 console.log(scryfallCardMatches)
-                setScryfallCardMatches(response.data)
+                setScryfallCardMatches(response.data ?? [])
             } else {
                 await addNewCard(parsedCard)
             }
@@ -114,7 +98,7 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
 
         try {
             for (let index = 0; index < parsedCard.quantity; index++) {
-                await client.post("/cards", newCard)
+                await postApiCards({ body: newCard })
             }
         } catch (error) {
             const label = `${parsedCard.setCode}-${parsedCard.setNumber}`

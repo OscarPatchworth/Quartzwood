@@ -1,5 +1,5 @@
 import type { CardDto } from '../../interfaces/generated.ts'
-import { LoadingIndicator } from '../misc/loadingIndicator.tsx'
+import { LoadingIndicator } from '../misc/LoadingIndicator.tsx'
 import { ConditionOptions, FoilTypeOptions, LanguageOptions, StampTypeOptions } from '../../utils/Enum.tsx'
 
 interface CardEditFormProps {

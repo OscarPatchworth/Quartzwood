@@ -18,10 +18,13 @@ public class EntitiesController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<EntityDto>), 200)]
     public async Task<IActionResult> GetAll()
         => Ok(await _query.GetAllAsync());
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(EntityDto), 200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var entity = await _query.GetByIdAsync(id);

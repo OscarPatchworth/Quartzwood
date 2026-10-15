@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react"
-import type { AddCardDto, GroupedCardDto, UpdateCardDto } from "../../interfaces/generated.ts"
-import type { CardDto } from "../../interfaces/generated.ts"
-import client from "../../api/client"
+import {
+    deleteApiCardsById,
+    getApiCardsById,
+    postApiCards,
+    putApiCardsById,
+    type AddCardDto,
+    type CardDto,
+    type GroupedCardDto,
+    type UpdateCardDto,
+} from "../../interfaces/generated.ts"
 import { CardDetails } from "./CardDetails"
 import { CardEditForm } from "./CardEditForm"
 import { CardDuplicateListSelect } from "./CardDuplicateListSelect.tsx"
@@ -25,14 +32,14 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
 
         if (cardIds.length > 0 && cardIds[0] !== displayCard?.id)
         {
-            client.get<CardDto>(`/cards/${cardIds[0]}`)
+            getApiCardsById({ path: { id: cardIds[0] } })
             .then((res) => { setDisplayCard(res.data) })
         }
     }
 
     useEffect(() =>{
         if(cards && cards.ids.length > 0){
-            client.get<CardDto>(`/cards/${cards.ids[0]}`)
+            getApiCardsById({ path: { id: cards.ids[0] } })
             .then((res) => { setDisplayCard(res.data) })
         }
     }, [cards])
@@ -64,7 +71,7 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
         setIsSaving(true)
         setActionError(undefined)
         try {
-            await Promise.all(cardIds.map(cardId => client.put(`/cards/${cardId}`, updateDto)))
+            await Promise.all(cardIds.map(cardId => putApiCardsById({ path: { id: cardId }, body: updateDto })))
         } catch {
             setActionError("Could not update the selected cards. Please try again.")
             setIsSaving(false)
@@ -94,7 +101,7 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
         setIsSaving(true)
         setActionError(undefined)
         try {
-            await Promise.all(cardIds.map(cardId => client.delete(`/cards/${cardId}`)))
+            await Promise.all(cardIds.map(cardId => deleteApiCardsById({ path: { id: cardId } })))
         } catch {
             setActionError("Could not delete the selected cards. Please try again.")
             setIsSaving(false)
@@ -131,7 +138,7 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
         setIsSaving(true)
         setActionError(undefined)
         try {
-            await client.post<CardDto>("/cards", addDto)
+            await postApiCards({ body: addDto })
         } catch {
             setActionError("Could not add a copy of this card. Please try again.")
             setIsSaving(false)
