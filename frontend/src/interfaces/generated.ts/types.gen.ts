@@ -42,12 +42,6 @@ export type AddCardDto = {
     purchasePrice?: null | number | string;
 };
 
-export type AddEntityDto = {
-    name: string;
-    type?: string;
-    location?: null | string;
-};
-
 export type AddGroupDto = {
     name: string;
     parentGroupId: string;
@@ -518,38 +512,6 @@ export type PostApiAccountLogoutResponses = {
 
 export type PostApiAccountLogoutResponse = PostApiAccountLogoutResponses[keyof PostApiAccountLogoutResponses];
 
-export type GetApiBoxesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/boxes';
-};
-
-export type GetApiBoxesResponses = {
-    /**
-     * OK
-     */
-    200: Array<BoxDto>;
-};
-
-export type GetApiBoxesResponse = GetApiBoxesResponses[keyof GetApiBoxesResponses];
-
-export type PostApiBoxesData = {
-    body: AddBoxDto;
-    path?: never;
-    query?: never;
-    url: '/api/boxes';
-};
-
-export type PostApiBoxesResponses = {
-    /**
-     * Created
-     */
-    201: BoxDto;
-};
-
-export type PostApiBoxesResponse = PostApiBoxesResponses[keyof PostApiBoxesResponses];
-
 export type DeleteApiBoxesByIdData = {
     body?: never;
     path: {
@@ -615,6 +577,10 @@ export type PutApiBoxesByIdData = {
 
 export type PutApiBoxesByIdErrors = {
     /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
      * Not Found
      */
     404: ProblemDetails;
@@ -640,6 +606,15 @@ export type GetApiBoxesByGroupByGroupIdData = {
     url: '/api/boxes/by-group/{groupId}';
 };
 
+export type GetApiBoxesByGroupByGroupIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiBoxesByGroupByGroupIdError = GetApiBoxesByGroupByGroupIdErrors[keyof GetApiBoxesByGroupByGroupIdErrors];
+
 export type GetApiBoxesByGroupByGroupIdResponses = {
     /**
      * OK
@@ -648,6 +623,31 @@ export type GetApiBoxesByGroupByGroupIdResponses = {
 };
 
 export type GetApiBoxesByGroupByGroupIdResponse = GetApiBoxesByGroupByGroupIdResponses[keyof GetApiBoxesByGroupByGroupIdResponses];
+
+export type PostApiBoxesData = {
+    body: AddBoxDto;
+    path?: never;
+    query?: never;
+    url: '/api/boxes';
+};
+
+export type PostApiBoxesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiBoxesError = PostApiBoxesErrors[keyof PostApiBoxesErrors];
+
+export type PostApiBoxesResponses = {
+    /**
+     * Created
+     */
+    201: BoxDto;
+};
+
+export type PostApiBoxesResponse = PostApiBoxesResponses[keyof PostApiBoxesResponses];
 
 export type GetApiBreadcrumbByIdData = {
     body?: never;
@@ -675,47 +675,6 @@ export type GetApiBreadcrumbByIdResponses = {
 };
 
 export type GetApiBreadcrumbByIdResponse = GetApiBreadcrumbByIdResponses[keyof GetApiBreadcrumbByIdResponses];
-
-export type GetApiCardsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/cards';
-};
-
-export type GetApiCardsResponses = {
-    /**
-     * OK
-     */
-    200: Array<CardDto>;
-};
-
-export type GetApiCardsResponse = GetApiCardsResponses[keyof GetApiCardsResponses];
-
-export type PostApiCardsData = {
-    body: AddCardDto;
-    path?: never;
-    query?: never;
-    url: '/api/cards';
-};
-
-export type PostApiCardsErrors = {
-    /**
-     * Bad Request
-     */
-    400: ProblemDetails;
-};
-
-export type PostApiCardsError = PostApiCardsErrors[keyof PostApiCardsErrors];
-
-export type PostApiCardsResponses = {
-    /**
-     * Created
-     */
-    201: CardDto;
-};
-
-export type PostApiCardsResponse = PostApiCardsResponses[keyof PostApiCardsResponses];
 
 export type DeleteApiCardsByIdData = {
     body?: never;
@@ -782,6 +741,10 @@ export type PutApiCardsByIdData = {
 
 export type PutApiCardsByIdErrors = {
     /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
      * Not Found
      */
     404: ProblemDetails;
@@ -807,6 +770,15 @@ export type GetApiCardsByBoxByBoxIdData = {
     url: '/api/cards/by-box/{boxId}';
 };
 
+export type GetApiCardsByBoxByBoxIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiCardsByBoxByBoxIdError = GetApiCardsByBoxByBoxIdErrors[keyof GetApiCardsByBoxByBoxIdErrors];
+
 export type GetApiCardsByBoxByBoxIdResponses = {
     /**
      * OK
@@ -825,6 +797,15 @@ export type GetApiCardsByBoxByBoxIdGroupedData = {
     url: '/api/cards/by-box/{boxId}/grouped';
 };
 
+export type GetApiCardsByBoxByBoxIdGroupedErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiCardsByBoxByBoxIdGroupedError = GetApiCardsByBoxByBoxIdGroupedErrors[keyof GetApiCardsByBoxByBoxIdGroupedErrors];
+
 export type GetApiCardsByBoxByBoxIdGroupedResponses = {
     /**
      * OK
@@ -833,6 +814,31 @@ export type GetApiCardsByBoxByBoxIdGroupedResponses = {
 };
 
 export type GetApiCardsByBoxByBoxIdGroupedResponse = GetApiCardsByBoxByBoxIdGroupedResponses[keyof GetApiCardsByBoxByBoxIdGroupedResponses];
+
+export type PostApiCardsData = {
+    body: AddCardDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards';
+};
+
+export type PostApiCardsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiCardsError = PostApiCardsErrors[keyof PostApiCardsErrors];
+
+export type PostApiCardsResponses = {
+    /**
+     * Created
+     */
+    201: CardDto;
+};
+
+export type PostApiCardsResponse = PostApiCardsResponses[keyof PostApiCardsResponses];
 
 export type GetApiEntitiesData = {
     body?: never;
@@ -849,36 +855,6 @@ export type GetApiEntitiesResponses = {
 };
 
 export type GetApiEntitiesResponse = GetApiEntitiesResponses[keyof GetApiEntitiesResponses];
-
-export type PostApiEntitiesData = {
-    body: AddEntityDto;
-    path?: never;
-    query?: never;
-    url: '/api/entities';
-};
-
-export type PostApiEntitiesResponses = {
-    /**
-     * OK
-     */
-    200: unknown;
-};
-
-export type DeleteApiEntitiesByIdData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/entities/{id}';
-};
-
-export type DeleteApiEntitiesByIdResponses = {
-    /**
-     * OK
-     */
-    200: unknown;
-};
 
 export type GetApiEntitiesByIdData = {
     body?: never;
@@ -916,44 +892,27 @@ export type PutApiEntitiesByIdData = {
     url: '/api/entities/{id}';
 };
 
+export type PutApiEntitiesByIdErrors = {
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiEntitiesByIdError = PutApiEntitiesByIdErrors[keyof PutApiEntitiesByIdErrors];
+
 export type PutApiEntitiesByIdResponses = {
     /**
      * OK
      */
-    200: unknown;
+    200: EntityDto;
 };
 
-export type GetApiGroupsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/groups';
-};
-
-export type GetApiGroupsResponses = {
-    /**
-     * OK
-     */
-    200: Array<GroupDto>;
-};
-
-export type GetApiGroupsResponse = GetApiGroupsResponses[keyof GetApiGroupsResponses];
-
-export type PostApiGroupsData = {
-    body: AddGroupDto;
-    path?: never;
-    query?: never;
-    url: '/api/groups';
-};
-
-export type PostApiGroupsResponses = {
-    /**
-     * Created
-     */
-    201: GroupDto;
-};
-
-export type PostApiGroupsResponse = PostApiGroupsResponses[keyof PostApiGroupsResponses];
+export type PutApiEntitiesByIdResponse = PutApiEntitiesByIdResponses[keyof PutApiEntitiesByIdResponses];
 
 export type DeleteApiGroupsByIdData = {
     body?: never;
@@ -1024,6 +983,10 @@ export type PutApiGroupsByIdData = {
 
 export type PutApiGroupsByIdErrors = {
     /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
      * Not Found
      */
     404: ProblemDetails;
@@ -1049,6 +1012,15 @@ export type GetApiGroupsByEntityByEntityIdData = {
     url: '/api/groups/by-entity/{entityId}';
 };
 
+export type GetApiGroupsByEntityByEntityIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiGroupsByEntityByEntityIdError = GetApiGroupsByEntityByEntityIdErrors[keyof GetApiGroupsByEntityByEntityIdErrors];
+
 export type GetApiGroupsByEntityByEntityIdResponses = {
     /**
      * OK
@@ -1067,6 +1039,15 @@ export type GetApiGroupsByParentByParentIdData = {
     url: '/api/groups/by-parent/{parentId}';
 };
 
+export type GetApiGroupsByParentByParentIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiGroupsByParentByParentIdError = GetApiGroupsByParentByParentIdErrors[keyof GetApiGroupsByParentByParentIdErrors];
+
 export type GetApiGroupsByParentByParentIdResponses = {
     /**
      * OK
@@ -1075,6 +1056,31 @@ export type GetApiGroupsByParentByParentIdResponses = {
 };
 
 export type GetApiGroupsByParentByParentIdResponse = GetApiGroupsByParentByParentIdResponses[keyof GetApiGroupsByParentByParentIdResponses];
+
+export type PostApiGroupsData = {
+    body: AddGroupDto;
+    path?: never;
+    query?: never;
+    url: '/api/groups';
+};
+
+export type PostApiGroupsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiGroupsError = PostApiGroupsErrors[keyof PostApiGroupsErrors];
+
+export type PostApiGroupsResponses = {
+    /**
+     * Created
+     */
+    201: GroupDto;
+};
+
+export type PostApiGroupsResponse = PostApiGroupsResponses[keyof PostApiGroupsResponses];
 
 export type GetApiScryfallSearchData = {
     body?: never;

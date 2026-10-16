@@ -3,6 +3,7 @@ using Quartzwood.Server.Data;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
 // Using Services
+using Quartzwood.Server.Services.Access;
 using Quartzwood.Server.Services.Accounts;
 using Quartzwood.Server.Services.Boxs;
 using Quartzwood.Server.Services.Cards;
@@ -52,6 +53,11 @@ builder.Services.AddScoped<IEntityCommandService, EntityCommandService>();
 builder.Services.AddScoped<IGroupCommandService, GroupCommandService>();
 builder.Services.AddScoped<IBoxCommandService, BoxCommandService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+
+// Access checks: "is the logged-in user a member of the Entity that owns this?"
+// HttpContextAccessor lets the service read the current request's user
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAccessService, AccessService>();
 builder.Services.AddHttpClient<IScryfallService, ScryfallService>(client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");

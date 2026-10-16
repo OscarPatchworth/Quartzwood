@@ -1,8 +1,8 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
+using Quartzwood.Server.Extensions;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Services.Accounts;
 
@@ -47,9 +47,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(401)]
     public async Task<IActionResult> Me()
     {
-        // The auth cookie stores the user's Id as the NameIdentifier claim
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var account = await _accounts.GetByIdAsync(userId);
+        var account = await _accounts.GetByIdAsync(User.GetUserId());
         return account is null ? Unauthorized() : Ok(account);
     }
 

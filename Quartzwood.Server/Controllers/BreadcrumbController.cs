@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.Data;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
+using Quartzwood.Server.Services.Access;
 using Microsoft.EntityFrameworkCore;
 
 namespace Quartzwood.Server.Controllers;
@@ -13,10 +14,12 @@ namespace Quartzwood.Server.Controllers;
 public class BreadcrumbController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IAccessService _access;
 
-    public BreadcrumbController(AppDbContext context)
+    public BreadcrumbController(AppDbContext context, IAccessService access)
     {
         _context = context;
+        _access = access;
     }
 
     [HttpGet("{id}")]
@@ -24,6 +27,12 @@ public class BreadcrumbController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetBreadcrumb(Guid id)
     {
+        // The id can be an Entity, Group or Box: if it isn't one of yours, it's a 404
+        if (!await _access.CanAccessEntityAsync(id)
+            && !await _access.CanAccessGroupAsync(id)
+            && !await _access.CanAccessBoxAsync(id))
+            return NotFound();
+
         // Try Entity
         var entity = await _context.Entities.FindAsync(id);
         if (entity != null)
