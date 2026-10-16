@@ -40,8 +40,15 @@ public class BoxesController : ControllerBase
     [ProducesResponseType(typeof(BoxDto), 201)]
     public async Task<IActionResult> Add(AddBoxDto dto)
     {
-        var created = await _command.AddAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        try
+        {
+            var created = await _command.AddAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPut("{id}")]
@@ -49,8 +56,15 @@ public class BoxesController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> Update(Guid id, UpdateBoxDto dto)
     {
-        var updated = await _command.UpdateAsync(id, dto);
-        return updated is null ? NotFound() : Ok(updated);
+        try
+        {
+            var updated = await _command.UpdateAsync(id, dto);
+            return updated is null ? NotFound() : Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpDelete("{id}")]

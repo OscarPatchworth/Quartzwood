@@ -12,7 +12,8 @@ import {
 import { LoadingIndicator } from "./misc/LoadingIndicator"
 
 interface TextBarProps {
-    boxId?: string
+    // Every card must live in a box
+    boxId: string
   onSuccess?: () => Promise<void>
 }
 
@@ -93,7 +94,7 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
             isSigned: false,
             isList: parsedCard.isList,
             alterArtist: parsedCard.alterArtist ?? null,
-            boxId: boxId ?? null
+            boxId
         }
 
         try {

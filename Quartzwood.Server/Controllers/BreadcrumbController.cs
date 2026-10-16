@@ -55,7 +55,7 @@ public class BreadcrumbController : ControllerBase
                 chain.EntityName, chain.EntityId,
                 chain.RootGroup?.Name, chain.RootGroup?.Id.ToString(),
                 chain.HasCollapsed,
-                box.Group.Name, box.GroupId?.ToString(),
+                box.Group.Name, box.GroupId.ToString(),
                 box.Name, box.Id.ToString()));
         }
 
@@ -85,11 +85,9 @@ public class BreadcrumbController : ControllerBase
                 .FirstOrDefaultAsync(g => g.Id == current.ParentGroupId);
         }
 
-        // Get entity from root
+        // Every group stores its Entity, so no need to start from the root
         var root = chain.First();
-        var entity = root.EntityId.HasValue
-            ? await _context.Entities.FindAsync(root.EntityId.Value)
-            : null;
+        var entity = await _context.Entities.FindAsync(startGroup.EntityId);
 
         var hasCollapsed = chain.Count > 2;
         var immediateParent = chain.Count > 1 ? chain.Last() : null;

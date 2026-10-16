@@ -218,7 +218,7 @@ namespace Quartzwood.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("GroupId")
+                    b.Property<Guid>("GroupId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -250,7 +250,7 @@ namespace Quartzwood.Server.Migrations
                     b.Property<string>("AlterPhotoPath")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("BoxId")
+                    b.Property<Guid>("BoxId")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Condition")
@@ -366,7 +366,7 @@ namespace Quartzwood.Server.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("EntityId")
+                    b.Property<Guid>("EntityId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -455,7 +455,9 @@ namespace Quartzwood.Server.Migrations
                 {
                     b.HasOne("Quartzwood.Server.Models.Group", "Group")
                         .WithMany("Boxes")
-                        .HasForeignKey("GroupId");
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Group");
                 });
@@ -464,7 +466,9 @@ namespace Quartzwood.Server.Migrations
                 {
                     b.HasOne("Quartzwood.Server.Models.Box", "Box")
                         .WithMany("Cards")
-                        .HasForeignKey("BoxId");
+                        .HasForeignKey("BoxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Box");
                 });
@@ -512,7 +516,8 @@ namespace Quartzwood.Server.Migrations
                     b.HasOne("Quartzwood.Server.Models.Entity", "Entity")
                         .WithMany("Groups")
                         .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Quartzwood.Server.Models.Group", "ParentGroup")
                         .WithMany("ChildGroups")

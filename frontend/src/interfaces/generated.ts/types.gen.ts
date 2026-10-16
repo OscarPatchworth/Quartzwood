@@ -20,7 +20,7 @@ export type AccountDto = {
 
 export type AddBoxDto = {
     name: string;
-    groupId?: null | string;
+    groupId: string;
 };
 
 export type AddCardDto = {
@@ -28,6 +28,7 @@ export type AddCardDto = {
     setNumber: null | string;
     name: null | string;
     condition: string;
+    boxId: string;
     foilType?: string;
     stampType?: string;
     language?: string;
@@ -36,7 +37,6 @@ export type AddCardDto = {
     isList?: boolean;
     alterArtist?: null | string;
     notes?: null | string;
-    boxId?: null | string;
     acquiredDate?: null | string;
     purchasePrice?: null | number | string;
 };
@@ -57,7 +57,7 @@ export type AddGroupDto = {
 export type BoxDto = {
     id: string;
     name: string;
-    groupId: null | string;
+    groupId: string;
     cardCount: number | string;
 };
 
@@ -88,7 +88,7 @@ export type CardDto = {
     isList: boolean;
     alterArtist: null | string;
     notes: null | string;
-    boxId: null | string;
+    boxId: string;
     tags: Array<string>;
 };
 
@@ -108,7 +108,7 @@ export type GroupDto = {
     id: string;
     name: string;
     description: null | string;
-    entityId: null | string;
+    entityId: string;
     parentGroupId: null | string;
     childGroupNames: Array<string>;
     boxNames: Array<string>;
@@ -238,7 +238,6 @@ export type UpdateEntityDto = {
 export type UpdateGroupDto = {
     name: null | string;
     description: null | string;
-    entityId: null | string;
     parentGroupId: null | string;
 };
 

@@ -7,14 +7,20 @@ namespace Quartzwood.Server.Services.Boxs;
 public class BoxCommandService : IBoxCommandService
 {
     private readonly IBoxRepository _boxes;
+    private readonly IGroupRepository _groups;
 
-    public BoxCommandService(IBoxRepository boxes)
+    public BoxCommandService(IBoxRepository boxes, IGroupRepository groups)
     {
         _boxes = boxes;
+        _groups = groups;
     }
 
     public async Task<BoxDto> AddAsync(AddBoxDto dto)
     {
+        // A missing groupId arrives as Guid.Empty, which would otherwise fail as a DB foreign key error (500)
+        if (await _groups.GetByIdAsync(dto.GroupId) is null)
+            throw new ArgumentException("Group not found.");
+
         var box = new Box
         {
             Name = dto.Name,
@@ -31,7 +37,12 @@ public class BoxCommandService : IBoxCommandService
         if (box is null) return null;
 
         if (dto.Name != null) box.Name = dto.Name;
-        if (dto.GroupId.HasValue) box.GroupId = dto.GroupId.Value;
+        if (dto.GroupId.HasValue && dto.GroupId != box.GroupId)
+        {
+            if (await _groups.GetByIdAsync(dto.GroupId.Value) is null)
+                throw new ArgumentException("Group not found.");
+            box.GroupId = dto.GroupId.Value;
+        }
 
         var updated = await _boxes.UpdateAsync(box);
         return ToDto(updated);

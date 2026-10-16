@@ -3,13 +3,13 @@ namespace Quartzwood.Server.DTOs;
 public record BoxDto(
     Guid Id,
     string Name,
-    Guid? GroupId,
+    Guid GroupId,
     int CardCount
 );
 
 public record AddBoxDto(
     string Name,
-    Guid? GroupId = null
+    Guid GroupId
 );
 
 public record UpdateBoxDto(

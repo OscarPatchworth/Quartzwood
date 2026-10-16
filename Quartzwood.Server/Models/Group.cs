@@ -12,10 +12,11 @@ public class Group
     
     public string? Description { get; set; }
     
-    // Either owned by Entity OR nested under another Group
-    public Guid? EntityId { get; set; }
-    public Entity? Entity { get; set; }
-    
+    // Every group (root or nested) stores the Entity that owns it, so access checks are one lookup
+    public Guid EntityId { get; set; }
+    public Entity Entity { get; set; } = null!;
+
+    // null = root group of its Entity
     public Guid? ParentGroupId { get; set; }
     public Group? ParentGroup { get; set; }
     

@@ -12,8 +12,9 @@ public class CardInstance
     [Key]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public Guid? BoxId { get; set; }
-    public Box? Box { get; set; }
+    // Every card is physically somewhere: loose cards go in an "Unsorted" box
+    public Guid BoxId { get; set; }
+    public Box Box { get; set; } = null!;
 
     // Printed
     public string? SetCode { get; set; }

@@ -41,6 +41,20 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
             .HasForeignKey(g => g.EntityId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Box → Group: GroupCommandService deletes a group's boxes itself, so block accidental DB-level deletes
+        modelBuilder.Entity<Box>()
+            .HasOne(b => b.Group)
+            .WithMany(g => g.Boxes)
+            .HasForeignKey(b => b.GroupId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Card → Box: deleting a box deletes the cards in it
+        modelBuilder.Entity<CardInstance>()
+            .HasOne(c => c.Box)
+            .WithMany(b => b.Cards)
+            .HasForeignKey(c => c.BoxId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // EntityMember composite primary key: a user can only be in an entity once
         modelBuilder.Entity<EntityMember>()
             .HasKey(m => new { m.EntityId, m.UserId });

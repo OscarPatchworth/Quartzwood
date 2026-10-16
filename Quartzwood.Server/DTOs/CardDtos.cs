@@ -16,7 +16,7 @@ public record CardDto(
     bool IsList,
     string? AlterArtist,
     string? Notes,
-    Guid? BoxId,
+    Guid BoxId,
     IEnumerable<string> Tags
 );
 
@@ -39,6 +39,7 @@ public record AddCardDto(
     string? SetNumber,
     string? Name,
     string Condition,
+    Guid BoxId,
     string FoilType = "None",
     string StampType = "None",
     string Language = "en",
@@ -47,7 +48,6 @@ public record AddCardDto(
     bool IsList = false,
     string? AlterArtist = null,
     string? Notes = null,
-    Guid? BoxId = null,
     DateOnly? AcquiredDate = null,
     decimal? PurchasePrice = null
 );

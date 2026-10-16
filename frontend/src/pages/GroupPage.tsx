@@ -95,7 +95,6 @@ export default function GroupPage() {
                 body: {
                     name: nextName,
                     description: activeGroup.description ?? null,
-                    entityId: activeGroup.entityId ?? null,
                     parentGroupId: activeGroup.parentGroupId ?? null,
                 },
             })

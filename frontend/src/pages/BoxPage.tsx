@@ -111,10 +111,12 @@ export default function BoxPage() {
                     className="mb-6 mt-4"
                 />
                 <div className='flex justify-end pt-[-10] pb-5'>
-                    <AddNewCardTextBar
-                        boxId={id}
-                        onSuccess={refreshCardsAfterMutation}
-                    />
+                    {box && (
+                        <AddNewCardTextBar
+                            boxId={box.id}
+                            onSuccess={refreshCardsAfterMutation}
+                        />
+                    )}
                 </div>
 
             </div>

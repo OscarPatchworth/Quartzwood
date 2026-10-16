@@ -8,16 +8,22 @@ namespace Quartzwood.Server.Services.Cards;
 public class CardCommandService : ICardCommandService
 {
     private readonly ICardRepository _cards;
+    private readonly IBoxRepository _boxes;
     private readonly IScryfallService _scryfall;
 
-    public CardCommandService(ICardRepository cards, IScryfallService scryfall)
+    public CardCommandService(ICardRepository cards, IBoxRepository boxes, IScryfallService scryfall)
     {
         _cards = cards;
+        _boxes = boxes;
         _scryfall = scryfall;
     }
 
     public async Task<CardDto?> AddAsync(AddCardDto dto)
     {
+        // A missing boxId arrives as Guid.Empty, which would otherwise fail as a DB foreign key error (500)
+        if (await _boxes.GetByIdAsync(dto.BoxId) is null)
+            throw new ArgumentException("Box not found.");
+
         if (!Enum.TryParse<Condition>(dto.Condition, true, out var condition))
             throw new ArgumentException($"Invalid condition: {dto.Condition}");
         if (!Enum.TryParse<FoilType>(dto.FoilType, true, out var foilType))
@@ -106,7 +112,12 @@ public class CardCommandService : ICardCommandService
         if (dto.IsList.HasValue) {card.IsList = dto.IsList.Value; updateImage = true;}
         if (dto.AlterArtist != null) card.AlterArtist = dto.AlterArtist;
         if (dto.Notes != null) card.Notes = dto.Notes;
-        if (dto.BoxId.HasValue) card.BoxId = dto.BoxId.Value;
+        if (dto.BoxId.HasValue && dto.BoxId != card.BoxId)
+        {
+            if (await _boxes.GetByIdAsync(dto.BoxId.Value) is null)
+                throw new ArgumentException("Box not found.");
+            card.BoxId = dto.BoxId.Value;
+        }
         if (dto.AcquiredDate.HasValue) card.AcquiredDate = dto.AcquiredDate.Value;
         if (dto.PurchasePrice.HasValue) card.PurchasePrice = dto.PurchasePrice.Value;
 

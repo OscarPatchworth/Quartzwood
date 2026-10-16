@@ -18,17 +18,30 @@ public class GroupCommandService : IGroupCommandService
 
     public async Task<GroupDto> AddAsync(AddGroupDto dto)
     {
-        if (dto.EntityId is null && dto.ParentGroupId is null)
-            throw new ArgumentException("Group must belong to either an Entity or a parent Group.");
+        Guid entityId;
+        if (dto.ParentGroupId is not null)
+        {
+            // Nested group: always owned by the same Entity as its parent
+            var parent = await _groups.GetByIdAsync(dto.ParentGroupId.Value)
+                ?? throw new ArgumentException("Parent group not found.");
 
-        if (dto.EntityId is not null && dto.ParentGroupId is not null)
-            throw new ArgumentException("Group cannot belong to both an Entity and a parent Group.");
+            if (dto.EntityId is not null && dto.EntityId != parent.EntityId)
+                throw new ArgumentException("A nested group must belong to the same Entity as its parent.");
+
+            entityId = parent.EntityId;
+        }
+        else
+        {
+            // Root group: needs an Entity to belong to
+            entityId = dto.EntityId
+                ?? throw new ArgumentException("Group must belong to either an Entity or a parent Group.");
+        }
 
         var group = new Group
         {
             Name = dto.Name,
             Description = dto.Description,
-            EntityId = dto.EntityId,
+            EntityId = entityId,
             ParentGroupId = dto.ParentGroupId
         };
 
@@ -43,8 +56,17 @@ public class GroupCommandService : IGroupCommandService
 
         if (dto.Name != null) group.Name = dto.Name;
         if (dto.Description != null) group.Description = dto.Description;
-        if (dto.EntityId.HasValue) group.EntityId = dto.EntityId.Value;
-        if (dto.ParentGroupId.HasValue) group.ParentGroupId = dto.ParentGroupId.Value;
+        if (dto.ParentGroupId.HasValue && dto.ParentGroupId != group.ParentGroupId)
+        {
+            var parent = await _groups.GetByIdAsync(dto.ParentGroupId.Value)
+                ?? throw new ArgumentException("Parent group not found.");
+
+            // Moving between Entities would mean re-stamping EntityId on the whole subtree: not supported yet
+            if (parent.EntityId != group.EntityId)
+                throw new ArgumentException("Groups can't be moved to a different Entity.");
+
+            group.ParentGroupId = parent.Id;
+        }
 
         var updated = await _groups.UpdateAsync(group);
         return ToDto(updated);

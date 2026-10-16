@@ -10,8 +10,8 @@ public class Box
     [Required]
     public string Name { get; set; } = string.Empty;
     
-    public Guid? GroupId { get; set; }
-    public Group? Group { get; set; }
+    public Guid GroupId { get; set; }
+    public Group Group { get; set; } = null!;
     
     // Navigation
     public ICollection<CardInstance> Cards { get; set; } = new List<CardInstance>();
