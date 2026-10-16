@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Quartzwood.Server.Data;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
@@ -59,5 +60,21 @@ public class AccountService : IAccountService
         await transaction.CommitAsync();
 
         return (result, new AccountDto(user.Id, dto.Email, user.DisplayName, personal.Id));
+    }
+
+    public async Task<AccountDto?> GetByIdAsync(Guid userId)
+    {
+        var user = await _users.FindByIdAsync(userId.ToString());
+        if (user is null) return null;
+
+        // The Personal entity is the one this user Owns with Type = Personal
+        var personalEntityId = await _context.EntityMembers
+            .Where(m => m.UserId == userId
+                && m.Role == EntityRole.Owner
+                && m.Entity.Type == EntityType.Personal)
+            .Select(m => m.EntityId)
+            .FirstOrDefaultAsync();
+
+        return new AccountDto(user.Id, user.Email ?? string.Empty, user.DisplayName, personalEntityId);
     }
 }

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getApiBreadcrumbById, type BreadcrumbDto } from '../interfaces/generated.ts'
+import { useAuth } from '../auth/useAuth'
 
 export default function Header() {
+    const { account, isLoading, logout } = useAuth()
+    const navigate = useNavigate()
     const location = useLocation()
     const { id } = useParams<{ id: string }>()
     const [breadcrumb, setBreadcrumb] = useState<BreadcrumbDto | null>(null)
@@ -67,6 +70,29 @@ export default function Header() {
                     <span className="text-gray-500">›</span>
                     <span className="text-white">{breadcrumb.boxName}</span>
                 </>
+            )}
+
+            {/* Right side: account. Hidden until the initial session check finishes to avoid a flash of "Log in" */}
+            {!isLoading && (
+                <div className="ml-auto flex items-center gap-4">
+                    {account ? (
+                        <>
+                            <span className="text-gray-300">{account.displayName}</span>
+                            <button
+                                type="button"
+                                onClick={() => void logout().then(() => navigate('/login'))}
+                                className="hover:text-gray-300"
+                            >
+                                Log out
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="hover:text-gray-300">Log in</Link>
+                            <Link to="/register" className="hover:text-gray-300">Register</Link>
+                        </>
+                    )}
+                </div>
             )}
         </header>
     )

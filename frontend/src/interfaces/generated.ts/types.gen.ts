@@ -478,6 +478,47 @@ export type PostApiAccountRegisterResponses = {
 
 export type PostApiAccountRegisterResponse = PostApiAccountRegisterResponses[keyof PostApiAccountRegisterResponses];
 
+export type GetApiAccountMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account/me';
+};
+
+export type GetApiAccountMeErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type GetApiAccountMeError = GetApiAccountMeErrors[keyof GetApiAccountMeErrors];
+
+export type GetApiAccountMeResponses = {
+    /**
+     * OK
+     */
+    200: AccountDto;
+};
+
+export type GetApiAccountMeResponse = GetApiAccountMeResponses[keyof GetApiAccountMeResponses];
+
+export type PostApiAccountLogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account/logout';
+};
+
+export type PostApiAccountLogoutResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type PostApiAccountLogoutResponse = PostApiAccountLogoutResponses[keyof PostApiAccountLogoutResponses];
+
 export type GetApiBoxesData = {
     body?: never;
     path?: never;
