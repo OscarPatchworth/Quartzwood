@@ -27,27 +27,11 @@ export default function Header() {
                 Quartzwood
             </Link>
 
-            {breadcrumb?.entityName && (
+            {/* The collection (root group) is the start of every breadcrumb, and doubles as the main nav link */}
+            {account && (
                 <>
-                    <span className="text-gray-500">›</span>
-                    <Link
-                        to={`/entity/${breadcrumb.entityId}`}
-                        className="hover:text-gray-300"
-                    >
-                        {breadcrumb.entityName}
-                    </Link>
-                </>
-            )}
-
-            {breadcrumb?.rootGroupName && (
-                <>
-                    <span className="text-gray-500">›</span>
-                    <Link
-                        to={`/group/${breadcrumb.rootGroupId}`}
-                        className="hover:text-gray-300"
-                    >
-                        {breadcrumb.rootGroupName}
-                    </Link>
+                    <span className="text-gray-500">|</span>
+                    <Link to="/collection" className="hover:text-gray-300">Collection</Link>
                 </>
             )}
 
@@ -77,6 +61,7 @@ export default function Header() {
                 <div className="ml-auto flex items-center gap-4">
                     {account ? (
                         <>
+                            <Link to="/search" className="hover:text-gray-300">Search</Link>
                             <span className="text-gray-300">{account.displayName}</span>
                             <button
                                 type="button"

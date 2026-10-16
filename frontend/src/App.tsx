@@ -3,6 +3,8 @@ import HomePage from './pages/HomePage'
 import EntityPage from './pages/EntityPage'
 import GroupPage from './pages/GroupPage'
 import BoxPage from './pages/BoxPage'
+import CollectionPage from './pages/CollectionPage'
+import SearchPage from './pages/SearchPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import Header from './components/Header'
@@ -21,6 +23,8 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/collection" element={<CollectionPage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/entity/:id" element={<EntityPage />} />
         <Route path="/group/:id" element={<GroupPage />} />
         <Route path="/box/:id" element={<BoxPage />} />

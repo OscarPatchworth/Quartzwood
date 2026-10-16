@@ -10,12 +10,12 @@ public record GroupDto(
     IEnumerable<string> BoxNames
 );
 
-// Root group: pass EntityId. Nested group: pass ParentGroupId (EntityId is copied from the parent)
+// Users can only create nested groups: root groups are created with the Entity.
+// EntityId is copied from the parent
 public record AddGroupDto(
     string Name,
-    string? Description = null,
-    Guid? EntityId = null,
-    Guid? ParentGroupId = null
+    Guid ParentGroupId,
+    string? Description = null
 );
 
 // EntityId isn't updatable: it always follows the group's place in the tree

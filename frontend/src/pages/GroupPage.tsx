@@ -16,8 +16,14 @@ import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupControl
 import GroupBoxListCard from '../components/BoxGroup/GroupBoxListCard'
 import EditableTitle from '../components/misc/EditableTitle'
 
-export default function GroupPage() {
-    const { id } = useParams<{ id: string }>()
+interface GroupPageProps {
+    // Set by CollectionPage to show the root group; otherwise the id comes from /group/:id
+    groupId?: string
+}
+
+export default function GroupPage({ groupId }: GroupPageProps) {
+    const params = useParams<{ id: string }>()
+    const id = groupId ?? params.id
     const [activeGroup, setActiveGroup] = useState<GroupDto>()
     const [groups, setGroups] = useState<GroupDto[]>([])
     const [boxes, setBoxes] = useState<BoxDto[]>([])
@@ -117,20 +123,29 @@ export default function GroupPage() {
 
     if (loading) return <LoadingIndicator />
 
+    // The root group (no parent) is the user's collection: fixed title, nothing above it to go back to
+    const isRoot = activeGroup?.parentGroupId === null
+
     return (
         <div className="p-8">
-            <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
-            
+            {!isRoot && (
+                <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
+            )}
+
             <div className='flex items-start justify-between align-top'>
-                <EditableTitle
-                    name={activeGroup?.name ?? ''}
-                    draftName={draftName}
-                    isEditing={isEditingName}
-                    onDraftChange={setDraftName}
-                    onSave={() => void saveGroupName()}
-                    onCancel={() => { setIsEditingName(false); setDraftName(activeGroup?.name ?? '') }}
-                    onStartEdit={() => setIsEditingName(true)}
-                />
+                {isRoot ? (
+                    <h1 className="mb-4 mt-3 text-2xl font-bold">My Collection</h1>
+                ) : (
+                    <EditableTitle
+                        name={activeGroup?.name ?? ''}
+                        draftName={draftName}
+                        isEditing={isEditingName}
+                        onDraftChange={setDraftName}
+                        onSave={() => void saveGroupName()}
+                        onCancel={() => { setIsEditingName(false); setDraftName(activeGroup?.name ?? '') }}
+                        onStartEdit={() => setIsEditingName(true)}
+                    />
+                )}
                 <AddBoxGroupController
                     groupId={id}
                     onBoxCreated={handleBoxCreated}

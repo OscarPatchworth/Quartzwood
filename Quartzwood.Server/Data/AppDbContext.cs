@@ -41,6 +41,17 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
             .HasForeignKey(g => g.EntityId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // A root group is one with no parent. The database guarantees each Entity has at most one.
+        modelBuilder.Entity<Group>()
+            .HasIndex(g => g.EntityId, "IX_Groups_OneRootPerEntity")
+            .IsUnique()
+            .HasFilter("ParentGroupId IS NULL");
+
+        // Declared explicitly: otherwise EF drops its automatic FK index because the filtered one above
+        // also starts with EntityId, but that only covers root groups. This one serves "all groups in Entity X"
+        modelBuilder.Entity<Group>()
+            .HasIndex(g => g.EntityId);
+
         // Box → Group: GroupCommandService deletes a group's boxes itself, so block accidental DB-level deletes
         modelBuilder.Entity<Box>()
             .HasOne(b => b.Group)

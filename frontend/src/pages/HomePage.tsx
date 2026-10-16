@@ -1,37 +1,11 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getApiEntities, type EntityDto } from '../interfaces/generated.ts'
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../auth/useAuth'
 import { LoadingIndicator } from '../components/misc/LoadingIndicator'
 
+// "/" has no page of its own: logged in -> your collection, otherwise -> log in
 export default function HomePage() {
-    const [entities, setEntities] = useState<EntityDto[]>([])
-    const [loading, setLoading] = useState(true)
-    const navigate = useNavigate()
+    const { account, isLoading } = useAuth()
 
-    // Runs once on mount — fetches data
-    useEffect(() => {
-        getApiEntities()
-            .then(res => setEntities(res.data))
-            .finally(() => setLoading(false))
-    }, [])
-
-    if (loading) return <LoadingIndicator />
-
-    return (
-        <div className="p-8">
-            <h1 className="text-2xl font-bold mb-6">Collections</h1>
-            <div className="grid grid-cols-1 gap-4">
-                {entities.map(e => (
-                    <div
-                        key={e.id}
-                        onClick={() => navigate(`/entity/${e.id}`)}
-                        className="p-4 border rounded cursor-pointer hover:bg-gray-100"
-                    >
-                        <h2 className="text-lg font-semibold">{e.name}</h2>
-                        <p className="text-sm text-gray-500">{e.type}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
+    if (isLoading) return <LoadingIndicator />
+    return <Navigate to={account ? '/collection' : '/login'} replace />
 }

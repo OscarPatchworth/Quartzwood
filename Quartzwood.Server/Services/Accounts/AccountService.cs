@@ -54,12 +54,17 @@ public class AccountService : IAccountService
         };
         personal.Members.Add(new EntityMember { UserId = user.Id, Role = EntityRole.Owner });
 
-        // Saves the entity and its membership row together
+        // Every Entity gets exactly one root group (no parent), with a default Unsorted box in it
+        var root = new Group { Name = "Collection" };
+        root.Boxes.Add(new Box { Name = "Unsorted" });
+        personal.Groups.Add(root);
+
+        // Saves the entity, membership, root group and box together
         await _entities.AddAsync(personal);
 
         await transaction.CommitAsync();
 
-        return (result, new AccountDto(user.Id, dto.Email, user.DisplayName, personal.Id));
+        return (result, new AccountDto(user.Id, dto.Email, user.DisplayName, personal.Id, root.Id));
     }
 
     public async Task<AccountDto?> GetByIdAsync(Guid userId)
@@ -75,6 +80,11 @@ public class AccountService : IAccountService
             .Select(m => m.EntityId)
             .FirstOrDefaultAsync();
 
-        return new AccountDto(user.Id, user.Email ?? string.Empty, user.DisplayName, personalEntityId);
+        var rootGroupId = await _context.Groups
+            .Where(g => g.EntityId == personalEntityId && g.ParentGroupId == null)
+            .Select(g => g.Id)
+            .FirstOrDefaultAsync();
+
+        return new AccountDto(user.Id, user.Email ?? string.Empty, user.DisplayName, personalEntityId, rootGroupId);
     }
 }

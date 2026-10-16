@@ -16,6 +16,7 @@ export type AccountDto = {
     email: string;
     displayName: string;
     personalEntityId: string;
+    rootGroupId: string;
 };
 
 export type AddBoxDto = {
@@ -49,9 +50,8 @@ export type AddEntityDto = {
 
 export type AddGroupDto = {
     name: string;
+    parentGroupId: string;
     description?: null | string;
-    entityId?: null | string;
-    parentGroupId?: null | string;
 };
 
 export type BoxDto = {
@@ -965,6 +965,10 @@ export type DeleteApiGroupsByIdData = {
 };
 
 export type DeleteApiGroupsByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
     /**
      * Not Found
      */

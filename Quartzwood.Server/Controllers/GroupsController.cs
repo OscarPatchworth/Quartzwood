@@ -74,10 +74,18 @@ public class GroupsController : ControllerBase
 
     [HttpDelete("{id}")]
     [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = await _command.DeleteAsync(id);
-        return deleted ? NoContent() : NotFound();
+        try
+        {
+            var deleted = await _command.DeleteAsync(id);
+            return deleted ? NoContent() : NotFound();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

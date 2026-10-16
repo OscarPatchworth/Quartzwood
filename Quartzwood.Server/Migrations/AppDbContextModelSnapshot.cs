@@ -382,6 +382,10 @@ namespace Quartzwood.Server.Migrations
 
                     b.HasIndex("ParentGroupId");
 
+                    b.HasIndex(new[] { "EntityId" }, "IX_Groups_OneRootPerEntity")
+                        .IsUnique()
+                        .HasFilter("ParentGroupId IS NULL");
+
                     b.ToTable("Groups");
                 });
 
