@@ -8,4 +8,5 @@ public interface ICardQueryService
     Task<IEnumerable<CardDto>> GetAllAsync();
     Task<IEnumerable<CardDto>> GetByBoxAsync(Guid boxId);
     Task<IEnumerable<GroupedCardDto>> GetByBoxGroupedAsync(Guid boxId);
+    Task<CardSearchResponseDto> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text);
 }

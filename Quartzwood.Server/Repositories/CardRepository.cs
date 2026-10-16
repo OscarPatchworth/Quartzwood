@@ -19,6 +19,25 @@ public class CardRepository : ICardRepository
             .ThenInclude(ct => ct.Tag)
             .FirstOrDefaultAsync(c => c.Id == id);
 
+    public async Task<List<CardInstance>> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text, int take)
+    {
+        // Escape LIKE's wildcards so searching for "50%" or "a_b" matches them literally
+        var escaped = text.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
+        var pattern = $"%{escaped}%";
+
+        // One query: Entity -> its Groups -> their Boxes -> their Cards, all via indexes,
+        // then the name check runs only on those cards. SQLite's LIKE is case-insensitive
+        return await _context.Cards
+            .AsNoTracking()
+            .Include(c => c.Box)
+            .Where(c => entityIds.Contains(c.Box.Group.EntityId))
+            .Where(c => EF.Functions.Like(c.Name, pattern, @"\")
+                || EF.Functions.Like(c.SetCode, escaped, @"\"))
+            .OrderBy(c => c.Name)
+            .Take(take)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<CardInstance>> GetAllAsync()
         => await _context.Cards
             .Include(c => c.CardTags)

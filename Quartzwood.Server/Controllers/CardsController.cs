@@ -22,6 +22,19 @@ public class CardsController : ControllerBase
         _access = access;
     }
 
+    // Searches every card in the Entities you're a member of, by name (partial) or set code (exact)
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(CardSearchResponseDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> Search([FromQuery] string? q)
+    {
+        var text = q?.Trim() ?? string.Empty;
+        if (text.Length < 2) return BadRequest("Search for at least 2 characters.");
+
+        var entityIds = await _access.GetEntityIdsAsync();
+        return Ok(await _query.SearchAsync(entityIds, text));
+    }
+
     // Cards in Entities you're not a member of are reported as 404, same as ones that don't exist
 
     [HttpGet("{id}")]

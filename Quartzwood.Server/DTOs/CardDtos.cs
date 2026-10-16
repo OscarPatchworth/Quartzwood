@@ -70,3 +70,32 @@ public record UpdateCardDto(
     DateOnly? AcquiredDate,
     decimal? PurchasePrice
 );
+
+// One step of a card's location: a group on the way down from the root to the card's box
+public record LocationStepDto(
+    Guid Id,
+    string Name
+);
+
+// What collection search returns: identical copies in the same box, plus where that box is
+public record CardSearchResultDto(
+    string? Name,
+    string? SetCode,
+    string? SetNumber,
+    string? ScryfallId,
+    string Condition,
+    string FoilType,
+    string StampType,
+    int Count,
+    List<string> Ids,
+    Guid BoxId,
+    string BoxName,
+    // Root group first, the box's own group last
+    List<LocationStepDto> GroupPath
+);
+
+public record CardSearchResponseDto(
+    List<CardSearchResultDto> Results,
+    // true when more cards matched than were returned: the user should narrow the search
+    bool HasMore
+);

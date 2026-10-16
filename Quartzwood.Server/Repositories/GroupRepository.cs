@@ -25,6 +25,12 @@ public class GroupRepository : IGroupRepository
             .Include(g => g.Boxes)
             .ToListAsync();
 
+    public async Task<List<Group>> GetTreeByEntitiesAsync(IReadOnlyCollection<Guid> entityIds)
+        => await _context.Groups
+            .AsNoTracking()
+            .Where(g => entityIds.Contains(g.EntityId))
+            .ToListAsync();
+
     public async Task<IEnumerable<Group>> GetByEntityAsync(Guid entityId)
         => await _context.Groups
             .Where(g => g.EntityId == entityId)

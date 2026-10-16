@@ -86,6 +86,26 @@ export type CardDto = {
     tags: Array<string>;
 };
 
+export type CardSearchResponseDto = {
+    results: Array<CardSearchResultDto>;
+    hasMore: boolean;
+};
+
+export type CardSearchResultDto = {
+    name: null | string;
+    setCode: null | string;
+    setNumber: null | string;
+    scryfallId: null | string;
+    condition: string;
+    foilType: string;
+    stampType: string;
+    count: number | string;
+    ids: Array<string>;
+    boxId: string;
+    boxName: string;
+    groupPath: Array<LocationStepDto>;
+};
+
 export type EntityDto = {
     id: string;
     name: string;
@@ -140,6 +160,11 @@ export type InfoRequest = {
 export type InfoResponse = {
     email: string;
     isEmailConfirmed: boolean;
+};
+
+export type LocationStepDto = {
+    id: string;
+    name: string;
 };
 
 export type LoginRequest = {
@@ -675,6 +700,33 @@ export type GetApiBreadcrumbByIdResponses = {
 };
 
 export type GetApiBreadcrumbByIdResponse = GetApiBreadcrumbByIdResponses[keyof GetApiBreadcrumbByIdResponses];
+
+export type GetApiCardsSearchData = {
+    body?: never;
+    path?: never;
+    query?: {
+        q?: string;
+    };
+    url: '/api/cards/search';
+};
+
+export type GetApiCardsSearchErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type GetApiCardsSearchError = GetApiCardsSearchErrors[keyof GetApiCardsSearchErrors];
+
+export type GetApiCardsSearchResponses = {
+    /**
+     * OK
+     */
+    200: CardSearchResponseDto;
+};
+
+export type GetApiCardsSearchResponse = GetApiCardsSearchResponses[keyof GetApiCardsSearchResponses];
 
 export type DeleteApiCardsByIdData = {
     body?: never;
