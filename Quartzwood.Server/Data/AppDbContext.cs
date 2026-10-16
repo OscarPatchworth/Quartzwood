@@ -16,6 +16,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<CardInstance> Cards { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<CardTag> CardTags { get; set; }
+    public DbSet<EntityMember> EntityMembers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,5 +40,27 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
             .WithMany(e => e.Groups)
             .HasForeignKey(g => g.EntityId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // EntityMember composite primary key: a user can only be in an entity once
+        modelBuilder.Entity<EntityMember>()
+            .HasKey(m => new { m.EntityId, m.UserId });
+
+        // EntityMember → Entity: deleting an entity removes its memberships
+        modelBuilder.Entity<EntityMember>()
+            .HasOne(m => m.Entity)
+            .WithMany(e => e.Members)
+            .HasForeignKey(m => m.EntityId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // EntityMember → User: deleting a user removes their memberships
+        modelBuilder.Entity<EntityMember>()
+            .HasOne(m => m.User)
+            .WithMany(u => u.Memberships)
+            .HasForeignKey(m => m.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Fast "which entities is this user in?" lookups
+        modelBuilder.Entity<EntityMember>()
+            .HasIndex(m => m.UserId);
     }
 }

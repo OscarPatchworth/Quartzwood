@@ -24,4 +24,5 @@ public class Entity
     
     // Navigation
     public ICollection<Group> Groups { get; set; } = new List<Group>();
+    public ICollection<EntityMember> Members { get; set; } = new List<EntityMember>();
 }

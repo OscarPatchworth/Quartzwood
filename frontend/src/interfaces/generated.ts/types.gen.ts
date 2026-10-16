@@ -11,6 +11,13 @@ export type AccessTokenResponse = {
     refreshToken: string;
 };
 
+export type AccountDto = {
+    id: string;
+    email: string;
+    displayName: string;
+    personalEntityId: string;
+};
+
 export type AddBoxDto = {
     name: string;
     groupId?: null | string;
@@ -160,9 +167,10 @@ export type RefreshRequest = {
     refreshToken: string;
 };
 
-export type RegisterRequest = {
+export type RegisterDto = {
     email: string;
     password: string;
+    displayName: string;
 };
 
 export type ResendConfirmationEmailRequest = {
@@ -234,27 +242,15 @@ export type UpdateGroupDto = {
     parentGroupId: null | string;
 };
 
-export type PostApiAuthRegisterData = {
-    body: RegisterRequest;
-    path?: never;
-    query?: never;
-    url: '/api/auth/register';
-};
-
-export type PostApiAuthRegisterErrors = {
-    /**
-     * Bad Request
-     */
-    400: HttpValidationProblemDetails;
-};
-
-export type PostApiAuthRegisterError = PostApiAuthRegisterErrors[keyof PostApiAuthRegisterErrors];
-
-export type PostApiAuthRegisterResponses = {
-    /**
-     * OK
-     */
-    200: unknown;
+export type ValidationProblemDetails = {
+    type?: null | string;
+    title?: null | string;
+    status?: null | number | string;
+    detail?: null | string;
+    instance?: null | string;
+    errors?: {
+        [key: string]: Array<string>;
+    };
 };
 
 export type PostApiAuthLoginData = {
@@ -456,6 +452,31 @@ export type PostApiAuthManageInfoResponses = {
 };
 
 export type PostApiAuthManageInfoResponse = PostApiAuthManageInfoResponses[keyof PostApiAuthManageInfoResponses];
+
+export type PostApiAccountRegisterData = {
+    body: RegisterDto;
+    path?: never;
+    query?: never;
+    url: '/api/account/register';
+};
+
+export type PostApiAccountRegisterErrors = {
+    /**
+     * Bad Request
+     */
+    400: ValidationProblemDetails;
+};
+
+export type PostApiAccountRegisterError = PostApiAccountRegisterErrors[keyof PostApiAccountRegisterErrors];
+
+export type PostApiAccountRegisterResponses = {
+    /**
+     * OK
+     */
+    200: AccountDto;
+};
+
+export type PostApiAccountRegisterResponse = PostApiAccountRegisterResponses[keyof PostApiAccountRegisterResponses];
 
 export type GetApiBoxesData = {
     body?: never;

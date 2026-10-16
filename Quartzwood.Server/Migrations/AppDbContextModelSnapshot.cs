@@ -339,6 +339,24 @@ namespace Quartzwood.Server.Migrations
                     b.ToTable("Entities");
                 });
 
+            modelBuilder.Entity("Quartzwood.Server.Models.EntityMember", b =>
+                {
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("EntityId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EntityMembers");
+                });
+
             modelBuilder.Entity("Quartzwood.Server.Models.Group", b =>
                 {
                     b.Property<Guid>("Id")
@@ -470,6 +488,25 @@ namespace Quartzwood.Server.Migrations
                     b.Navigation("Tag");
                 });
 
+            modelBuilder.Entity("Quartzwood.Server.Models.EntityMember", b =>
+                {
+                    b.HasOne("Quartzwood.Server.Models.Entity", "Entity")
+                        .WithMany("Members")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Quartzwood.Server.Models.AppUser", "User")
+                        .WithMany("Memberships")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Quartzwood.Server.Models.Group", b =>
                 {
                     b.HasOne("Quartzwood.Server.Models.Entity", "Entity")
@@ -487,6 +524,11 @@ namespace Quartzwood.Server.Migrations
                     b.Navigation("ParentGroup");
                 });
 
+            modelBuilder.Entity("Quartzwood.Server.Models.AppUser", b =>
+                {
+                    b.Navigation("Memberships");
+                });
+
             modelBuilder.Entity("Quartzwood.Server.Models.Box", b =>
                 {
                     b.Navigation("Cards");
@@ -500,6 +542,8 @@ namespace Quartzwood.Server.Migrations
             modelBuilder.Entity("Quartzwood.Server.Models.Entity", b =>
                 {
                     b.Navigation("Groups");
+
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.Group", b =>

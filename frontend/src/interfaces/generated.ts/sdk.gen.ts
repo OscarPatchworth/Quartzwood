@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiBoxesByIdData, DeleteApiBoxesByIdErrors, DeleteApiBoxesByIdResponses, DeleteApiCardsByIdData, DeleteApiCardsByIdErrors, DeleteApiCardsByIdResponses, DeleteApiEntitiesByIdData, DeleteApiEntitiesByIdResponses, DeleteApiGroupsByIdData, DeleteApiGroupsByIdErrors, DeleteApiGroupsByIdResponses, GetApiAuthManageInfoData, GetApiAuthManageInfoErrors, GetApiAuthManageInfoResponses, GetApiBoxesByGroupByGroupIdData, GetApiBoxesByGroupByGroupIdResponses, GetApiBoxesByIdData, GetApiBoxesByIdErrors, GetApiBoxesByIdResponses, GetApiBoxesData, GetApiBoxesResponses, GetApiBreadcrumbByIdData, GetApiBreadcrumbByIdErrors, GetApiBreadcrumbByIdResponses, GetApiCardsByBoxByBoxIdData, GetApiCardsByBoxByBoxIdGroupedData, GetApiCardsByBoxByBoxIdGroupedResponses, GetApiCardsByBoxByBoxIdResponses, GetApiCardsByIdData, GetApiCardsByIdErrors, GetApiCardsByIdResponses, GetApiCardsData, GetApiCardsResponses, GetApiEntitiesByIdData, GetApiEntitiesByIdErrors, GetApiEntitiesByIdResponses, GetApiEntitiesData, GetApiEntitiesResponses, GetApiGroupsByEntityByEntityIdData, GetApiGroupsByEntityByEntityIdResponses, GetApiGroupsByIdData, GetApiGroupsByIdErrors, GetApiGroupsByIdResponses, GetApiGroupsByParentByParentIdData, GetApiGroupsByParentByParentIdResponses, GetApiGroupsData, GetApiGroupsResponses, GetApiScryfallSearchData, GetApiScryfallSearchErrors, GetApiScryfallSearchPromoData, GetApiScryfallSearchPromoErrors, GetApiScryfallSearchPromoResponses, GetApiScryfallSearchResponses, MapIdentityApiApiAuthConfirmEmailData, MapIdentityApiApiAuthConfirmEmailResponses, PostApiAuthForgotPasswordData, PostApiAuthForgotPasswordErrors, PostApiAuthForgotPasswordResponses, PostApiAuthLoginData, PostApiAuthLoginResponses, PostApiAuthManage2FaData, PostApiAuthManage2FaErrors, PostApiAuthManage2FaResponses, PostApiAuthManageInfoData, PostApiAuthManageInfoErrors, PostApiAuthManageInfoResponses, PostApiAuthRefreshData, PostApiAuthRefreshResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiAuthResendConfirmationEmailData, PostApiAuthResendConfirmationEmailResponses, PostApiAuthResetPasswordData, PostApiAuthResetPasswordErrors, PostApiAuthResetPasswordResponses, PostApiBoxesData, PostApiBoxesResponses, PostApiCardsData, PostApiCardsErrors, PostApiCardsResponses, PostApiEntitiesData, PostApiEntitiesResponses, PostApiGroupsData, PostApiGroupsResponses, PutApiBoxesByIdData, PutApiBoxesByIdErrors, PutApiBoxesByIdResponses, PutApiCardsByIdData, PutApiCardsByIdErrors, PutApiCardsByIdResponses, PutApiEntitiesByIdData, PutApiEntitiesByIdResponses, PutApiGroupsByIdData, PutApiGroupsByIdErrors, PutApiGroupsByIdResponses } from './types.gen';
+import type { DeleteApiBoxesByIdData, DeleteApiBoxesByIdErrors, DeleteApiBoxesByIdResponses, DeleteApiCardsByIdData, DeleteApiCardsByIdErrors, DeleteApiCardsByIdResponses, DeleteApiEntitiesByIdData, DeleteApiEntitiesByIdResponses, DeleteApiGroupsByIdData, DeleteApiGroupsByIdErrors, DeleteApiGroupsByIdResponses, GetApiAuthManageInfoData, GetApiAuthManageInfoErrors, GetApiAuthManageInfoResponses, GetApiBoxesByGroupByGroupIdData, GetApiBoxesByGroupByGroupIdResponses, GetApiBoxesByIdData, GetApiBoxesByIdErrors, GetApiBoxesByIdResponses, GetApiBoxesData, GetApiBoxesResponses, GetApiBreadcrumbByIdData, GetApiBreadcrumbByIdErrors, GetApiBreadcrumbByIdResponses, GetApiCardsByBoxByBoxIdData, GetApiCardsByBoxByBoxIdGroupedData, GetApiCardsByBoxByBoxIdGroupedResponses, GetApiCardsByBoxByBoxIdResponses, GetApiCardsByIdData, GetApiCardsByIdErrors, GetApiCardsByIdResponses, GetApiCardsData, GetApiCardsResponses, GetApiEntitiesByIdData, GetApiEntitiesByIdErrors, GetApiEntitiesByIdResponses, GetApiEntitiesData, GetApiEntitiesResponses, GetApiGroupsByEntityByEntityIdData, GetApiGroupsByEntityByEntityIdResponses, GetApiGroupsByIdData, GetApiGroupsByIdErrors, GetApiGroupsByIdResponses, GetApiGroupsByParentByParentIdData, GetApiGroupsByParentByParentIdResponses, GetApiGroupsData, GetApiGroupsResponses, GetApiScryfallSearchData, GetApiScryfallSearchErrors, GetApiScryfallSearchPromoData, GetApiScryfallSearchPromoErrors, GetApiScryfallSearchPromoResponses, GetApiScryfallSearchResponses, MapIdentityApiApiAuthConfirmEmailData, MapIdentityApiApiAuthConfirmEmailResponses, PostApiAccountRegisterData, PostApiAccountRegisterErrors, PostApiAccountRegisterResponses, PostApiAuthForgotPasswordData, PostApiAuthForgotPasswordErrors, PostApiAuthForgotPasswordResponses, PostApiAuthLoginData, PostApiAuthLoginResponses, PostApiAuthManage2FaData, PostApiAuthManage2FaErrors, PostApiAuthManage2FaResponses, PostApiAuthManageInfoData, PostApiAuthManageInfoErrors, PostApiAuthManageInfoResponses, PostApiAuthRefreshData, PostApiAuthRefreshResponses, PostApiAuthResendConfirmationEmailData, PostApiAuthResendConfirmationEmailResponses, PostApiAuthResetPasswordData, PostApiAuthResetPasswordErrors, PostApiAuthResetPasswordResponses, PostApiBoxesData, PostApiBoxesResponses, PostApiCardsData, PostApiCardsErrors, PostApiCardsResponses, PostApiEntitiesData, PostApiEntitiesResponses, PostApiGroupsData, PostApiGroupsResponses, PutApiBoxesByIdData, PutApiBoxesByIdErrors, PutApiBoxesByIdResponses, PutApiCardsByIdData, PutApiCardsByIdErrors, PutApiCardsByIdResponses, PutApiEntitiesByIdData, PutApiEntitiesByIdResponses, PutApiGroupsByIdData, PutApiGroupsByIdErrors, PutApiGroupsByIdResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,15 +17,6 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
-
-export const postApiAuthRegister = <ThrowOnError extends boolean = true>(options: Options<PostApiAuthRegisterData, ThrowOnError>): RequestResult<PostApiAuthRegisterResponses, PostApiAuthRegisterErrors, ThrowOnError> => (options.client ?? client).post<PostApiAuthRegisterResponses, PostApiAuthRegisterErrors, ThrowOnError>({
-    url: '/api/auth/register',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
 
 export const postApiAuthLogin = <ThrowOnError extends boolean = true>(options: Options<PostApiAuthLoginData, ThrowOnError>): RequestResult<PostApiAuthLoginResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostApiAuthLoginResponses, unknown, ThrowOnError>({
     url: '/api/auth/login',
@@ -87,6 +78,15 @@ export const getApiAuthManageInfo = <ThrowOnError extends boolean = true>(option
 
 export const postApiAuthManageInfo = <ThrowOnError extends boolean = true>(options: Options<PostApiAuthManageInfoData, ThrowOnError>): RequestResult<PostApiAuthManageInfoResponses, PostApiAuthManageInfoErrors, ThrowOnError> => (options.client ?? client).post<PostApiAuthManageInfoResponses, PostApiAuthManageInfoErrors, ThrowOnError>({
     url: '/api/auth/manage/info',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const postApiAccountRegister = <ThrowOnError extends boolean = true>(options: Options<PostApiAccountRegisterData, ThrowOnError>): RequestResult<PostApiAccountRegisterResponses, PostApiAccountRegisterErrors, ThrowOnError> => (options.client ?? client).post<PostApiAccountRegisterResponses, PostApiAccountRegisterErrors, ThrowOnError>({
+    url: '/api/account/register',
     ...options,
     headers: {
         'Content-Type': 'application/json',

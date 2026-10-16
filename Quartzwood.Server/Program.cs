@@ -3,6 +3,7 @@ using Quartzwood.Server.Data;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
 // Using Services
+using Quartzwood.Server.Services.Accounts;
 using Quartzwood.Server.Services.Boxs;
 using Quartzwood.Server.Services.Cards;
 using Quartzwood.Server.Services.Entities;
@@ -50,6 +51,7 @@ builder.Services.AddScoped<ICardCommandService, CardCommandService>();
 builder.Services.AddScoped<IEntityCommandService, EntityCommandService>();
 builder.Services.AddScoped<IGroupCommandService, GroupCommandService>();
 builder.Services.AddScoped<IBoxCommandService, BoxCommandService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddHttpClient<IScryfallService, ScryfallService>(client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
@@ -68,8 +70,19 @@ app.UseCors("DevPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// /api/auth/register, /api/auth/login, /api/auth/refresh, /api/auth/manage/info, ...
-app.MapGroup("/api/auth").MapIdentityApi<AppUser>();
+// /api/auth/login, /api/auth/refresh, /api/auth/manage/info, ...
+app.MapGroup("/api/auth")
+    .MapIdentityApi<AppUser>()
+    .Add(endpoint =>
+    {
+        // Disable the built-in /register: sign-up goes through POST /api/account/register
+        // so every new user also gets a Personal entity
+        if (endpoint is RouteEndpointBuilder { RoutePattern.RawText: var route } && route?.EndsWith("/register") == true)
+        {
+            endpoint.Metadata.Add(new ExcludeFromDescriptionAttribute());
+            endpoint.FilterFactories.Add((_, _) => _ => ValueTask.FromResult<object?>(Results.NotFound()));
+        }
+    });
 app.MapControllers();
 
 app.Run();

@@ -6,4 +6,7 @@ namespace Quartzwood.Server.Models;
 public class AppUser : IdentityUser<Guid>
 {
     public string DisplayName { get; set; } = string.Empty;
+
+    // Navigation
+    public ICollection<EntityMember> Memberships { get; set; } = new List<EntityMember>();
 }
