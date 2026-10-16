@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Quartzwood.Server.Data;
+using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
 // Using Services
 using Quartzwood.Server.Services.Boxs;
@@ -15,6 +16,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=quartzwood.db"));
+
+// Auth: Identity handles users, password hashing and sign-in (cookie or bearer token)
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<AppUser>()
+    .AddEntityFrameworkStores<AppDbContext>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevPolicy", policy =>
@@ -59,6 +65,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("DevPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+
+// /api/auth/register, /api/auth/login, /api/auth/refresh, /api/auth/manage/info, ...
+app.MapGroup("/api/auth").MapIdentityApi<AppUser>();
 app.MapControllers();
 
 app.Run();

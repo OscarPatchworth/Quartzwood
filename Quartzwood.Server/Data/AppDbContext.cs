@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Quartzwood.Server.Models;
 
 namespace Quartzwood.Server.Data;
 
-public class AppDbContext : DbContext
+// IdentityDbContext adds the AspNetUsers / AspNetRoles / ... tables alongside ours
+public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -16,6 +19,9 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Must run first: configures the Identity tables
+        base.OnModelCreating(modelBuilder);
+
         // CardTag composite primary key
         modelBuilder.Entity<CardTag>()
             .HasKey(ct => new { ct.CardInstanceId, ct.TagId });

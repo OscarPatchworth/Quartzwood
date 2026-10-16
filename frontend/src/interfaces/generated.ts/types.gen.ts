@@ -4,6 +4,13 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:5163/' | (string & {});
 };
 
+export type AccessTokenResponse = {
+    tokenType?: null | string;
+    accessToken: string;
+    expiresIn: number | string;
+    refreshToken: string;
+};
+
 export type AddBoxDto = {
     name: string;
     groupId?: null | string;
@@ -86,6 +93,10 @@ export type EntityDto = {
     groupNames: Array<string>;
 };
 
+export type ForgotPasswordRequest = {
+    email: string;
+};
+
 export type GroupDto = {
     id: string;
     name: string;
@@ -108,6 +119,35 @@ export type GroupedCardDto = {
     ids: Array<string>;
 };
 
+export type HttpValidationProblemDetails = {
+    type?: null | string;
+    title?: null | string;
+    status?: null | number | string;
+    detail?: null | string;
+    instance?: null | string;
+    errors?: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InfoRequest = {
+    newEmail?: null | string;
+    newPassword?: null | string;
+    oldPassword?: null | string;
+};
+
+export type InfoResponse = {
+    email: string;
+    isEmailConfirmed: boolean;
+};
+
+export type LoginRequest = {
+    email: string;
+    password: string;
+    twoFactorCode?: null | string;
+    twoFactorRecoveryCode?: null | string;
+};
+
 export type ProblemDetails = {
     type?: null | string;
     title?: null | string;
@@ -116,11 +156,46 @@ export type ProblemDetails = {
     instance?: null | string;
 };
 
+export type RefreshRequest = {
+    refreshToken: string;
+};
+
+export type RegisterRequest = {
+    email: string;
+    password: string;
+};
+
+export type ResendConfirmationEmailRequest = {
+    email: string;
+};
+
+export type ResetPasswordRequest = {
+    email: string;
+    resetCode: string;
+    newPassword: string;
+};
+
 export type ScryfallSearchResultDto = {
     name: string;
     setCode: string;
     setNumber: string;
     scryfallId: string;
+};
+
+export type TwoFactorRequest = {
+    enable?: null | boolean;
+    twoFactorCode?: null | string;
+    resetSharedKey?: boolean;
+    resetRecoveryCodes?: boolean;
+    forgetMachine?: boolean;
+};
+
+export type TwoFactorResponse = {
+    sharedKey: string;
+    recoveryCodesLeft: number | string;
+    recoveryCodes?: null | Array<string>;
+    isTwoFactorEnabled: boolean;
+    isMachineRemembered: boolean;
 };
 
 export type UpdateBoxDto = {
@@ -158,6 +233,229 @@ export type UpdateGroupDto = {
     entityId: null | string;
     parentGroupId: null | string;
 };
+
+export type PostApiAuthRegisterData = {
+    body: RegisterRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/register';
+};
+
+export type PostApiAuthRegisterErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+};
+
+export type PostApiAuthRegisterError = PostApiAuthRegisterErrors[keyof PostApiAuthRegisterErrors];
+
+export type PostApiAuthRegisterResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+};
+
+export type PostApiAuthLoginData = {
+    body: LoginRequest;
+    path?: never;
+    query?: {
+        useCookies?: boolean;
+        useSessionCookies?: boolean;
+    };
+    url: '/api/auth/login';
+};
+
+export type PostApiAuthLoginResponses = {
+    /**
+     * OK
+     */
+    200: AccessTokenResponse;
+};
+
+export type PostApiAuthLoginResponse = PostApiAuthLoginResponses[keyof PostApiAuthLoginResponses];
+
+export type PostApiAuthRefreshData = {
+    body: RefreshRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/refresh';
+};
+
+export type PostApiAuthRefreshResponses = {
+    /**
+     * OK
+     */
+    200: AccessTokenResponse;
+};
+
+export type PostApiAuthRefreshResponse = PostApiAuthRefreshResponses[keyof PostApiAuthRefreshResponses];
+
+export type MapIdentityApiApiAuthConfirmEmailData = {
+    body?: never;
+    path?: never;
+    query: {
+        userId: string;
+        code: string;
+        changedEmail?: string;
+    };
+    url: '/api/auth/confirmEmail';
+};
+
+export type MapIdentityApiApiAuthConfirmEmailResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+};
+
+export type PostApiAuthResendConfirmationEmailData = {
+    body: ResendConfirmationEmailRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/resendConfirmationEmail';
+};
+
+export type PostApiAuthResendConfirmationEmailResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+};
+
+export type PostApiAuthForgotPasswordData = {
+    body: ForgotPasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/forgotPassword';
+};
+
+export type PostApiAuthForgotPasswordErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+};
+
+export type PostApiAuthForgotPasswordError = PostApiAuthForgotPasswordErrors[keyof PostApiAuthForgotPasswordErrors];
+
+export type PostApiAuthForgotPasswordResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+};
+
+export type PostApiAuthResetPasswordData = {
+    body: ResetPasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/resetPassword';
+};
+
+export type PostApiAuthResetPasswordErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+};
+
+export type PostApiAuthResetPasswordError = PostApiAuthResetPasswordErrors[keyof PostApiAuthResetPasswordErrors];
+
+export type PostApiAuthResetPasswordResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+};
+
+export type PostApiAuthManage2FaData = {
+    body: TwoFactorRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/manage/2fa';
+};
+
+export type PostApiAuthManage2FaErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+    /**
+     * Not Found
+     */
+    404: unknown;
+};
+
+export type PostApiAuthManage2FaError = PostApiAuthManage2FaErrors[keyof PostApiAuthManage2FaErrors];
+
+export type PostApiAuthManage2FaResponses = {
+    /**
+     * OK
+     */
+    200: TwoFactorResponse;
+};
+
+export type PostApiAuthManage2FaResponse = PostApiAuthManage2FaResponses[keyof PostApiAuthManage2FaResponses];
+
+export type GetApiAuthManageInfoData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/manage/info';
+};
+
+export type GetApiAuthManageInfoErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+    /**
+     * Not Found
+     */
+    404: unknown;
+};
+
+export type GetApiAuthManageInfoError = GetApiAuthManageInfoErrors[keyof GetApiAuthManageInfoErrors];
+
+export type GetApiAuthManageInfoResponses = {
+    /**
+     * OK
+     */
+    200: InfoResponse;
+};
+
+export type GetApiAuthManageInfoResponse = GetApiAuthManageInfoResponses[keyof GetApiAuthManageInfoResponses];
+
+export type PostApiAuthManageInfoData = {
+    body: InfoRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/manage/info';
+};
+
+export type PostApiAuthManageInfoErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+    /**
+     * Not Found
+     */
+    404: unknown;
+};
+
+export type PostApiAuthManageInfoError = PostApiAuthManageInfoErrors[keyof PostApiAuthManageInfoErrors];
+
+export type PostApiAuthManageInfoResponses = {
+    /**
+     * OK
+     */
+    200: InfoResponse;
+};
+
+export type PostApiAuthManageInfoResponse = PostApiAuthManageInfoResponses[keyof PostApiAuthManageInfoResponses];
 
 export type GetApiBoxesData = {
     body?: never;
