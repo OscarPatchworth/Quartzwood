@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Services.Cards;
@@ -5,6 +6,7 @@ using Quartzwood.Server.Services.Cards;
 namespace Quartzwood.Server.Controllers;
 
 [ApiController]
+[Authorize]   // every endpoint in this controller requires a logged-in user
 [Route("api/cards")]
 public class CardsController : ControllerBase
 {

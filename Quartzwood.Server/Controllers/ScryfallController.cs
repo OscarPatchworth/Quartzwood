@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Services.Scryfall;
@@ -6,6 +7,7 @@ namespace Quartzwood.Server.Controllers;
 
 // ScryfallController.cs
 [ApiController]
+[Authorize]   // every endpoint in this controller requires a logged-in user
 [Route("api/scryfall")]
 public class ScryfallController : ControllerBase
 {

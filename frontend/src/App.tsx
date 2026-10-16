@@ -8,6 +8,7 @@ import SearchPage from './pages/SearchPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import Header from './components/Header'
+import { RequireAuth } from './auth/RequireAuth'
 
 function Layout() {
   return (
@@ -23,11 +24,16 @@ function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/collection" element={<CollectionPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/entity/:id" element={<EntityPage />} />
-        <Route path="/group/:id" element={<GroupPage />} />
-        <Route path="/box/:id" element={<BoxPage />} />
+
+        {/* Logged-in only: everything here talks to [Authorize] endpoints */}
+        <Route element={<RequireAuth />}>
+          <Route path="/collection" element={<CollectionPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/entity/:id" element={<EntityPage />} />
+          <Route path="/group/:id" element={<GroupPage />} />
+          <Route path="/box/:id" element={<BoxPage />} />
+        </Route>
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>

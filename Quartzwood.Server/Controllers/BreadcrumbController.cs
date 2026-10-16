@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.Data;
 using Quartzwood.Server.DTOs;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Quartzwood.Server.Controllers;
 
 [ApiController]
+[Authorize]   // every endpoint in this controller requires a logged-in user
 [Route("api/breadcrumb")]
 public class BreadcrumbController : ControllerBase
 {

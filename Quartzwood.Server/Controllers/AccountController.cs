@@ -9,6 +9,7 @@ using Quartzwood.Server.Services.Accounts;
 namespace Quartzwood.Server.Controllers;
 
 [ApiController]
+[Authorize]   // every endpoint in this controller requires a logged-in user...
 [Route("api/account")]
 public class AccountController : ControllerBase
 {
@@ -21,6 +22,7 @@ public class AccountController : ControllerBase
         _signIn = signIn;
     }
 
+    [AllowAnonymous]   // ...except sign-up, which has to work while logged out
     [HttpPost("register")]
     [ProducesResponseType(typeof(AccountDto), 200)]
     [ProducesResponseType(typeof(ValidationProblemDetails), 400)]
@@ -40,7 +42,6 @@ public class AccountController : ControllerBase
     }
 
     // The currently logged-in user (401 if not logged in)
-    [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(typeof(AccountDto), 200)]
     [ProducesResponseType(401)]
@@ -53,7 +54,6 @@ public class AccountController : ControllerBase
     }
 
     // Clears the auth cookie
-    [Authorize]
     [HttpPost("logout")]
     [ProducesResponseType(204)]
     public async Task<IActionResult> Logout()
