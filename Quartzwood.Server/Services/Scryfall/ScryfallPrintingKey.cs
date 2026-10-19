@@ -36,9 +36,11 @@ public static class ScryfallPrintingKey
                 scryfallSetNumber = scryfallSetCode + "-" + scryfallSetNumber;
                 scryfallSetCode = "PLST";
         }
-        else if (!isList && scryfallSetCode == "PLST")
+        // Only when the number really is "SET-NUMBER" (e.g. IKO-1): a plain "PLST-1" typed in has no inner set,
+        // and is left as-is so the lookup simply finds nothing instead of crashing on a missing part
+        else if (!isList && scryfallSetCode == "PLST" && scryfallSetNumber.Contains('-'))
         {
-            var parseSetId = scryfallSetNumber.Split("-");
+            var parseSetId = scryfallSetNumber.Split("-", 2);
             scryfallSetCode = parseSetId[0];
             scryfallSetNumber = parseSetId[1];
         }

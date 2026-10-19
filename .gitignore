@@ -223,6 +223,8 @@ __marimo__/
 # SQLite's temporary write-ahead-log files, created next to the .db while the server runs
 *.db-shm
 *.db-wal
+# Card images downloaded from Scryfall (a re-downloadable cache)
+Quartzwood.Server/image-cache/
 *.sqlite3
 *.pyc
 poetry.lock

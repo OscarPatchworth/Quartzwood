@@ -1,8 +1,11 @@
 
 import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 
-// A set code: exactly 3 letters/digits with at least one letter (IKO, M21, 2XM), so a plain number isn't one
-const SET = String.raw`(?=[A-Z0-9]*[A-Z])[A-Z0-9]{3}`
+// A set code: 3-4 letters/digits with at least one letter (IKO, M21, 2XM, and 4-letter token sets like TFDC),
+// so a plain number isn't one
+const SET = String.raw`(?=[A-Z0-9]*[A-Z])[A-Z0-9]{3,4}`
+// Same, but "lazy" (prefers 3 characters, takes 4 only if 3 doesn't work): used where nothing separates set and number
+const SET_LAZY = String.raw`(?=[A-Z0-9]*[A-Z])[A-Z0-9]{3,4}?`
 
 const patterns = {
     quantity:     /^(\d{1,3})$/,
@@ -10,8 +13,10 @@ const patterns = {
     dashedSet:    new RegExp(String.raw`^(?:(\d{1,3})-(${SET})|(${SET})-(\d{1,3}))$`, 'i'),
     // \. = a literal dot (a bare . in a regex matches any character)
     dotSet:       new RegExp(String.raw`^(?:(\d{1,3})\.(${SET})|(${SET})\.(\d{1,3}))$`, 'i'),
-    // Set codes are always 3 characters, so the split is fixed: IKO107 = IKO #107, M2110 = M21 #10
-    compactSet:   new RegExp(String.raw`^(?:(\d{1,3})(${SET})|(${SET})(\d{1,3}))$`, 'i'),
+    // With no separator, a 3-character set is tried first: IKO107 = IKO #107, M2110 = M21 #10, and
+    // TFDC16 = TFDC #16 (because "TFD" + "C16" isn't a valid number). A 4-character code ending in a digit
+    // is ambiguous here (PM2110 reads as PM2 #110): write those with a dash, PM21-10
+    compactSet:   new RegExp(String.raw`^(?:(\d{1,3})(${SET})|(${SET_LAZY})(\d{1,3}))$`, 'i'),
     year:         /^\d{4}$/,
     flagFoil:     /^-f$/i,
     flagProxy:    /^-p$/i,

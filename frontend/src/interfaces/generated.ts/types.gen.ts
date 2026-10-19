@@ -1292,6 +1292,62 @@ export type PostApiImportBoxesByIdResponses = {
 
 export type PostApiImportBoxesByIdResponse = PostApiImportBoxesByIdResponses[keyof PostApiImportBoxesByIdResponses];
 
+export type GetApiScryfallAutocompleteData = {
+    body?: never;
+    path?: never;
+    query?: {
+        q?: string;
+    };
+    url: '/api/scryfall/autocomplete';
+};
+
+export type GetApiScryfallAutocompleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type GetApiScryfallAutocompleteError = GetApiScryfallAutocompleteErrors[keyof GetApiScryfallAutocompleteErrors];
+
+export type GetApiScryfallAutocompleteResponses = {
+    /**
+     * OK
+     */
+    200: Array<string>;
+};
+
+export type GetApiScryfallAutocompleteResponse = GetApiScryfallAutocompleteResponses[keyof GetApiScryfallAutocompleteResponses];
+
+export type GetApiScryfallPrintingData = {
+    body?: never;
+    path?: never;
+    query?: {
+        setCode?: string;
+        setNumber?: string;
+        isList?: boolean;
+    };
+    url: '/api/scryfall/printing';
+};
+
+export type GetApiScryfallPrintingErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiScryfallPrintingError = GetApiScryfallPrintingErrors[keyof GetApiScryfallPrintingErrors];
+
+export type GetApiScryfallPrintingResponses = {
+    /**
+     * OK
+     */
+    200: ScryfallSearchResultDto;
+};
+
+export type GetApiScryfallPrintingResponse = GetApiScryfallPrintingResponses[keyof GetApiScryfallPrintingResponses];
+
 export type GetApiScryfallSearchData = {
     body?: never;
     path?: never;
@@ -1372,3 +1428,10 @@ export type GetApiScryfallCardsByIdImageErrors = {
 };
 
 export type GetApiScryfallCardsByIdImageError = GetApiScryfallCardsByIdImageErrors[keyof GetApiScryfallCardsByIdImageErrors];
+
+export type GetApiScryfallCardsByIdImageResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+};

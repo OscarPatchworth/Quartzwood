@@ -78,6 +78,15 @@ builder.Services.AddHttpClient(ScryfallBulkImporter.HttpClientName, client =>
 });
 builder.Services.AddScoped<IScryfallService, LocalScryfallService>();
 
+// Card images: downloaded once from Scryfall's CDN, then served from disk (Scryfall:ImageCachePath)
+builder.Services.AddHttpClient(ScryfallImageCache.HttpClientName, client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
+    client.DefaultRequestHeaders.Accept.ParseAdd("image/*");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddSingleton<ScryfallImageCache>();
+
 // Import/export in other apps' formats (plain text list, Moxfield/Deckbox CSV, ManaBox CSV)
 builder.Services.AddScoped<CollectionTransferService>();
 builder.Services.AddHostedService<ScryfallBulkImporter>();

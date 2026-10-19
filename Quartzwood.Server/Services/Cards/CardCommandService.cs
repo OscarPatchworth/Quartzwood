@@ -84,9 +84,10 @@ public class CardCommandService : ICardCommandService
                 PurchasePrice = dto.PurchasePrice,
             };
 
-            if (dto.SetCode == "PLST" && dto.SetNumber != null)
+            // List cards are stored under their original set: PLST "IKO-1" -> IKO #1
+            if (dto.SetCode == "PLST" && dto.SetNumber != null && dto.SetNumber.Contains('-'))
             {
-                var parsedSetCode = dto.SetNumber.Split("-");
+                var parsedSetCode = dto.SetNumber.Split("-", 2);
                 card.SetCode = parsedSetCode[0];
                 card.SetNumber = parsedSetCode[1];
                 card.IsList = true;

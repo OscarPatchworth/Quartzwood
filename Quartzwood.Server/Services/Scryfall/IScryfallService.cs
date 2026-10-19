@@ -23,4 +23,6 @@ public interface IScryfallService
     Task<string?> GetImageUrlAsync(string scryfallId, string size);
     // Many printings at once by Scryfall id (import/export); ids it can't find are simply left out
     Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds);
+    // Card names for the add bar's suggestions as you type: names starting with the text first
+    Task<List<string>> AutocompleteAsync(string text, int limit);
 }

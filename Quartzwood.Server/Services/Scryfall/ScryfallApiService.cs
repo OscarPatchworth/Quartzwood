@@ -16,6 +16,16 @@ public class ScryfallApiService : IScryfallService
         _http = http;
     }
 
+    // https://scryfall.com/docs/api/cards/autocomplete: up to 20 names
+    public async Task<List<string>> AutocompleteAsync(string text, int limit)
+    {
+        var url = $"https://api.scryfall.com/cards/autocomplete?q={Uri.EscapeDataString(text)}";
+        var response = await _http.GetFromJsonAsync<AutocompleteResponse>(url);
+        return response?.data.Take(limit).ToList() ?? [];
+    }
+
+    private record AutocompleteResponse(List<string> data);
+
     // Not used for bulk lookups: one request per id would be slow and heavy on the API.
     // Import/export fall back to the card's own set/number when the local data doesn't have an id
     public Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds)

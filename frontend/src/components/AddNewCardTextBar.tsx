@@ -1,116 +1,127 @@
+import { useState, type FormEvent } from "react"
 import { parseCardInput } from "../utils/addCardParser"
-import { useState } from "react"
 import { getErrorMessage } from "../api/getErrorMessage"
 import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 import {
+    getApiScryfallAutocomplete,
+    getApiScryfallPrinting,
     getApiScryfallSearch,
     getApiScryfallSearchPromo,
     postApiCards,
     type AddCardDto,
     type ScryfallSearchResultDto as ScryfallCardMatch,
 } from "../interfaces/generated.ts"
-import { LoadingIndicator } from "./misc/LoadingIndicator"
 import { cardImageUrl } from "../utils/cardImageUrl"
+import { useDebouncedSearch } from "../hooks/useDebouncedSearch"
+import { SearchInput } from "./misc/SearchInput"
 
 interface TextBarProps {
     // Every card must live in a box
     boxId: string
-  onSuccess?: () => Promise<void>
+    onSuccess?: () => Promise<void>
 }
 
-export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
+// What the dropdown shows. "kind" says which shape it is, so TypeScript knows which fields exist
+type Suggestions =
+    | { kind: "names", names: string[] }                       // partial name: pick the card
+    | { kind: "printings", printings: ScryfallCardMatch[] }    // exact name / promo: pick the printing
+    | { kind: "preview", printing: ScryfallCardMatch | null }  // set code + number: this exact card (null = not found)
+    | { kind: "none" }                                          // nothing to look up (e.g. just flags)
 
-    const [cardInput, setCardInput] = useState<string>("");
-    const [scryfallCardMatches, setScryfallCardMatches] = useState<ScryfallCardMatch[]>([])
-    const [parsedCardObject, setParsedCardObject] = useState<IParsedCardInput>()
-    const [isLoading, setIsLoading] = useState(false)
-    const [addFailureLabel, setAddFailureLabel] = useState<string>()
-    const [failureMessage, setFailureMessage] = useState<string>()
-    const notFoundLabel = addFailureLabel ?? parsedCardObject?.name
+interface Lookup {
+    parsed: IParsedCardInput
+    suggestions: Suggestions
+}
 
-    async function searchCard(input: string){
-        setScryfallCardMatches([])
-        setAddFailureLabel(undefined)
-        setFailureMessage(undefined)
-        setIsLoading(true)
+// Works out what the typed text means and fetches matching suggestions.
+// Everything comes from the local Scryfall data on the server, so this costs no Scryfall API calls
+async function lookUp(text: string): Promise<Lookup> {
+    const parsed = parseCardInput(text)
+
+    if (parsed.isPRM) {
+        const res = await getApiScryfallSearchPromo({
+            query: { name: parsed.name, year: parsed.year, setNumber: parsed.setNumber },
+        })
+        return { parsed, suggestions: { kind: "printings", printings: res.data ?? [] } }
+    }
+
+    if (parsed.setCode && parsed.setNumber) {
         try {
-            const parsedCard = parseCardInput(input)
-            setParsedCardObject(parsedCard)
-
-            console.log(parsedCard.isPRM)
-            if(parsedCard.isNameLookup && parsedCard.name && !parsedCard.isPRM){
-                const response = await getApiScryfallSearch({
-                    query: { name: parsedCard.name, year: parsedCard.year }
-                })
-                console.log(scryfallCardMatches)
-                setScryfallCardMatches(response.data ?? [])
-            } else if (parsedCard.isPRM){
-                const response = await getApiScryfallSearchPromo({
-                    query: { name: parsedCard.name, year: parsedCard.year, setNumber: parsedCard.setNumber}
-                })
-                console.log(scryfallCardMatches)
-                setScryfallCardMatches(response.data ?? [])
-            } else {
-                await addNewCard(parsedCard)
-            }
-        } catch (error) {
-            setFailureMessage(getErrorMessage(error, "Unable to search for this card."))
-        } finally {
-            setIsLoading(false)
+            const res = await getApiScryfallPrinting({
+                query: { setCode: parsed.setCode, setNumber: parsed.setNumber, isList: parsed.isList },
+            })
+            return { parsed, suggestions: { kind: "preview", printing: res.data } }
+        } catch {
+            // 404: no card at that set + number
+            return { parsed, suggestions: { kind: "preview", printing: null } }
         }
     }
 
-    async function setParsedCardToSelectedSetCode(card: ScryfallCardMatch){
-        if (!parsedCardObject) return
+    if (parsed.name) {
+        // A complete name: list its printings. Otherwise suggest names that start with / contain it
+        const printings = (await getApiScryfallSearch({ query: { name: parsed.name, year: parsed.year } })).data ?? []
+        if (printings.length > 0) return { parsed, suggestions: { kind: "printings", printings } }
 
-        const selectedCard = {
-            ...parsedCardObject,
-            name: card.name,
-            setCode: card.setCode,
-            setNumber: card.setNumber,
-            isNameLookup: false
-        }
-
-        setParsedCardObject(selectedCard)
-        setIsLoading(true)
-        try {
-            await addNewCard(selectedCard)
-        } finally {
-            setIsLoading(false)
-        }
+        const names = parsed.name.length >= 2
+            ? (await getApiScryfallAutocomplete({ query: { q: parsed.name } })).data
+            : []
+        return { parsed, suggestions: { kind: "names", names } }
     }
 
-    async function addNewCard(parsedCard: IParsedCardInput){
-        if (!parsedCard.setCode || !parsedCard.setNumber) return
+    return { parsed, suggestions: { kind: "none" } }
+}
+
+export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
+    const [text, setText] = useState("")
+    const [isAdding, setIsAdding] = useState(false)
+    const [addError, setAddError] = useState<string>()
+    // "Added 4 × Sol Ring": confirmation after a successful add, cleared when typing again
+    const [lastAdded, setLastAdded] = useState<string>()
+
+    // Same search-as-you-type behaviour as the collection search page
+    const { result: lookup, errorMessage: lookupError, isSearching, isTooShort } = useDebouncedSearch(text, lookUp)
+
+    function changeText(nextText: string) {
+        setText(nextText)
+        setAddError(undefined)
+        setLastAdded(undefined)
+    }
+
+    async function addCard(parsed: IParsedCardInput, printing?: ScryfallCardMatch) {
+        const setCode = printing?.setCode ?? parsed.setCode
+        const setNumber = printing?.setNumber ?? parsed.setNumber
+        if (!setCode || !setNumber) return
 
         const newCard: AddCardDto = {
-            setCode: parsedCard.setCode,
-            setNumber: parsedCard.setNumber,
-            name: parsedCard.name ?? null,
+            setCode,
+            setNumber,
+            name: printing?.name ?? parsed.name ?? null,
             condition: "NM",
-            foilType: parsedCard.foil ? "Traditional" : "None",
+            foilType: parsed.foil ? "Traditional" : "None",
             stampType: "None",
             language: "en",
-            isProxy: parsedCard.isProxy,
+            isProxy: parsed.isProxy,
             isSigned: false,
-            isList: parsedCard.isList,
-            alterArtist: parsedCard.alterArtist ?? null,
-            boxId
-        }
-
-        try {
+            isList: parsed.isList,
+            alterArtist: parsed.alterArtist ?? null,
+            boxId,
             // One request for all copies: the server looks the card up once and saves them together
-            await postApiCards({ body: { ...newCard, quantity: parsedCard.quantity } })
-        } catch (error) {
-            const label = `${parsedCard.setCode}-${parsedCard.setNumber}`
-            setAddFailureLabel(label)
-            setFailureMessage(getErrorMessage(error, `Unable to add ${label}.`))
-            return
+            quantity: parsed.quantity,
         }
 
-        setCardInput("")
-        setParsedCardObject(undefined)
-        setScryfallCardMatches([])
+        setIsAdding(true)
+        setAddError(undefined)
+        try {
+            const added = (await postApiCards({ body: newCard })).data
+            setText("")
+            setLastAdded(`Added ${added.length} × ${added[0]?.name ?? "card"}`)
+        } catch (error) {
+            setAddError(getErrorMessage(error, `Unable to add ${setCode}-${setNumber}.`))
+            return
+        } finally {
+            setIsAdding(false)
+        }
+
         try {
             await onSuccess?.()
         } catch (error) {
@@ -118,89 +129,148 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
         }
     }
 
-    return(
+    // A suggested name was picked: put it in place of the partial name, keeping quantity/flags around it
+    function pickName(parsed: IParsedCardInput, name: string) {
+        changeText(parsed.name && text.includes(parsed.name) ? text.replace(parsed.name, name) : name)
+    }
+
+    // Enter: add when it's clear which card is meant
+    async function submit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        if (isAdding) return
+
+        // Typed fast and hit Enter before the lookup finished: a set code + number is still unambiguous
+        if (isSearching || !lookup) {
+            const parsed = parseCardInput(text)
+            if (parsed.setCode && parsed.setNumber && !parsed.isPRM) await addCard(parsed)
+            return
+        }
+
+        const { parsed, suggestions } = lookup
+        if (suggestions.kind === "preview" && suggestions.printing) await addCard(parsed)
+        else if (suggestions.kind === "printings" && suggestions.printings.length === 1) await addCard(parsed, suggestions.printings[0])
+        else if (suggestions.kind === "names" && suggestions.names.length === 1) pickName(parsed, suggestions.names[0])
+    }
+
+    const showDropdown = text.trim() !== "" && !isTooShort && (lookup || lookupError || addError || isAdding)
+
+    return (
         <div className="relative w-full max-w-2xl">
-            <form onSubmit={event => {
-                event.preventDefault()
-                searchCard(cardInput)
-            }}>
-                <label htmlFor="new-card-search" className="sr-only">Card name</label>
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-sm transition focus-within:border-fuchsia-700 focus-within:ring-4 focus-within:ring-fuchsia-700/10">
-                    <input
-                        id="new-card-search"
-                        type="text"
-                        name="card-search"
-                        autoComplete="off"
-                        autoCorrect="off"
-                        autoCapitalize="none"
-                        spellCheck={false}
-                        placeholder="Search cards by name or set..."
-                        className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-                        value={cardInput}
-                        onChange={event => {
-                            setCardInput(event.target.value)
-                            setAddFailureLabel(undefined)
-                            setFailureMessage(undefined)
-                        }}
-                    />
+            <form onSubmit={submit}>
+                <SearchInput
+                    id="new-card-search"
+                    label="Card to add"
+                    placeholder="Add a card: name, or set + number e.g. IKO-107 -f"
+                    value={text}
+                    onChange={changeText}
+                    isSearching={isSearching || isAdding}
+                >
                     <button
                         type="submit"
-                        disabled={isLoading}
-                        className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-fuchsia-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-800 active:translate-y-px"
+                        disabled={isAdding}
+                        className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-fuchsia-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-800 active:translate-y-px disabled:opacity-60"
                     >
                         <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                             <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                         </svg>
                         Add card
                     </button>
-                </div>
+                </SearchInput>
             </form>
 
-            {isLoading &&
-                <div role="status" className="absolute right-0 top-full z-50 mt-2 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-lg">
-                    <LoadingIndicator />
-                </div>
-            }
+            {lastAdded && text === "" && (
+                <p role="status" className="mt-1 text-right text-xs text-emerald-700">{lastAdded}</p>
+            )}
 
-            {!isLoading && scryfallCardMatches.length > 0 &&
-                <ul className="absolute right-0 top-full z-50 mt-2 max-h-70 w-full divide-y divide-slate-200 overflow-y-auto 
-                rounded-lg border border-slate-200 bg-white shadow-lg">
-                    {scryfallCardMatches.map(card => (
-                        <li key={card.scryfallId}>
-                            <button
-                                type="button"
-                                onClick={() => setParsedCardToSelectedSetCode(card)}
-                                className="flex items-center justify-between gap-4 px-4 py-3 text-sm hover:bg-slate-50"
-                            >
-                                <span className="flex min-w-0 flex-col">
-                                    <span className="truncate font-medium text-slate-900">{card.name}</span>
-                                    <span className="text-xs text-slate-600">{card.setCode} #{card.setNumber}</span>
-                                </span>
-                                <img
-                                    src={cardImageUrl(card.scryfallId, "small")}
-                                    alt={`${card.name} card`}
-                                    loading="lazy"
-                                    className="h-auto w-auto shrink-0 rounded"
-                                />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            }
-            {!isLoading && scryfallCardMatches.length === 0 &&
-                (failureMessage || (cardInput.trim() !== "" && notFoundLabel)) &&
-                <div className="absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-amber-200 bg-white shadow-lg shadow-slate-200/80">
-                    <div className="flex items-center gap-3 px-4 py-3">
-                        <div className="ml-3">
-                            <p className="text-sm font-semibold text-slate-900">{failureMessage ?? "Card not found"}</p>
-                            {(addFailureLabel || (!failureMessage && notFoundLabel)) &&
-                                <p className="truncate text-xs text-slate-600 ml-2">{addFailureLabel ?? notFoundLabel}</p>
-                            }
-                        </div>
-                    </div>
+            {showDropdown && (
+                // While a newer lookup runs, the old suggestions stay visible but dimmed and unclickable,
+                // so nothing flickers and you can't add a card for text you've already changed
+                <div className={`absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg ${isSearching ? "pointer-events-none opacity-60" : ""}`}>
+                    {addError || lookupError ? (
+                        <p role="alert" className="px-4 py-3 text-sm font-semibold text-rose-700">{addError ?? lookupError}</p>
+                    ) : isAdding ? (
+                        <p className="px-4 py-3 text-sm text-slate-600">Adding...</p>
+                    ) : lookup && (
+                        <SuggestionList
+                            lookup={lookup}
+                            onPickName={name => pickName(lookup.parsed, name)}
+                            onPickPrinting={printing => void addCard(lookup.parsed, printing)}
+                            onAddPreview={() => void addCard(lookup.parsed)}
+                        />
+                    )}
                 </div>
-            }
-
+            )}
         </div>
     )
+}
+
+interface SuggestionListProps {
+    lookup: Lookup
+    onPickName: (name: string) => void
+    onPickPrinting: (printing: ScryfallCardMatch) => void
+    onAddPreview: () => void
+}
+
+function SuggestionList({ lookup, onPickName, onPickPrinting, onAddPreview }: SuggestionListProps) {
+    const { parsed, suggestions } = lookup
+    const copies = parsed.quantity > 1 ? `${parsed.quantity} × ` : ""
+
+    switch (suggestions.kind) {
+        case "names":
+            return suggestions.names.length === 0
+                ? <Message text={`No cards called "${parsed.name}"`} />
+                : (
+                    <ul className="max-h-70 divide-y divide-slate-100 overflow-y-auto">
+                        {suggestions.names.map(name => (
+                            <li key={name}>
+                                <button type="button" onClick={() => onPickName(name)}
+                                    className="w-full px-4 py-2.5 text-left text-sm text-slate-900 hover:bg-slate-50">
+                                    {name}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )
+
+        case "printings":
+            return suggestions.printings.length === 0
+                ? <Message text={`No printings found for "${parsed.name ?? parsed.setNumber}"`} />
+                : (
+                    <ul className="max-h-70 divide-y divide-slate-200 overflow-y-auto">
+                        {suggestions.printings.map(card => (
+                            <li key={card.scryfallId}>
+                                <PrintingRow card={card} label={`${copies}${card.name}`} onClick={() => onPickPrinting(card)} />
+                            </li>
+                        ))}
+                    </ul>
+                )
+
+        case "preview":
+            return suggestions.printing
+                ? <PrintingRow card={suggestions.printing} label={`${copies}${suggestions.printing.name}`} hint="Enter to add" onClick={onAddPreview} />
+                : <Message text={`No card at ${parsed.setCode} #${parsed.setNumber}`} />
+
+        case "none":
+            return <Message text="Type a card name, or a set code and number" />
+    }
+}
+
+function PrintingRow({ card, label, hint, onClick }: { card: ScryfallCardMatch, label: string, hint?: string, onClick: () => void }) {
+    return (
+        <button type="button" onClick={onClick}
+            className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm hover:bg-slate-50">
+            <span className="flex min-w-0 flex-col">
+                <span className="truncate font-medium text-slate-900">{label}</span>
+                <span className="text-xs text-slate-600">
+                    {card.setCode} #{card.setNumber}
+                    {hint && <span className="ml-2 text-slate-400">· {hint}</span>}
+                </span>
+            </span>
+            <img src={cardImageUrl(card.scryfallId, "small")} alt="" loading="lazy" className="h-16 w-auto shrink-0 rounded" />
+        </button>
+    )
+}
+
+function Message({ text }: { text: string }) {
+    return <p className="px-4 py-3 text-sm text-slate-600">{text}</p>
 }

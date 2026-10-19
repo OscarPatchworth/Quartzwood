@@ -1,74 +1,58 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getApiCardsSearch, type CardSearchResponseDto, type CardSearchResultDto } from '../interfaces/generated.ts'
-import { getErrorMessage } from '../api/getErrorMessage'
+import { getApiCardsSearch, type CardSearchResultDto } from '../interfaces/generated.ts'
 import { useAuth } from '../auth/useAuth'
 import { cardImageUrl } from '../utils/cardImageUrl'
+import { useDebouncedSearch } from '../hooks/useDebouncedSearch'
+import { SearchInput } from '../components/misc/SearchInput'
 
 const MIN_LENGTH = 2
-// Wait this long after the last keystroke before searching, so typing "sol ring" is 1 request, not 8
-const DEBOUNCE_MS = 300
 
 // Searches every card the user owns and shows where each one is
 export default function SearchPage() {
     // The search lives in the URL (?q=...), so Back from a box returns to the same results
     const [searchParams, setSearchParams] = useSearchParams()
     const [text, setText] = useState(searchParams.get('q') ?? '')
-    const [response, setResponse] = useState<CardSearchResponseDto>()
-    const [isSearching, setIsSearching] = useState(false)
-    const [errorMessage, setErrorMessage] = useState<string>()
-    // Only the newest request may update the page: an older, slower one must not overwrite it
-    const latestRequest = useRef(0)
 
+    // Debounce, ignoring out-of-date answers and errors all live in the shared hook
+    const { result: response, resultQuery, errorMessage, isSearching, isTooShort } = useDebouncedSearch(
+        text,
+        async query => (await getApiCardsSearch({ query: { q: query } })).data,
+        { minLength: MIN_LENGTH },
+    )
     const query = text.trim()
-    const isTooShort = query.length < MIN_LENGTH
+
+    // Once a search has finished, put its text in the URL
+    useEffect(() => {
+        if (resultQuery) setSearchParams({ q: resultQuery }, { replace: true })
+    }, [resultQuery, setSearchParams])
 
     function changeText(nextText: string) {
         setText(nextText)
-        // Too short to search: drop ?q= so Back/refresh don't bring an old search back.
-        // Longer text is written to the URL by the debounced search below
+        // Too short to search: drop ?q= so Back/refresh don't bring an old search back
         if (nextText.trim().length < MIN_LENGTH && searchParams.has('q')) {
             setSearchParams({}, { replace: true })
         }
     }
 
-    useEffect(() => {
-        if (isTooShort) return
-
-        const timer = setTimeout(async () => {
-            const requestId = ++latestRequest.current
-            setSearchParams({ q: query }, { replace: true })
-            setIsSearching(true)
-            setErrorMessage(undefined)
-            try {
-                const res = await getApiCardsSearch({ query: { q: query } })
-                if (requestId === latestRequest.current) setResponse(res.data)
-            } catch (error) {
-                if (requestId === latestRequest.current) setErrorMessage(getErrorMessage(error, "Search failed."))
-            } finally {
-                if (requestId === latestRequest.current) setIsSearching(false)
-            }
-        }, DEBOUNCE_MS)
-
-        return () => clearTimeout(timer)
-    }, [query, isTooShort, setSearchParams])
-
-    const results = isTooShort ? [] : response?.results ?? []
+    const results = response?.results ?? []
     const copyCount = results.reduce((total, result) => total + Number(result.count), 0)
 
     return (
         <div className="p-8">
             <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
 
-            <input
-                type="search"
-                autoFocus
-                value={text}
-                onChange={event => changeText(event.target.value)}
-                placeholder="Card name or set code, e.g. sol ring or LEA"
-                aria-label="Search your collection"
-                className="w-full max-w-2xl rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20"
-            />
+            <div className="max-w-2xl">
+                <SearchInput
+                    id="collection-search"
+                    label="Search your collection"
+                    placeholder="Card name or set code, e.g. sol ring or LEA"
+                    value={text}
+                    onChange={changeText}
+                    isSearching={isSearching}
+                    autoFocus
+                />
+            </div>
 
             <div className="mt-2 min-h-5 text-sm text-slate-600" aria-live="polite">
                 {isTooShort ? (
@@ -78,7 +62,7 @@ export default function SearchPage() {
                 ) : isSearching && !response ? (
                     "Searching..."
                 ) : response && results.length === 0 ? (
-                    `No cards matching "${query}".`
+                    `No cards matching "${resultQuery}".`
                 ) : response && (
                     <>
                         {copyCount} {copyCount === 1 ? "card" : "cards"} in {results.length} {results.length === 1 ? "place" : "places"}
