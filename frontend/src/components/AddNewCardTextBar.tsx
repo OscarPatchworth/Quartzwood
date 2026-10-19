@@ -10,6 +10,7 @@ import {
     type ScryfallSearchResultDto as ScryfallCardMatch,
 } from "../interfaces/generated.ts"
 import { LoadingIndicator } from "./misc/LoadingIndicator"
+import { cardImageUrl } from "../utils/cardImageUrl"
 
 interface TextBarProps {
     // Every card must live in a box
@@ -177,7 +178,7 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
                                     <span className="text-xs text-slate-600">{card.setCode} #{card.setNumber}</span>
                                 </span>
                                 <img
-                                    src={`https://api.scryfall.com/cards/${encodeURIComponent(card.scryfallId)}?format=image&version=small`}
+                                    src={cardImageUrl(card.scryfallId, "small")}
                                     alt={`${card.name} card`}
                                     loading="lazy"
                                     className="h-auto w-auto shrink-0 rounded"

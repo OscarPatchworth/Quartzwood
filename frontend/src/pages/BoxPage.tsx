@@ -13,6 +13,7 @@ import { CardEditController } from '../components/Cards/CardEditController.tsx'
 import { LoadingIndicator } from '../components/misc/LoadingIndicator.tsx'
 import { AddNewCardTextBar } from '../components/AddNewCardTextBar.tsx'
 import EditableTitle from '../components/misc/EditableTitle.tsx'
+import { cardImageUrl } from '../utils/cardImageUrl'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -127,7 +128,7 @@ export default function BoxPage() {
                     {cards.map(c => (
                         <div key={`${c.setCode}-${c.setNumber}-${c.condition}-${c.foilType}`} className='relative flex flex-col items-center'>
                             <img
-                                src={`https://api.scryfall.com/cards/${c.scryfallId}?format=image&version=normal`}
+                                src={c.scryfallId ? cardImageUrl(c.scryfallId) : undefined}
                                 alt={c.name ?? ''}
                                 className="w-full rounded-lg shadow"
                                 onClick={() => selectCard(c)}

@@ -58,13 +58,34 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 // HttpContextAccessor lets the service read the current request's user
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAccessService, AccessService>();
-builder.Services.AddHttpClient<IScryfallService, ScryfallService>(client =>
+// Scryfall: a local copy of Scryfall's card data in scryfall.db (separate from user data),
+// refreshed in the background every Scryfall:RefreshDays. Lookups use it first, the live API as fallback
+builder.Services.Configure<ScryfallOptions>(builder.Configuration.GetSection("Scryfall"));
+builder.Services.AddDbContext<ScryfallDbContext>(options =>
+    options.UseSqlite("Data Source=scryfall.db"));
+builder.Services.AddHttpClient<ScryfallApiService>(client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 });
+builder.Services.AddHttpClient(ScryfallBulkImporter.HttpClientName, client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+    // The bulk file is ~80MB: allow more than the default 100 seconds
+    client.Timeout = TimeSpan.FromMinutes(15);
+});
+builder.Services.AddScoped<IScryfallService, LocalScryfallService>();
+builder.Services.AddHostedService<ScryfallBulkImporter>();
 
 var app = builder.Build();
+
+// scryfall.db is a re-downloadable cache, so it's created/upgraded automatically on startup
+// (quartzwood.db, which holds user data, is still only migrated by hand with dotnet ef database update)
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<ScryfallDbContext>().Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {

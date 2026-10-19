@@ -5,34 +5,21 @@ using System.Linq;
 
 namespace Quartzwood.Server.Services.Scryfall;
 
-public record ScryfallCard(
-    string Id,
-    string Name,
-    string Set,
-    string CollectorNumber
-);
-
-public record ScryfallYearName(
-    int Year,
-    string Name
-);
-
-public interface IScryfallService
-{
-    Task<ScryfallCard?> GetCardAsync(string setCode, string setNumber);
-    Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year);
-    Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, bool isList, string? cardName);
-    Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber);
-}
-
-public class ScryfallService : IScryfallService
+// Talks to the live Scryfall API. Used by LocalScryfallService as the fallback
+// when scryfall.db doesn't have an answer (not imported yet, or a card newer than the last import)
+public class ScryfallApiService : IScryfallService
 {
     private readonly HttpClient _http;
 
-    public ScryfallService(HttpClient http)
+    public ScryfallApiService(HttpClient http)
     {
         _http = http;
     }
+
+    // No request needed: this API URL redirects to the image (it does count as an API call when loaded)
+    public Task<string?> GetImageUrlAsync(string scryfallId, string size)
+        => Task.FromResult<string?>(
+            $"https://api.scryfall.com/cards/{Uri.EscapeDataString(scryfallId)}?format=image&version={size}");
 
 public async Task<ScryfallCard?> GetCardAsync(string setCode, string setNumber)
 {
@@ -85,42 +72,7 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
 
 public async Task<string?> GetScryfallId(string setCode, string setNumber, string? stampType, bool isList, string? cardName)
     {
-
-        var scryfallSetCode = setCode;
-        var scryfallSetNumber = setNumber;
-
-        // Scryfall alters setCodes of:
-        // 1| Stamped cards: planeswalker & pre-release
-        // 2| List & Promo cards i.e. Japan Standard Cup: PRM => PJSC
-
-        // Using If/Else prevents a stamped List card from being processed
-        if(stampType != nameof(StampType.None))
-        {
-            switch (stampType){
-                case nameof(StampType.None):
-                    break;
-                case nameof(StampType.Promo):
-                    scryfallSetCode = "p" + scryfallSetCode;
-                    scryfallSetNumber = scryfallSetNumber + "p";
-                    break;
-                case nameof(StampType.Prerelease):
-                    scryfallSetCode = "p" + scryfallSetCode;
-                    scryfallSetNumber = scryfallSetNumber + "s";
-                    break;
-                default:    // If null
-                    break;                      
-            }   
-        }else if (isList && scryfallSetCode != "PLST")
-        {
-                scryfallSetNumber = scryfallSetCode + "-" + scryfallSetNumber;
-                scryfallSetCode = "PLST";
-        }
-        else if (!isList && scryfallSetCode == "PLST")
-        {
-            var parseSetId = scryfallSetNumber.Split("-");
-            scryfallSetCode = parseSetId[0];
-            scryfallSetNumber = parseSetId[1];
-        }
+        var (scryfallSetCode, scryfallSetNumber) = ScryfallPrintingKey.Resolve(setCode, setNumber, stampType, isList);
 
         var responce = await GetCardAsync(scryfallSetCode, scryfallSetNumber);
         return responce?.Id;

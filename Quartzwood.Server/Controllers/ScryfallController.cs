@@ -55,4 +55,21 @@ public class ScryfallController : ControllerBase
             c.Id
         )));
     }
+
+    // A card's image: redirects to Scryfall's image CDN (cards.scryfall.io) using the URL from the local data,
+    // so showing images doesn't use Scryfall API calls. Later this can serve images cached on disk instead
+    [HttpGet("cards/{id}/image")]
+    [ProducesResponseType(302)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    // Lets the browser reuse the redirect for a day instead of asking again on every page load
+    [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Client)]
+    public async Task<IActionResult> GetImage(string id, [FromQuery] string size = "normal")
+    {
+        if (!Guid.TryParse(id, out _)) return BadRequest("Invalid card id.");
+        if (size is not ("small" or "normal")) return BadRequest("Size must be small or normal.");
+
+        var url = await _scryfall.GetImageUrlAsync(id, size);
+        return url is null ? NotFound() : Redirect(url);
+    }
 }

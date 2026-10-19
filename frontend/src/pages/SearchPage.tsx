@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getApiCardsSearch, type CardSearchResponseDto, type CardSearchResultDto } from '../interfaces/generated.ts'
 import { getErrorMessage } from '../api/getErrorMessage'
 import { useAuth } from '../auth/useAuth'
+import { cardImageUrl } from '../utils/cardImageUrl'
 
 const MIN_LENGTH = 2
 // Wait this long after the last keystroke before searching, so typing "sol ring" is 1 request, not 8
@@ -105,7 +106,7 @@ function SearchResultRow({ result }: { result: CardSearchResultDto }) {
             <Link to={`/box/${result.boxId}`} className="relative shrink-0" aria-label={`Open ${result.boxName}`}>
                 {result.scryfallId ? (
                     <img
-                        src={`https://api.scryfall.com/cards/${result.scryfallId}?format=image&version=small`}
+                        src={cardImageUrl(result.scryfallId, "small")}
                         alt=""
                         loading="lazy"
                         className="h-16 w-auto rounded"
