@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import {
-    deleteApiCardsById,
     getApiCardsById,
     postApiCards,
+    postApiCardsBulkDelete,
     putApiCardsById,
     type AddCardDto,
     type CardDto,
@@ -101,7 +101,8 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
         setIsSaving(true)
         setActionError(undefined)
         try {
-            await Promise.all(cardIds.map(cardId => deleteApiCardsById({ path: { id: cardId } })))
+            // One request for all of them: either every selected copy is deleted or none is
+            await postApiCardsBulkDelete({ body: { cardIds } })
         } catch {
             setActionError("Could not delete the selected cards. Please try again.")
             setIsSaving(false)
