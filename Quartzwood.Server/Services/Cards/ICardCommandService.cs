@@ -8,4 +8,9 @@ public interface ICardCommandService
     Task<List<CardDto>?> AddAsync(AddCardDto dto);
     Task<CardDto?> UpdateAsync(Guid id, UpdateCardDto dto);
     Task<bool> DeleteAsync(Guid id);
+
+    // Mass actions on cards the caller has already checked access to; each returns how many changed
+    Task<int> UpdateManyAsync(IReadOnlyCollection<Guid> ids, BulkUpdateCardsDto dto);
+    Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId);
+    Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids);
 }

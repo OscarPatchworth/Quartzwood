@@ -12,4 +12,18 @@ public interface ICardRepository
     Task AddRangeAsync(IEnumerable<CardInstance> cards);
     Task<CardInstance> UpdateAsync(CardInstance card);
     Task DeleteAsync(Guid id);
+
+    // Mass actions: each is ONE SQL statement for all the cards, returning how many rows changed
+    Task<int> UpdateManyAsync(IReadOnlyCollection<Guid> ids, CardChanges changes);
+    Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId);
+    Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids);
 }
+
+// The fields a mass edit may set; null = leave as is
+public record CardChanges(
+    Condition? Condition,
+    FoilType? FoilType,
+    string? Language,
+    bool? IsProxy,
+    bool? IsSigned
+);

@@ -101,3 +101,29 @@ public record CardSearchResponseDto(
     // true when more cards matched than were returned: the user should narrow the search
     bool HasMore
 );
+// Mass actions: one change applied to many cards in one request (all of them, or none if any id isn't yours)
+
+public record BulkCardIdsDto(
+    List<Guid> CardIds
+);
+
+// Only fields that don't change WHICH printing a card is (set, number, name, stamp and List are left out).
+// null = leave that field as it is on every card
+public record BulkUpdateCardsDto(
+    List<Guid> CardIds,
+    string? Condition,
+    string? FoilType,
+    string? Language,
+    bool? IsProxy,
+    bool? IsSigned
+);
+
+public record BulkMoveCardsDto(
+    List<Guid> CardIds,
+    Guid BoxId
+);
+
+// How many cards were changed
+public record BulkResultDto(
+    int Count
+);

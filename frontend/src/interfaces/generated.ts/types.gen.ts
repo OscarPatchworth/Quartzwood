@@ -56,6 +56,15 @@ export type BoxDto = {
     cardCount: number | string;
 };
 
+export type BoxSearchResultDto = {
+    id: string;
+    name: string;
+    entityId: string;
+    entityName: string;
+    isOwned: boolean;
+    groupPath: Array<LocationStepDto>;
+};
+
 export type BreadcrumbDto = {
     entityName: null | string;
     entityId: null | string;
@@ -66,6 +75,28 @@ export type BreadcrumbDto = {
     parentGroupId: null | string;
     boxName: null | string;
     boxId: null | string;
+};
+
+export type BulkCardIdsDto = {
+    cardIds: Array<string>;
+};
+
+export type BulkMoveCardsDto = {
+    cardIds: Array<string>;
+    boxId: string;
+};
+
+export type BulkResultDto = {
+    count: number | string;
+};
+
+export type BulkUpdateCardsDto = {
+    cardIds: Array<string>;
+    condition: null | string;
+    foilType: null | string;
+    language: null | string;
+    isProxy: null | boolean;
+    isSigned: null | boolean;
 };
 
 export type CardDto = {
@@ -582,6 +613,24 @@ export type PostApiAccountLogoutResponses = {
 
 export type PostApiAccountLogoutResponse = PostApiAccountLogoutResponses[keyof PostApiAccountLogoutResponses];
 
+export type GetApiBoxesSearchData = {
+    body?: never;
+    path?: never;
+    query?: {
+        q?: string;
+    };
+    url: '/api/boxes/search';
+};
+
+export type GetApiBoxesSearchResponses = {
+    /**
+     * OK
+     */
+    200: Array<BoxSearchResultDto>;
+};
+
+export type GetApiBoxesSearchResponse = GetApiBoxesSearchResponses[keyof GetApiBoxesSearchResponses];
+
 export type DeleteApiBoxesByIdData = {
     body?: never;
     path: {
@@ -936,6 +985,93 @@ export type PostApiCardsResponses = {
 };
 
 export type PostApiCardsResponse = PostApiCardsResponses[keyof PostApiCardsResponses];
+
+export type PostApiCardsBulkUpdateData = {
+    body: BulkUpdateCardsDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/bulk/update';
+};
+
+export type PostApiCardsBulkUpdateErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiCardsBulkUpdateError = PostApiCardsBulkUpdateErrors[keyof PostApiCardsBulkUpdateErrors];
+
+export type PostApiCardsBulkUpdateResponses = {
+    /**
+     * OK
+     */
+    200: BulkResultDto;
+};
+
+export type PostApiCardsBulkUpdateResponse = PostApiCardsBulkUpdateResponses[keyof PostApiCardsBulkUpdateResponses];
+
+export type PostApiCardsBulkMoveData = {
+    body: BulkMoveCardsDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/bulk/move';
+};
+
+export type PostApiCardsBulkMoveErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiCardsBulkMoveError = PostApiCardsBulkMoveErrors[keyof PostApiCardsBulkMoveErrors];
+
+export type PostApiCardsBulkMoveResponses = {
+    /**
+     * OK
+     */
+    200: BulkResultDto;
+};
+
+export type PostApiCardsBulkMoveResponse = PostApiCardsBulkMoveResponses[keyof PostApiCardsBulkMoveResponses];
+
+export type PostApiCardsBulkDeleteData = {
+    body: BulkCardIdsDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/bulk/delete';
+};
+
+export type PostApiCardsBulkDeleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiCardsBulkDeleteError = PostApiCardsBulkDeleteErrors[keyof PostApiCardsBulkDeleteErrors];
+
+export type PostApiCardsBulkDeleteResponses = {
+    /**
+     * OK
+     */
+    200: BulkResultDto;
+};
+
+export type PostApiCardsBulkDeleteResponse = PostApiCardsBulkDeleteResponses[keyof PostApiCardsBulkDeleteResponses];
 
 export type GetApiEntitiesData = {
     body?: never;

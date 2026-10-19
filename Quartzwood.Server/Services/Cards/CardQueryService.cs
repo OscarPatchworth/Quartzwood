@@ -1,6 +1,7 @@
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
+using Quartzwood.Server.Services.Groups;
 
 namespace Quartzwood.Server.Services.Cards;
 
@@ -27,27 +28,8 @@ public class CardQueryService : ICardQueryService
         if (cards.Count == 0) return new CardSearchResponseDto([], false);
 
         // One query for every group in the user's Entities (usually tens of rows),
-        // then each location path is built in memory by following ParentGroupId up
-        var groupsById = (await _groups.GetTreeByEntitiesAsync(entityIds)).ToDictionary(g => g.Id);
-        var pathCache = new Dictionary<Guid, List<LocationStepDto>>();
-
-        List<LocationStepDto> PathTo(Guid groupId)
-        {
-            if (pathCache.TryGetValue(groupId, out var cached)) return cached;
-
-            var path = new List<LocationStepDto>();
-            Guid? currentId = groupId;
-            // The step limit is a safety net: group moves already reject loops
-            while (currentId is not null && groupsById.TryGetValue(currentId.Value, out var group)
-                   && path.Count <= groupsById.Count)
-            {
-                path.Insert(0, new LocationStepDto(group.Id, group.Name));
-                currentId = group.ParentGroupId;
-            }
-
-            pathCache[groupId] = path;
-            return path;
-        }
+        // then each location path is built in memory
+        var paths = new GroupPaths(await _groups.GetTreeByEntitiesAsync(entityIds));
 
         // Same grouping as the box page, plus the box: identical copies in one box = one row
         var results = cards
@@ -77,7 +59,7 @@ public class CardQueryService : ICardQueryService
                     g.Select(c => c.Id.ToString()).ToList(),
                     box.Id,
                     box.Name,
-                    PathTo(box.GroupId)
+                    paths.PathTo(box.GroupId)
                 );
             })
             .OrderBy(r => r.Name)

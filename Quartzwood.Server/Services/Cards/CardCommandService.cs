@@ -154,6 +154,41 @@ public class CardCommandService : ICardCommandService
         return true;
     }
 
+    public async Task<int> UpdateManyAsync(IReadOnlyCollection<Guid> ids, BulkUpdateCardsDto dto)
+    {
+        // Unlike the single-card update, a bad value is an error rather than silently skipped:
+        // with many cards at once, a typo shouldn't look like it worked
+        Condition? condition = null;
+        if (dto.Condition != null)
+            condition = Enum.TryParse<Condition>(dto.Condition, true, out var parsed)
+                ? parsed : throw new ArgumentException($"Invalid condition: {dto.Condition}");
+
+        FoilType? foilType = null;
+        if (dto.FoilType != null)
+            foilType = Enum.TryParse<FoilType>(dto.FoilType, true, out var parsed)
+                ? parsed : throw new ArgumentException($"Invalid foil type: {dto.FoilType}");
+
+        var language = dto.Language?.Trim();
+        if (language == "") throw new ArgumentException("Language can't be empty.");
+
+        var changes = new CardChanges(condition, foilType, language, dto.IsProxy, dto.IsSigned);
+        if (changes == new CardChanges(null, null, null, null, null))
+            throw new ArgumentException("Nothing to change.");
+
+        return await _cards.UpdateManyAsync(ids, changes);
+    }
+
+    public async Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId)
+    {
+        if (!await _boxes.ExistsAsync(boxId))
+            throw new ArgumentException("Box not found.");
+
+        return await _cards.MoveManyAsync(ids, boxId);
+    }
+
+    public Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids)
+        => _cards.DeleteManyAsync(ids);
+
     private static CardDto ToDto(CardInstance c) => new(
         c.Id,
         c.Name,

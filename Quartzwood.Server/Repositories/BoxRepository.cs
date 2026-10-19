@@ -29,6 +29,17 @@ public class BoxRepository : IBoxRepository
             .Include(b => b.Cards)
             .ToListAsync();
 
+    public Task<bool> ExistsAsync(Guid id)
+        => _context.Boxes.AnyAsync(b => b.Id == id);
+
+    public Task<List<Box>> GetByEntitiesAsync(IReadOnlyCollection<Guid> entityIds)
+        => _context.Boxes
+            .AsNoTracking()
+            .Include(b => b.Group)
+            .ThenInclude(g => g.Entity)
+            .Where(b => entityIds.Contains(b.Group.EntityId))
+            .ToListAsync();
+
     public async Task<Box> AddAsync(Box box)
     {
         _context.Boxes.Add(box);

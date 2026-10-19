@@ -53,6 +53,18 @@ public class AccessService : IAccessService
                 && _context.EntityMembers.Any(m => m.EntityId == c.Box.Group.EntityId && m.UserId == userId));
     }
 
+    // Counts how many of the ids are accessible cards: if that's all of them, every one is yours.
+    // One query however many ids: WHERE Id IN (@ids1, @ids2, ...). SQLite allows up to 32766 parameters,
+    // well above the 5000-card cap on mass actions
+    public async Task<bool> CanAccessCardsAsync(IReadOnlyCollection<Guid> cardIds)
+    {
+        var userId = UserId;
+        var accessible = await _context.Cards
+            .CountAsync(c => cardIds.Contains(c.Id)
+                && _context.EntityMembers.Any(m => m.EntityId == c.Box.Group.EntityId && m.UserId == userId));
+        return accessible == cardIds.Count;
+    }
+
     public Task<bool> IsEntityOwnerAsync(Guid entityId)
     {
         var userId = UserId;
@@ -67,5 +79,13 @@ public class AccessService : IAccessService
             .Where(m => m.UserId == userId)
             .Select(m => m.EntityId)
             .ToListAsync();
+    }
+
+    public Task<Dictionary<Guid, EntityRole>> GetEntityRolesAsync()
+    {
+        var userId = UserId;
+        return _context.EntityMembers
+            .Where(m => m.UserId == userId)
+            .ToDictionaryAsync(m => m.EntityId, m => m.Role);
     }
 }

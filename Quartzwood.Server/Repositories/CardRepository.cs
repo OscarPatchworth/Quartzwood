@@ -65,6 +65,33 @@ public class CardRepository : ICardRepository
         return card;
     }
 
+    // ExecuteUpdate/ExecuteDelete send the SQL straight to the database: no loading cards into memory first.
+    // Only the fields that were given go in the SET list:
+    //   UPDATE Cards SET Condition = @c, FoilType = @f WHERE Id IN (...)
+    public Task<int> UpdateManyAsync(IReadOnlyCollection<Guid> ids, CardChanges changes)
+        => _context.Cards
+            .Where(c => ids.Contains(c.Id))
+            .ExecuteUpdateAsync(set =>
+            {
+                if (changes.Condition is { } condition) set.SetProperty(c => c.Condition, condition);
+                if (changes.FoilType is { } foilType) set.SetProperty(c => c.FoilType, foilType);
+                if (changes.Language is { } language) set.SetProperty(c => c.Language, language);
+                if (changes.IsProxy is { } isProxy) set.SetProperty(c => c.IsProxy, isProxy);
+                if (changes.IsSigned is { } isSigned) set.SetProperty(c => c.IsSigned, isSigned);
+            });
+
+    // A move is just pointing the cards at another box: the same rows keep their ids, tags and notes
+    public Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId)
+        => _context.Cards
+            .Where(c => ids.Contains(c.Id))
+            .ExecuteUpdateAsync(set => set.SetProperty(c => c.BoxId, boxId));
+
+    // The cards' CardTags rows go too: the database deletes them itself (ON DELETE CASCADE)
+    public Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids)
+        => _context.Cards
+            .Where(c => ids.Contains(c.Id))
+            .ExecuteDeleteAsync();
+
     public async Task DeleteAsync(Guid id)
     {
         var card = await GetByIdAsync(id);

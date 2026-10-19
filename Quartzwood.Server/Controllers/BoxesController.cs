@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
+using Quartzwood.Server.Models;
 using Quartzwood.Server.Services.Access;
 using Quartzwood.Server.Services.Boxs;
 
@@ -20,6 +21,18 @@ public class BoxesController : ControllerBase
         _query = query;
         _command = command;
         _access = access;
+    }
+
+    // Boxes you can put cards into (for "move to..."): every Entity you're a member of, except ones
+    // you can only view. Search by box or group name; no text = all boxes
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(List<BoxSearchResultDto>), 200)]
+    public async Task<IActionResult> Search([FromQuery] string? q)
+    {
+        var editable = (await _access.GetEntityRolesAsync())
+            .Where(entry => entry.Value != EntityRole.Viewer)
+            .ToDictionary();
+        return Ok(await _query.SearchAsync(editable, q?.Trim() ?? string.Empty));
     }
 
     // Boxes in Entities you're not a member of are reported as 404, same as ones that don't exist

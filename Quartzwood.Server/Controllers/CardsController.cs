@@ -107,6 +107,56 @@ public class CardsController : ControllerBase
         }
     }
 
+    // ---- Mass actions ----
+    // All or nothing: if ANY id isn't one of your cards, nothing changes (404, like a single unknown card).
+    // POST rather than PUT/DELETE: these act on a list sent in the body, not on one URL's resource
+
+    // Most cards one mass action may touch: a whole large box at once, but not an accidental runaway list
+    private const int MaxBulkCards = 5000;
+
+    [HttpPost("bulk/update")]
+    [ProducesResponseType(typeof(BulkResultDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public Task<IActionResult> BulkUpdate(BulkUpdateCardsDto dto)
+        => RunBulkAsync(dto.CardIds, ids => _command.UpdateManyAsync(ids, dto));
+
+    [HttpPost("bulk/move")]
+    [ProducesResponseType(typeof(BulkResultDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> BulkMove(BulkMoveCardsDto dto)
+    {
+        if (!await _access.CanAccessBoxAsync(dto.BoxId)) return BadRequest("Box not found.");
+        return await RunBulkAsync(dto.CardIds, ids => _command.MoveManyAsync(ids, dto.BoxId));
+    }
+
+    [HttpPost("bulk/delete")]
+    [ProducesResponseType(typeof(BulkResultDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public Task<IActionResult> BulkDelete(BulkCardIdsDto dto)
+        => RunBulkAsync(dto.CardIds, _command.DeleteManyAsync);
+
+    // The checks every mass action shares, then the action itself
+    private async Task<IActionResult> RunBulkAsync(List<Guid> cardIds, Func<IReadOnlyCollection<Guid>, Task<int>> action)
+    {
+        // Distinct: the same card sent twice must still count once in the access check
+        var ids = cardIds.Distinct().ToList();
+        if (ids.Count == 0) return BadRequest("No cards selected.");
+        if (ids.Count > MaxBulkCards) return BadRequest($"At most {MaxBulkCards} cards at once.");
+        if (!await _access.CanAccessCardsAsync(ids)) return NotFound();
+
+        try
+        {
+            return Ok(new BulkResultDto(await action(ids)));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpDelete("{id}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
