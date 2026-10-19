@@ -15,6 +15,7 @@ import { LoadingIndicator } from '../components/misc/LoadingIndicator'
 import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupController'
 import GroupBoxListCard from '../components/BoxGroup/GroupBoxListCard'
 import EditableTitle from '../components/misc/EditableTitle'
+import { ExportMenu } from '../components/ImportExport/ExportMenu'
 
 interface GroupPageProps {
     // Set by CollectionPage to show the root group; otherwise the id comes from /group/:id
@@ -146,11 +147,15 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                         onStartEdit={() => setIsEditingName(true)}
                     />
                 )}
-                <AddBoxGroupController
-                    groupId={id}
-                    onBoxCreated={handleBoxCreated}
-                    onGroupCreated={handleGroupCreated}
-                />
+                <div className="flex items-center gap-2">
+                    {/* On the collection page this exports the whole collection */}
+                    {id && <ExportMenu kind="group" id={id} />}
+                    <AddBoxGroupController
+                        groupId={id}
+                        onBoxCreated={handleBoxCreated}
+                        onGroupCreated={handleGroupCreated}
+                    />
+                </div>
             </div>
 
             {deleteError && <p role="alert" className="mb-4 text-sm text-rose-700">{deleteError}</p>}

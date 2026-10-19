@@ -14,6 +14,8 @@ import { LoadingIndicator } from '../components/misc/LoadingIndicator.tsx'
 import { AddNewCardTextBar } from '../components/AddNewCardTextBar.tsx'
 import EditableTitle from '../components/misc/EditableTitle.tsx'
 import { cardImageUrl } from '../utils/cardImageUrl'
+import { ImportDialog } from '../components/ImportExport/ImportDialog'
+import { ExportMenu } from '../components/ImportExport/ExportMenu'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -111,12 +113,16 @@ export default function BoxPage() {
                     onStartEdit={() => setIsEditingName(true)}
                     className="mb-6 mt-4"
                 />
-                <div className='flex justify-end pt-[-10] pb-5'>
+                <div className='flex justify-end items-start gap-2 pt-[-10] pb-5'>
                     {box && (
-                        <AddNewCardTextBar
-                            boxId={box.id}
-                            onSuccess={refreshCardsAfterMutation}
-                        />
+                        <>
+                            <AddNewCardTextBar
+                                boxId={box.id}
+                                onSuccess={refreshCardsAfterMutation}
+                            />
+                            <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
+                            <ExportMenu kind="box" id={box.id} />
+                        </>
                     )}
                 </div>
 

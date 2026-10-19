@@ -16,6 +16,11 @@ public class ScryfallApiService : IScryfallService
         _http = http;
     }
 
+    // Not used for bulk lookups: one request per id would be slow and heavy on the API.
+    // Import/export fall back to the card's own set/number when the local data doesn't have an id
+    public Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds)
+        => Task.FromResult(new Dictionary<string, ScryfallCard>());
+
     // No request needed: this API URL redirects to the image (it does count as an API call when loaded)
     public Task<string?> GetImageUrlAsync(string scryfallId, string size)
         => Task.FromResult<string?>(

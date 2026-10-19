@@ -21,4 +21,6 @@ public interface IScryfallService
     Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber);
     // Where the card's image lives: size is "small" or "normal"
     Task<string?> GetImageUrlAsync(string scryfallId, string size);
+    // Many printings at once by Scryfall id (import/export); ids it can't find are simply left out
+    Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds);
 }

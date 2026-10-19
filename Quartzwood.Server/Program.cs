@@ -9,6 +9,7 @@ using Quartzwood.Server.Services.Boxs;
 using Quartzwood.Server.Services.Cards;
 using Quartzwood.Server.Services.Entities;
 using Quartzwood.Server.Services.Groups;
+using Quartzwood.Server.Services.ImportExport;
 using Quartzwood.Server.Services.Scryfall;
 
 
@@ -76,6 +77,9 @@ builder.Services.AddHttpClient(ScryfallBulkImporter.HttpClientName, client =>
     client.Timeout = TimeSpan.FromMinutes(15);
 });
 builder.Services.AddScoped<IScryfallService, LocalScryfallService>();
+
+// Import/export in other apps' formats (plain text list, Moxfield/Deckbox CSV, ManaBox CSV)
+builder.Services.AddScoped<CollectionTransferService>();
 builder.Services.AddHostedService<ScryfallBulkImporter>();
 
 var app = builder.Build();

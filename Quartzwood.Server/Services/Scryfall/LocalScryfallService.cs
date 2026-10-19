@@ -87,6 +87,18 @@ public class LocalScryfallService : IScryfallService
         return local ?? await _api.GetImageUrlAsync(scryfallId, size);
     }
 
+    // Local only: no API fallback, callers (import/export) fall back to the card's own set/number instead
+    public async Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds)
+    {
+        var ids = scryfallIds.Distinct().ToList();
+        if (ids.Count == 0) return [];
+
+        return await _db.Printings.AsNoTracking()
+            .Where(p => ids.Contains(p.Id))
+            .Select(p => new ScryfallCard(p.Id, p.Name, p.SetCode, p.CollectorNumber))
+            .ToDictionaryAsync(c => c.Id);
+    }
+
     // year=YYYY: released during that calendar year. Dates are stored as ISO text, so this is a range check
     private static IQueryable<ScryfallPrinting> InYear(IQueryable<ScryfallPrinting> query, int? year)
     {

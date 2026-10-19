@@ -40,6 +40,7 @@ export type AddCardDto = {
     notes?: null | string;
     acquiredDate?: null | string;
     purchasePrice?: null | number | string;
+    quantity?: number | string;
 };
 
 export type AddGroupDto = {
@@ -114,6 +115,20 @@ export type EntityDto = {
     groupNames: Array<string>;
 };
 
+export type EntityTagHeaderValue = {
+    tag?: StringSegment;
+    isWeak?: boolean;
+};
+
+export type FileContentResult = {
+    fileContents?: string;
+    contentType?: null | string;
+    fileDownloadName?: null | string;
+    lastModified?: null | string;
+    entityTag?: null | EntityTagHeaderValue;
+    enableRangeProcessing?: boolean;
+};
+
 export type ForgotPasswordRequest = {
     email: string;
 };
@@ -149,6 +164,23 @@ export type HttpValidationProblemDetails = {
     errors?: {
         [key: string]: Array<string>;
     };
+};
+
+export type ImportFailureDto = {
+    line: number | string;
+    text: string;
+    reason: string;
+};
+
+export type ImportRequestDto = {
+    content: string;
+};
+
+export type ImportResultDto = {
+    format: string;
+    cardsAdded: number | string;
+    linesAdded: number | string;
+    failed: Array<ImportFailureDto>;
 };
 
 export type InfoRequest = {
@@ -207,6 +239,19 @@ export type ScryfallSearchResultDto = {
     setCode: string;
     setNumber: string;
     scryfallId: string;
+};
+
+export type StringSegment = {
+    buffer?: null | string;
+    offset?: number | string;
+    length?: number | string;
+    value?: null | string;
+    hasValue?: boolean;
+};
+
+export type TransferFormatDto = {
+    key: string;
+    displayName: string;
 };
 
 export type TwoFactorRequest = {
@@ -887,7 +932,7 @@ export type PostApiCardsResponses = {
     /**
      * Created
      */
-    201: CardDto;
+    201: Array<CardDto>;
 };
 
 export type PostApiCardsResponse = PostApiCardsResponses[keyof PostApiCardsResponses];
@@ -1134,6 +1179,119 @@ export type PostApiGroupsResponses = {
 
 export type PostApiGroupsResponse = PostApiGroupsResponses[keyof PostApiGroupsResponses];
 
+export type GetApiExportFormatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/export/formats';
+};
+
+export type GetApiExportFormatsResponses = {
+    /**
+     * OK
+     */
+    200: Array<TransferFormatDto>;
+};
+
+export type GetApiExportFormatsResponse = GetApiExportFormatsResponses[keyof GetApiExportFormatsResponses];
+
+export type GetApiExportGroupsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        format?: string;
+    };
+    url: '/api/export/groups/{id}';
+};
+
+export type GetApiExportGroupsByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiExportGroupsByIdError = GetApiExportGroupsByIdErrors[keyof GetApiExportGroupsByIdErrors];
+
+export type GetApiExportGroupsByIdResponses = {
+    /**
+     * OK
+     */
+    200: FileContentResult;
+};
+
+export type GetApiExportGroupsByIdResponse = GetApiExportGroupsByIdResponses[keyof GetApiExportGroupsByIdResponses];
+
+export type GetApiExportBoxesByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        format?: string;
+    };
+    url: '/api/export/boxes/{id}';
+};
+
+export type GetApiExportBoxesByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiExportBoxesByIdError = GetApiExportBoxesByIdErrors[keyof GetApiExportBoxesByIdErrors];
+
+export type GetApiExportBoxesByIdResponses = {
+    /**
+     * OK
+     */
+    200: FileContentResult;
+};
+
+export type GetApiExportBoxesByIdResponse = GetApiExportBoxesByIdResponses[keyof GetApiExportBoxesByIdResponses];
+
+export type PostApiImportBoxesByIdData = {
+    body: ImportRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/import/boxes/{id}';
+};
+
+export type PostApiImportBoxesByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiImportBoxesByIdError = PostApiImportBoxesByIdErrors[keyof PostApiImportBoxesByIdErrors];
+
+export type PostApiImportBoxesByIdResponses = {
+    /**
+     * OK
+     */
+    200: ImportResultDto;
+};
+
+export type PostApiImportBoxesByIdResponse = PostApiImportBoxesByIdResponses[keyof PostApiImportBoxesByIdResponses];
+
 export type GetApiScryfallSearchData = {
     body?: never;
     path?: never;
@@ -1190,3 +1348,27 @@ export type GetApiScryfallSearchPromoResponses = {
 };
 
 export type GetApiScryfallSearchPromoResponse = GetApiScryfallSearchPromoResponses[keyof GetApiScryfallSearchPromoResponses];
+
+export type GetApiScryfallCardsByIdImageData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        size?: string;
+    };
+    url: '/api/scryfall/cards/{id}/image';
+};
+
+export type GetApiScryfallCardsByIdImageErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiScryfallCardsByIdImageError = GetApiScryfallCardsByIdImageErrors[keyof GetApiScryfallCardsByIdImageErrors];
