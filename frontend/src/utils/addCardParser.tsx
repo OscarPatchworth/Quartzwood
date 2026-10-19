@@ -1,16 +1,31 @@
 
 import type { IParsedCardInput } from "../interfaces/IParsedCardInput"
 
+// A set code: exactly 3 letters/digits with at least one letter (IKO, M21, 2XM), so a plain number isn't one
+const SET = String.raw`(?=[A-Z0-9]*[A-Z])[A-Z0-9]{3}`
+
 const patterns = {
     quantity:     /^(\d{1,3})$/,
-    dashedSet:    /^(?:(\d{1,3})-([A-Z0-9]{2,5})|([A-Z0-9]{2,5})-(\d{1,3}))$/i,
-    compactSet:   /^(?:(\d{1,3})([A-Z0-9]{2,5})|([A-Z0-9]{2,5})(\d{1,3}))$/i,
+    // Each set pattern: number then set (107-IKO) in groups 1+2, or set then number (IKO-107) in groups 3+4
+    dashedSet:    new RegExp(String.raw`^(?:(\d{1,3})-(${SET})|(${SET})-(\d{1,3}))$`, 'i'),
+    // \. = a literal dot (a bare . in a regex matches any character)
+    dotSet:       new RegExp(String.raw`^(?:(\d{1,3})\.(${SET})|(${SET})\.(\d{1,3}))$`, 'i'),
+    // Set codes are always 3 characters, so the split is fixed: IKO107 = IKO #107, M2110 = M21 #10
+    compactSet:   new RegExp(String.raw`^(?:(\d{1,3})(${SET})|(${SET})(\d{1,3}))$`, 'i'),
     year:         /^\d{4}$/,
     flagFoil:     /^-f$/i,
     flagProxy:    /^-p$/i,
     flagSigned:   /^-s$/i,
     flagList:     /^-l$/i,
     alterArtist:  /^-a$/i,
+}
+
+// Checked in this order; all three share the same group layout
+const setPatterns = [patterns.dashedSet, patterns.dotSet, patterns.compactSet]
+
+// Scryfall collector numbers have no padding: IKO-001 is IKO #1 (keeps a lone "0")
+function stripLeadingZeros(setNumber: string): string {
+    return setNumber.replace(/^0+(?=\d)/, '')
 }
 
 export function parseCardInput(input: string): IParsedCardInput {
@@ -37,25 +52,17 @@ export function parseCardInput(input: string): IParsedCardInput {
             i++; continue
         }
 
-        // dashed set code e.g. IKO-107 or 107-IKO
-        const dashedMatch = token.match(patterns.dashedSet)
-        if (dashedMatch) {
-            result.setNumber = (dashedMatch[1] ?? dashedMatch[4])
-            result.setCode = (dashedMatch[2] ?? dashedMatch[3])?.toUpperCase()
-            i++; continue
-        }
-
-        // compact set code e.g. 107IKO or IKO107
-        const compactMatch = token.match(patterns.compactSet)
-        if (compactMatch) {
-            result.setNumber = (compactMatch[1] ?? compactMatch[4])
-            result.setCode = (compactMatch[2] ?? compactMatch[3])?.toUpperCase()
-            i++; continue
-        }
-
-        // year
+        // year, before set codes so it can never be read as one
         if (patterns.year.test(token)) {
             result.year = parseInt(token)
+            i++; continue
+        }
+
+        // set code + number e.g. IKO-107, 107-IKO, IKO.107, 107.IKO, IKO107, 107IKO
+        const setMatch = setPatterns.map(pattern => token.match(pattern)).find(match => match)
+        if (setMatch) {
+            result.setNumber = stripLeadingZeros(setMatch[1] ?? setMatch[4])
+            result.setCode = (setMatch[2] ?? setMatch[3])?.toUpperCase()
             i++; continue
         }
 

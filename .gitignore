@@ -220,6 +220,9 @@ __marimo__/
 
 # Misc
 *.db
+# SQLite's temporary write-ahead-log files, created next to the .db while the server runs
+*.db-shm
+*.db-wal
 *.sqlite3
 *.pyc
 poetry.lock

@@ -22,6 +22,15 @@ export default function SearchPage() {
     const query = text.trim()
     const isTooShort = query.length < MIN_LENGTH
 
+    function changeText(nextText: string) {
+        setText(nextText)
+        // Too short to search: drop ?q= so Back/refresh don't bring an old search back.
+        // Longer text is written to the URL by the debounced search below
+        if (nextText.trim().length < MIN_LENGTH && searchParams.has('q')) {
+            setSearchParams({}, { replace: true })
+        }
+    }
+
     useEffect(() => {
         if (isTooShort) return
 
@@ -54,7 +63,7 @@ export default function SearchPage() {
                 type="search"
                 autoFocus
                 value={text}
-                onChange={event => setText(event.target.value)}
+                onChange={event => changeText(event.target.value)}
                 placeholder="Card name or set code, e.g. sol ring or LEA"
                 aria-label="Search your collection"
                 className="w-full max-w-2xl rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20"
