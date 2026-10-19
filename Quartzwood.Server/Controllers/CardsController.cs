@@ -66,8 +66,9 @@ public class CardsController : ControllerBase
         return Ok(await _query.GetByBoxGroupedAsync(boxId));
     }
 
+    // Adds dto.Quantity identical copies (default 1) and returns them all
     [HttpPost]
-    [ProducesResponseType(typeof(CardDto), 201)]
+    [ProducesResponseType(typeof(List<CardDto>), 201)]
     [ProducesResponseType(400)]
     public async Task<IActionResult> Add(AddCardDto dto)
     {
@@ -77,7 +78,7 @@ public class CardsController : ControllerBase
         {
             var created = await _command.AddAsync(dto);
             if (created is null) return BadRequest("Card was not found on Scryfall.");
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return StatusCode(StatusCodes.Status201Created, created);
         }
         catch (ArgumentException ex)
         {

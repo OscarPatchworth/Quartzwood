@@ -49,7 +49,9 @@ public record AddCardDto(
     string? AlterArtist = null,
     string? Notes = null,
     DateOnly? AcquiredDate = null,
-    decimal? PurchasePrice = null
+    decimal? PurchasePrice = null,
+    // How many identical copies to add (one lookup, one save)
+    int Quantity = 1
 );
 
 // What the API accepts to update a card

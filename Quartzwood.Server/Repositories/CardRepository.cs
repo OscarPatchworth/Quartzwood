@@ -51,11 +51,11 @@ public class CardRepository : ICardRepository
             .ThenInclude(ct => ct.Tag)
             .ToListAsync();
 
-    public async Task<CardInstance> AddAsync(CardInstance card)
+    // One SaveChanges for all of them: a single database transaction however many copies there are
+    public async Task AddRangeAsync(IEnumerable<CardInstance> cards)
     {
-        _context.Cards.Add(card);
+        _context.Cards.AddRange(cards);
         await _context.SaveChangesAsync();
-        return card;
     }
 
     public async Task<CardInstance> UpdateAsync(CardInstance card)

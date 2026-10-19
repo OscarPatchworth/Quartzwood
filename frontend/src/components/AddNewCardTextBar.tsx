@@ -99,9 +99,8 @@ export function AddNewCardTextBar({ boxId, onSuccess } : TextBarProps){
         }
 
         try {
-            for (let index = 0; index < parsedCard.quantity; index++) {
-                await postApiCards({ body: newCard })
-            }
+            // One request for all copies: the server looks the card up once and saves them together
+            await postApiCards({ body: { ...newCard, quantity: parsedCard.quantity } })
         } catch (error) {
             const label = `${parsedCard.setCode}-${parsedCard.setNumber}`
             setAddFailureLabel(label)

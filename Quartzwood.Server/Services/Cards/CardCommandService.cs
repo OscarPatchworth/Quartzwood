@@ -18,8 +18,14 @@ public class CardCommandService : ICardCommandService
         _scryfall = scryfall;
     }
 
-    public async Task<CardDto?> AddAsync(AddCardDto dto)
+    // Most copies one request may add: stops a typo like "10000 Sol Ring" filling the database
+    private const int MaxQuantity = 1000;
+
+    public async Task<List<CardDto>?> AddAsync(AddCardDto dto)
     {
+        if (dto.Quantity is < 1 or > MaxQuantity)
+            throw new ArgumentException($"Quantity must be between 1 and {MaxQuantity}.");
+
         // A missing boxId arrives as Guid.Empty, which would otherwise fail as a DB foreign key error (500)
         if (await _boxes.GetByIdAsync(dto.BoxId) is null)
             throw new ArgumentException("Box not found.");
@@ -53,37 +59,45 @@ public class CardCommandService : ICardCommandService
         {
             nameSource = NameSource.Manual;
         }
-        var card = new CardInstance
-        {
-            SetCode = dto.SetCode,
-            SetNumber = dto.SetNumber,
-            Name = name,
-            NameSource = nameSource,
-            ScryfallId = scryfallId,
-            Condition = condition,
-            FoilType = foilType,
-            StampType = stampType,
-            Language = dto.Language,
-            IsProxy = dto.IsProxy,
-            IsSigned = dto.IsSigned,
-            IsList = dto.IsList,
-            AlterArtist = dto.AlterArtist,
-            Notes = dto.Notes,
-            BoxId = dto.BoxId,
-            AcquiredDate = dto.AcquiredDate,
-            PurchasePrice = dto.PurchasePrice,
-        };
 
-        if (dto.SetCode == "PLST" && dto.SetNumber != null)
+        // Everything above (validation + Scryfall lookup) ran once; now make the identical copies
+        CardInstance NewCopy()
         {
-            var parsedSetCode = dto.SetNumber.Split("-");
-            card.SetCode = parsedSetCode[0];
-            card.SetNumber = parsedSetCode[1];
-            card.IsList = true;            
+            var card = new CardInstance
+            {
+                SetCode = dto.SetCode,
+                SetNumber = dto.SetNumber,
+                Name = name,
+                NameSource = nameSource,
+                ScryfallId = scryfallId,
+                Condition = condition,
+                FoilType = foilType,
+                StampType = stampType,
+                Language = dto.Language,
+                IsProxy = dto.IsProxy,
+                IsSigned = dto.IsSigned,
+                IsList = dto.IsList,
+                AlterArtist = dto.AlterArtist,
+                Notes = dto.Notes,
+                BoxId = dto.BoxId,
+                AcquiredDate = dto.AcquiredDate,
+                PurchasePrice = dto.PurchasePrice,
+            };
+
+            if (dto.SetCode == "PLST" && dto.SetNumber != null)
+            {
+                var parsedSetCode = dto.SetNumber.Split("-");
+                card.SetCode = parsedSetCode[0];
+                card.SetNumber = parsedSetCode[1];
+                card.IsList = true;
+            }
+
+            return card;
         }
 
-        var created = await _cards.AddAsync(card);
-        return ToDto(created);
+        var copies = Enumerable.Range(0, dto.Quantity).Select(_ => NewCopy()).ToList();
+        await _cards.AddRangeAsync(copies);
+        return copies.Select(ToDto).ToList();
     }
 
     public async Task<CardDto?> UpdateAsync(Guid id, UpdateCardDto dto)
