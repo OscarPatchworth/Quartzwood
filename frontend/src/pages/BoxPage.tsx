@@ -190,7 +190,7 @@ export default function BoxPage() {
             </div>
         </div>
 
-        <BulkActionBar selection={selection} onChanged={refreshCardsAfterMutation} />
+        <BulkActionBar selection={selection} onChanged={refreshCardsAfterMutation} currentBoxId={box?.id} />
         </>
     )
 }
