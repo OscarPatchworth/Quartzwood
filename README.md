@@ -169,6 +169,13 @@ frontend/                 React app
 
 ---
 
+## How it was built
+
+Quartzwood's design, features and direction are mine. Much of the .NET + React code for the later
+features (mass edit, sort/filter, prices, tags, trading, Find a list, backups) was written with
+Claude (Anthropic's AI assistant), working in stages that I reviewed, tested and committed.
+Commits titled 'Claude Opus 5.5 ...' mark that work.
+
 ## Legacy Python CLI
 
 Quartzwood started as a Python command-line tool (Typer, SQLModel, FastAPI). That code is still in
