@@ -12,13 +12,16 @@ import {
 import { CardDetails } from "./CardDetails"
 import { CardEditForm } from "./CardEditForm"
 import { CardDuplicateListSelect } from "./CardDuplicateListSelect.tsx"
+import { CardTagEditor } from "../Tags/CardTagEditor"
 
 interface CECProps {
   cards?: GroupedCardDto
     onMutationComplete?: () => Promise<void>
+    // After a tag change: reload the page's list but keep the panel open (several tags in a row is common)
+    onTagsChanged?: () => Promise<void>
 }
 
-export function CardEditController({cards, onMutationComplete}: CECProps){
+export function CardEditController({cards, onMutationComplete, onTagsChanged}: CECProps){
 
     const [displayCard, setDisplayCard] = useState<CardDto>();
     const [editMode, setEditMode] = useState<boolean>(false);
@@ -35,6 +38,19 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
             getApiCardsById({ path: { id: cardIds[0] } })
             .then((res) => { setDisplayCard(res.data) })
         }
+    }
+
+    // Tags apply to the selected copies, or the shown card when none are picked (same as Update/Delete)
+    const tagCardIds = selectedGroupedCardIds.length > 0
+        ? selectedGroupedCardIds
+        : displayCard ? [displayCard.id] : []
+
+    async function afterTagsChanged() {
+        if (displayCard) {
+            const res = await getApiCardsById({ path: { id: displayCard.id } })
+            setDisplayCard(res.data)
+        }
+        await onTagsChanged?.()
     }
 
     useEffect(() =>{
@@ -193,6 +209,9 @@ export function CardEditController({cards, onMutationComplete}: CECProps){
                     <CardDetails card={displayCard} />
                 }
                 {actionError && <p className="px-2 pb-2 text-sm text-rose-700" role="alert">{actionError}</p>}
+                {displayCard && (
+                    <CardTagEditor cardIds={tagCardIds} tags={displayCard.tags} onChanged={afterTagsChanged} />
+                )}
                 
                 {editMode &&
                     <button

@@ -18,6 +18,7 @@ import { ImportDialog } from '../components/ImportExport/ImportDialog'
 import { ExportMenu } from '../components/ImportExport/ExportMenu'
 import { BulkActionBar } from '../components/Cards/BulkActionBar'
 import { useCardSelection } from '../hooks/useCardSelection'
+import { TagList } from '../components/Tags/TagList'
 import { useCardSort } from '../hooks/useCardSort'
 import { SortMenu } from '../components/misc/SortMenu'
 import { FilterMenu } from '../components/misc/FilterMenu'
@@ -59,10 +60,16 @@ export default function BoxPage() {
         }
     }
 
-    async function refreshCardsAfterMutation() {
+    // Reloads the cards, leaving the panel as it is (after a tag change, which keeps the panel open)
+    async function reloadCards() {
         if (!id) return
         const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, ...filter } })
         setCards(response.data)
+    }
+
+    async function refreshCardsAfterMutation() {
+        if (!id) return
+        await reloadCards()
         setSelectedCards(undefined)
         setShowRightPanel(false)
     }
@@ -120,6 +127,7 @@ export default function BoxPage() {
                 onClose={() => setShowRightPanel(false)}
                 cards={selectedCards}
                 onMutationComplete={refreshCardsAfterMutation}
+                onTagsChanged={reloadCards}
             />
         )}    
         
@@ -207,6 +215,7 @@ export default function BoxPage() {
                                 </span>
                             )}
                             <span className='text-center text-xs mt-1'>{c.name} ⋆ {c.condition} {c.foilType !== "None" && "⋆ " + c.foilType}</span>
+                            <TagList tags={c.tags} className="mt-1 justify-center" />
                         </div>
                         )
                     })}

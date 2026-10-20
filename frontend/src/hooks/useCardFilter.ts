@@ -2,15 +2,17 @@ import { useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { formatPrice } from "../utils/formatPrice"
 
-// The card list filters (CardListOptions.cs): ranges, each end optional. The keys are the URL/API parameter names
+// The card list filters (CardListOptions.cs): ranges (each end optional) and tags (the card must have
+// all of them). The keys are the URL/API parameter names
 export interface CardFilter {
     mvMin?: number
     mvMax?: number
     priceMin?: number
     priceMax?: number
+    tags?: string[]
 }
 
-type FilterKey = keyof CardFilter
+type FilterKey = Exclude<keyof CardFilter, "tags">
 
 // Every range the filter menu shows, in order. Adding a filter = adding one entry here (and on the server)
 export const FilterRanges = [
@@ -27,7 +29,7 @@ function readNumber(value: string | null): number | undefined {
 }
 
 export function hasFilter(filter: CardFilter) {
-    return FilterKeys.some(key => filter[key] !== undefined)
+    return FilterKeys.some(key => filter[key] !== undefined) || (filter.tags?.length ?? 0) > 0
 }
 
 // Short label for the filter button: "MV 2–4", "MV 3+", "$5+ · MV ≤ 2"
@@ -35,6 +37,7 @@ export function describeFilter(filter: CardFilter) {
     const parts = [
         describeRange("MV ", filter.mvMin, filter.mvMax, value => String(value)),
         describeRange("", filter.priceMin, filter.priceMax, formatPrice),
+        ...(filter.tags ?? []).map(tag => `#${tag}`),
     ].filter(part => part !== undefined)
     return parts.length > 0 ? parts.join(" · ") : undefined
 }
@@ -51,10 +54,13 @@ export function useCardFilter() {
     const [searchParams, setSearchParams] = useSearchParams()
     // useMemo: the SAME object until the URL changes, so pages can list `filter` as an effect dependency
     // (a new object every render would look "changed" every render and reload in a loop)
-    const filter: CardFilter = useMemo(
-        () => Object.fromEntries(FilterKeys.map(key => [key, readNumber(searchParams.get(key))])),
-        [searchParams]
-    )
+    const filter: CardFilter = useMemo(() => {
+        const tags = searchParams.getAll("tags").filter(tag => tag.trim() !== "")
+        return {
+            ...Object.fromEntries(FilterKeys.map(key => [key, readNumber(searchParams.get(key))])),
+            tags: tags.length > 0 ? tags : undefined,
+        }
+    }, [searchParams])
 
     function setFilter(next: CardFilter) {
         setSearchParams(current => {
@@ -64,6 +70,9 @@ export function useCardFilter() {
                 if (value === undefined) params.delete(key)
                 else params.set(key, String(value))
             }
+            // One ?tags= per tag: ?tags=Trade&tags=Commander
+            params.delete("tags")
+            for (const tag of next.tags ?? []) params.append("tags", tag)
             return params
         }, { replace: true })
     }

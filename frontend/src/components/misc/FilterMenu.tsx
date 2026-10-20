@@ -1,13 +1,15 @@
 import { useRef, useState, type FormEvent } from "react"
 import { describeFilter, FilterRanges, hasFilter, type CardFilter } from "../../hooks/useCardFilter"
+import { useMyTags } from "../../hooks/useMyTags"
+import { TagInput } from "../Tags/TagInput"
 
 interface FilterMenuProps {
     value: CardFilter
     onChange: (next: CardFilter) => void
 }
 
-// What's typed but not applied yet, per filter key; text, so a half-typed or empty box is allowed
-type Drafts = Record<keyof CardFilter, string>
+// What's typed but not applied yet, per range key; text, so a half-typed or empty box is allowed
+type Drafts = Record<Exclude<keyof CardFilter, "tags">, string>
 
 const inputClassName = "w-24 rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20"
 
@@ -17,7 +19,9 @@ const inputClassName = "w-24 rounded-md border border-slate-300 px-2 py-1.5 text
 export function FilterMenu({ value, onChange }: FilterMenuProps) {
     const menu = useRef<HTMLDetailsElement>(null)
     const [drafts, setDrafts] = useState<Drafts>({ mvMin: "", mvMax: "", priceMin: "", priceMax: "" })
+    const [draftTags, setDraftTags] = useState<string[]>([])
     const [error, setError] = useState<string>()
+    const { tags: myTags } = useMyTags()
 
     const isActive = hasFilter(value)
     const toNumber = (text: string) => text.trim() === "" ? undefined : Number(text)
@@ -31,6 +35,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
             priceMin: value.priceMin?.toString() ?? "",
             priceMax: value.priceMax?.toString() ?? "",
         })
+        setDraftTags(value.tags ?? [])
         setError(undefined)
     }
 
@@ -51,6 +56,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
             next[range.min] = min
             next[range.max] = max
         }
+        next.tags = draftTags.length > 0 ? draftTags : undefined
         onChange(next)
         menu.current?.removeAttribute("open")
     }
@@ -77,7 +83,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
             </summary>
             <form
                 onSubmit={apply}
-                className="absolute right-0 z-40 mt-1 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-lg"
+                className="absolute right-0 z-40 mt-1 w-72 rounded-lg border border-slate-200 bg-white p-4 shadow-lg"
             >
                 {FilterRanges.map(range => (
                     <fieldset key={range.label} className="mb-4">
@@ -105,6 +111,18 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                         </div>
                     </fieldset>
                 ))}
+                <fieldset className="mb-4">
+                    <legend className="mb-2 text-sm font-semibold text-slate-800">Tags <span className="font-normal text-slate-500">(cards with all of them)</span></legend>
+                    <TagInput
+                        id="filter-tags"
+                        label="Filter by tag"
+                        value={draftTags}
+                        suggestions={myTags}
+                        onAdd={name => setDraftTags(current => [...current, name])}
+                        onRemove={name => setDraftTags(current => current.filter(tag => tag !== name))}
+                        placeholder="Any"
+                    />
+                </fieldset>
                 <p className="text-xs text-slate-500">
                     Fill in any boxes. Cards without that data (e.g. no Scryfall price) are hidden while it's filtered.
                 </p>

@@ -78,12 +78,6 @@ export function CardDetails({card: card}: CardDetailsProps) {
                             <dt className="font-semibold text-stone-600">Notes</dt>
                             <dd className="text-right">{card.notes && String(card.notes)}</dd>
                         </div>
-                        {card.tags.length > 0 &&
-                            <div className="flex justify-between gap-4 border-b border-amber-100 pb-1 ml-5">
-                                <dt className="font-semibold text-stone-600">Tags</dt>
-                                <dd className="text-right">{String(card.tags)}</dd>
-                            </div>
-                        }
 
                     </dl>
                 </div>

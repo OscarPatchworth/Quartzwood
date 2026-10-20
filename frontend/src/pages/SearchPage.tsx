@@ -12,6 +12,7 @@ import { useCardFilter, hasFilter, describeFilter } from '../hooks/useCardFilter
 import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
+import { TagList } from '../components/Tags/TagList'
 
 // The same details/edit panel as the box page
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
@@ -98,6 +99,8 @@ export default function SearchPage() {
                     onClose={() => setOpenCard(undefined)}
                     cards={openCard}
                     onMutationComplete={afterCardChanged}
+                    // Tag changes: search again (the tags shown change) but keep the panel open
+                    onTagsChanged={async () => setRefreshCount(count => count + 1)}
                 />
             )}
 
@@ -187,6 +190,7 @@ function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOp
                       result.foilType !== "None" && result.foilType, result.stampType !== "None" && result.stampType]
                         .filter(Boolean).join(" ⋆ ")}
                 </p>
+                <TagList tags={result.tags} className="mt-1" />
 
                 {/* Where it is: Collection › Binders › Binder 1 › Page 1 */}
                 <nav aria-label="Location" className="mt-1 flex flex-wrap items-center gap-1 text-sm">

@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react"
-import { postApiCardsBulkUpdate, type BulkUpdateCardsDto } from "../../interfaces/generated.ts"
+import { postApiCardsBulkTags, postApiCardsBulkUpdate, type BulkUpdateCardsDto } from "../../interfaces/generated.ts"
 import { getErrorMessage } from "../../api/getErrorMessage"
 import { ConditionOptions, FoilTypeOptions, LanguageOptions } from "../../utils/Enum.tsx"
+import { useMyTags } from "../../hooks/useMyTags"
+import { TagInput } from "../Tags/TagInput"
 
 interface BulkEditDialogProps {
     cardIds: string[]
@@ -24,11 +26,16 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
     const [language, setLanguage] = useState(LEAVE)
     const [isProxy, setIsProxy] = useState<YesNo>(LEAVE)
     const [isSigned, setIsSigned] = useState<YesNo>(LEAVE)
+    const [addTags, setAddTags] = useState<string[]>([])
+    const [removeTags, setRemoveTags] = useState<string[]>([])
+    const { tags: myTags } = useMyTags()
     const [isSaving, setIsSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState<string>()
 
     const toBool = (value: YesNo) => value === LEAVE ? null : value === "yes"
-    const hasChanges = [condition, foilType, language, isProxy, isSigned].some(value => value !== LEAVE)
+    const hasFieldChanges = [condition, foilType, language, isProxy, isSigned].some(value => value !== LEAVE)
+    const hasTagChanges = addTags.length > 0 || removeTags.length > 0
+    const hasChanges = hasFieldChanges || hasTagChanges
     const countLabel = cardIds.length === 1 ? "1 card" : `${cardIds.length} cards`
 
     async function save(event: FormEvent<HTMLFormElement>) {
@@ -47,7 +54,10 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
         setIsSaving(true)
         setErrorMessage(undefined)
         try {
-            await postApiCardsBulkUpdate({ body })
+            // Two requests (fields, then tags), each only when something in it changed.
+            // Each is all-or-nothing on its own; if the tags part fails, the field changes are already saved
+            if (hasFieldChanges) await postApiCardsBulkUpdate({ body })
+            if (hasTagChanges) await postApiCardsBulkTags({ body: { cardIds, add: addTags, remove: removeTags } })
             await onSaved()
             onClose()
         } catch (error) {
@@ -87,6 +97,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                 <h2 id="bulk-edit-title" className="text-lg font-semibold text-slate-900">Edit {countLabel}</h2>
                 <p className="mb-4 mt-1 text-sm text-slate-500">
                     Only the fields you change are updated. Set, number and name can't be mass edited.
+                    Removing a tag removes it whoever added it.
                 </p>
 
                 <div className="flex flex-col gap-3">
@@ -118,6 +129,29 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                             {yesNoOptions}
                         </select>
                     )}
+                    {/* Not wrapped in a <label> like the rows above: the tag box has its own buttons inside */}
+                    <div className="grid grid-cols-[7rem_1fr] items-start gap-3 text-sm">
+                        <span className="pt-1.5 font-semibold text-slate-600">Add tags</span>
+                        <TagInput
+                            id="bulk-add-tags"
+                            label="Tags to add to every selected card"
+                            value={addTags}
+                            suggestions={myTags}
+                            onAdd={name => setAddTags(current => [...current, name])}
+                            onRemove={name => setAddTags(current => current.filter(tag => tag !== name))}
+                            placeholder="None"
+                        />
+                        <span className="pt-1.5 font-semibold text-slate-600">Remove tags</span>
+                        <TagInput
+                            id="bulk-remove-tags"
+                            label="Tags to remove from every selected card"
+                            value={removeTags}
+                            suggestions={myTags}
+                            onAdd={name => setRemoveTags(current => [...current, name])}
+                            onRemove={name => setRemoveTags(current => current.filter(tag => tag !== name))}
+                            placeholder="None"
+                        />
+                    </div>
                 </div>
 
                 {errorMessage && <p role="alert" className="mt-4 text-sm text-rose-700">{errorMessage}</p>}
