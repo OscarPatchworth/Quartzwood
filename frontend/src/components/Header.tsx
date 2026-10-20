@@ -62,6 +62,7 @@ export default function Header() {
                     {account ? (
                         <>
                             <Link to="/search" className="hover:text-gray-300">Search</Link>
+                            <Link to="/trade" className="hover:text-gray-300">Trade</Link>
                             <span className="text-gray-300">{account.displayName}</span>
                             <button
                                 type="button"

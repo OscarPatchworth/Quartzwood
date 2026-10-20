@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
     getApiBoxesById,
     getApiCardsByBoxByBoxIdGrouped,
+    postApiCards,
     putApiBoxesById,
     type BoxDto,
     type GroupedCardDto,
@@ -11,7 +12,7 @@ import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
 import { LoadingIndicator } from '../components/misc/LoadingIndicator.tsx'
-import { AddNewCardTextBar } from '../components/AddNewCardTextBar.tsx'
+import { AddNewCardTextBar, type NewCard } from '../components/AddNewCardTextBar.tsx'
 import EditableTitle from '../components/misc/EditableTitle.tsx'
 import { cardImageUrl } from '../utils/cardImageUrl'
 import { ImportDialog } from '../components/ImportExport/ImportDialog'
@@ -72,6 +73,19 @@ export default function BoxPage() {
         await reloadCards()
         setSelectedCards(undefined)
         setShowRightPanel(false)
+    }
+
+    // The add bar's "add": into this box, then reload
+    async function addToBox(card: NewCard) {
+        if (!id) throw new Error("No box.")
+        const added = (await postApiCards({ body: { ...card, boxId: id } })).data
+        // The card IS added at this point: a failed reload mustn't show as "Unable to add"
+        try {
+            await refreshCardsAfterMutation()
+        } catch (error) {
+            console.error("Refreshing cards failed", error)
+        }
+        return `Added ${added.length} × ${added[0]?.name ?? "card"}`
     }
 
     async function saveBoxName() {
@@ -147,10 +161,7 @@ export default function BoxPage() {
                 <div className='flex justify-end items-start gap-2 pt-[-10] pb-5'>
                     {box && (
                         <>
-                            <AddNewCardTextBar
-                                boxId={box.id}
-                                onSuccess={refreshCardsAfterMutation}
-                            />
+                            <AddNewCardTextBar onAdd={addToBox} />
                             <FilterMenu value={filter} onChange={setFilter} />
                             <SortMenu value={{ sort, desc }} onChange={setSort} />
                             <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />

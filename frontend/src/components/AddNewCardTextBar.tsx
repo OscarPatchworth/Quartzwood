@@ -7,7 +7,6 @@ import {
     getApiScryfallPrinting,
     getApiScryfallSearch,
     getApiScryfallSearchPromo,
-    postApiCards,
     type AddCardDto,
     type ScryfallSearchResultDto as ScryfallCardMatch,
 } from "../interfaces/generated.ts"
@@ -15,10 +14,17 @@ import { cardImageUrl } from "../utils/cardImageUrl"
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch"
 import { SearchInput } from "./misc/SearchInput"
 
+// What the bar produces: a card as typed/picked, without a box (where it goes is up to the page)
+export type NewCard = Omit<AddCardDto, "boxId">
+
 interface TextBarProps {
-    // Every card must live in a box
-    boxId: string
-    onSuccess?: () => Promise<void>
+    // Does the adding (into a box, onto a trade, ...). Returns the confirmation to show, e.g. "Added 4 × Sol Ring";
+    // throwing shows the error instead
+    onAdd: (card: NewCard) => Promise<string>
+    // Must be unique on the page (the input's id)
+    id?: string
+    placeholder?: string
+    buttonLabel?: string
 }
 
 // What the dropdown shows. "kind" says which shape it is, so TypeScript knows which fields exist
@@ -71,7 +77,12 @@ async function lookUp(text: string): Promise<Lookup> {
     return { parsed, suggestions: { kind: "none" } }
 }
 
-export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
+export function AddNewCardTextBar({
+    onAdd,
+    id = "new-card-search",
+    placeholder = "Add a card: name, or set + number e.g. IKO-107 -f",
+    buttonLabel = "Add card",
+}: TextBarProps) {
     const [text, setText] = useState("")
     const [isAdding, setIsAdding] = useState(false)
     const [addError, setAddError] = useState<string>()
@@ -92,7 +103,7 @@ export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
         const setNumber = printing?.setNumber ?? parsed.setNumber
         if (!setCode || !setNumber) return
 
-        const newCard: AddCardDto = {
+        const newCard: NewCard = {
             setCode,
             setNumber,
             name: printing?.name ?? parsed.name ?? null,
@@ -104,7 +115,6 @@ export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
             isSigned: false,
             isList: parsed.isList,
             alterArtist: parsed.alterArtist ?? null,
-            boxId,
             // One request for all copies: the server looks the card up once and saves them together
             quantity: parsed.quantity,
         }
@@ -112,20 +122,13 @@ export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
         setIsAdding(true)
         setAddError(undefined)
         try {
-            const added = (await postApiCards({ body: newCard })).data
+            const message = await onAdd(newCard)
             setText("")
-            setLastAdded(`Added ${added.length} × ${added[0]?.name ?? "card"}`)
+            setLastAdded(message)
         } catch (error) {
             setAddError(getErrorMessage(error, `Unable to add ${setCode}-${setNumber}.`))
-            return
         } finally {
             setIsAdding(false)
-        }
-
-        try {
-            await onSuccess?.()
-        } catch (error) {
-            console.error("Refreshing cards failed", error)
         }
     }
 
@@ -158,9 +161,9 @@ export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
         <div className="relative w-full max-w-2xl">
             <form onSubmit={submit}>
                 <SearchInput
-                    id="new-card-search"
+                    id={id}
                     label="Card to add"
-                    placeholder="Add a card: name, or set + number e.g. IKO-107 -f"
+                    placeholder={placeholder}
                     value={text}
                     onChange={changeText}
                     isSearching={isSearching || isAdding}
@@ -173,7 +176,7 @@ export function AddNewCardTextBar({ boxId, onSuccess }: TextBarProps) {
                         <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                             <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                         </svg>
-                        Add card
+                        {buttonLabel}
                     </button>
                 </SearchInput>
             </form>
