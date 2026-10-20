@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getApiCardsSearch, type CardSearchResultDto } from '../interfaces/generated.ts'
+import { getApiCardsSearch, type CardSearchResultDto, type GroupedCardDto } from '../interfaces/generated.ts'
 import { useAuth } from '../auth/useAuth'
 import { cardImageUrl } from '../utils/cardImageUrl'
 import { useDebouncedSearch } from '../hooks/useDebouncedSearch'
@@ -9,6 +9,28 @@ import { SortMenu } from '../components/misc/SortMenu'
 import { useCardSort } from '../hooks/useCardSort'
 import { FilterMenu } from '../components/misc/FilterMenu'
 import { useCardFilter, hasFilter, describeFilter } from '../hooks/useCardFilter'
+import { withPopup } from '../components/hocs/withPopup.tsx'
+import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
+import { CardEditController } from '../components/Cards/CardEditController.tsx'
+
+// The same details/edit panel as the box page
+const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
+
+// The panel works on a stack of identical cards: give it just the result's first copy, so it shows
+// (and edits) that one card rather than every copy in the box
+function singleCard(result: CardSearchResultDto): GroupedCardDto {
+    return {
+        name: result.name,
+        setCode: result.setCode,
+        setNumber: result.setNumber,
+        scryfallId: result.scryfallId,
+        condition: result.condition,
+        foilType: result.foilType,
+        stampType: result.stampType,
+        count: 1,
+        ids: result.ids.slice(0, 1),
+    }
+}
 
 const MIN_LENGTH = 2
 
@@ -20,6 +42,10 @@ export default function SearchPage() {
     const { sort, desc, setSort } = useCardSort()
     const { filter, setFilter } = useCardFilter()
     const isFiltered = hasFilter(filter)
+    // The card whose details panel is open
+    const [openCard, setOpenCard] = useState<GroupedCardDto>()
+    // Bumped after an edit/delete in the panel: part of the search key below, so the search runs again
+    const [refreshCount, setRefreshCount] = useState(0)
 
     // Debounce, ignoring out-of-date answers and errors all live in the shared hook.
     // key: changing the sort or filter runs the search again (the server filters and sorts every match,
@@ -27,7 +53,7 @@ export default function SearchPage() {
     const { result: response, resultQuery, errorMessage, isSearching, isTooShort } = useDebouncedSearch(
         text,
         async query => (await getApiCardsSearch({ query: { q: query, sort, desc, ...filter } })).data,
-        { minLength: isFiltered ? 0 : MIN_LENGTH, key: `${sort}|${desc}|${JSON.stringify(filter)}` },
+        { minLength: isFiltered ? 0 : MIN_LENGTH, key: `${sort}|${desc}|${JSON.stringify(filter)}|${refreshCount}` },
     )
     const query = text.trim()
 
@@ -57,8 +83,23 @@ export default function SearchPage() {
     const results = response?.results ?? []
     const copyCount = results.reduce((total, result) => total + Number(result.count), 0)
 
+    // After an edit or delete: close the panel and search again, so the list shows the change
+    async function afterCardChanged() {
+        setOpenCard(undefined)
+        setRefreshCount(count => count + 1)
+    }
+
     return (
         <div className="p-8">
+            {openCard && (
+                <CardDetailsPopup
+                    show
+                    onClose={() => setOpenCard(undefined)}
+                    cards={openCard}
+                    onMutationComplete={afterCardChanged}
+                />
+            )}
+
             <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
 
             <div className="flex max-w-2xl items-center gap-2">
@@ -99,7 +140,7 @@ export default function SearchPage() {
             {results.length > 0 && (
                 <ul className={`mt-4 max-w-4xl divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white ${isSearching ? "opacity-60" : ""}`}>
                     {results.map(result => (
-                        <SearchResultRow key={`${result.boxId}-${result.ids[0]}`} result={result} />
+                        <SearchResultRow key={`${result.boxId}-${result.ids[0]}`} result={result} onOpen={() => setOpenCard(singleCard(result))} />
                     ))}
                 </ul>
             )}
@@ -107,12 +148,13 @@ export default function SearchPage() {
     )
 }
 
-function SearchResultRow({ result }: { result: CardSearchResultDto }) {
+// onOpen: show this card's details panel (the image and the name open it; the box link is in the breadcrumbs)
+function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOpen: () => void }) {
     const { account } = useAuth()
 
     return (
         <li className="flex items-center gap-4 p-3">
-            <Link to={`/box/${result.boxId}`} className="relative shrink-0" aria-label={`Open ${result.boxName}`}>
+            <button type="button" onClick={onOpen} className="relative shrink-0 cursor-pointer" aria-label={`Show details of ${result.name ?? "this card"}`}>
                 {result.scryfallId ? (
                     <img
                         src={cardImageUrl(result.scryfallId, "small")}
@@ -129,12 +171,16 @@ function SearchResultRow({ result }: { result: CardSearchResultDto }) {
                         {result.count}
                     </span>
                 )}
-            </Link>
+            </button>
 
             <div className="min-w-0">
-                <p className="truncate font-semibold text-slate-900">
+                <button
+                    type="button"
+                    onClick={onOpen}
+                    className="block max-w-full cursor-pointer truncate text-left font-semibold text-slate-900 hover:underline"
+                >
                     {result.name ?? "Unnamed card"}
-                </p>
+                </button>
                 <p className="text-xs text-slate-500">
                     {[result.setCode && `${result.setCode} #${result.setNumber}`, result.condition,
                       result.foilType !== "None" && result.foilType, result.stampType !== "None" && result.stampType]
