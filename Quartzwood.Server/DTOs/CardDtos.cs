@@ -37,6 +37,8 @@ public record GroupedCardDto(
     List<string> Ids,
     // A-Z; every card in the stack has exactly these (different tags = different stacks)
     List<string> Tags,
+    // Every card in the stack is behind this divider (different dividers = different stacks); null = none
+    Guid? DividerId,
     // Each card's price in USD for its foil type (CardPrice); null = no price
     decimal? Price = null
 );

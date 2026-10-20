@@ -45,6 +45,14 @@ public class AccessService : IAccessService
                 && _context.EntityMembers.Any(m => m.EntityId == b.Group.EntityId && m.UserId == userId));
     }
 
+    public Task<bool> CanAccessDividerAsync(Guid dividerId)
+    {
+        var userId = UserId;
+        return _context.Dividers
+            .AnyAsync(d => d.Id == dividerId
+                && _context.EntityMembers.Any(m => m.EntityId == d.Box.Group.EntityId && m.UserId == userId));
+    }
+
     public Task<bool> CanAccessCardAsync(Guid cardId)
     {
         var userId = UserId;

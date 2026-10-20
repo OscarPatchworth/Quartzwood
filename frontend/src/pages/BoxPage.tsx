@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
+    deleteApiDividersById,
     getApiBoxesById,
     getApiCardsByBoxByBoxIdGrouped,
+    getApiDividersByBoxByBoxId,
     postApiCards,
     putApiBoxesById,
+    putApiDividersByBoxByBoxIdOrder,
+    putApiDividersById,
     type BoxDto,
+    type DividerDto,
     type GroupedCardDto,
 } from '../interfaces/generated.ts'
+import { getErrorMessage } from '../api/getErrorMessage'
 import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
@@ -24,14 +30,22 @@ import { useCardSort } from '../hooks/useCardSort'
 import { SortMenu } from '../components/misc/SortMenu'
 import { FilterMenu } from '../components/misc/FilterMenu'
 import { useCardFilter, hasFilter } from '../hooks/useCardFilter'
+import { AddDividerButton } from '../components/Dividers/AddDividerButton'
+import { DividerHeader } from '../components/Dividers/DividerHeader'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
+
+const cardGridClass = "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
 
 
 export default function BoxPage() {
     const { id } = useParams<{ id: string }>()
     const [cards, setCards] = useState<GroupedCardDto[]>([])
     const [box, setBox] = useState<BoxDto>()
+    // Front of the box first
+    const [dividers, setDividers] = useState<DividerDto[]>([])
+    const [dividerError, setDividerError] = useState<string>()
+    const [isSavingDividers, setIsSavingDividers] = useState(false)
     const [loading, setLoading] = useState(true)
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
     const [isEditingName, setIsEditingName] = useState(false)
@@ -61,11 +75,16 @@ export default function BoxPage() {
         }
     }
 
-    // Reloads the cards, leaving the panel as it is (after a tag change, which keeps the panel open)
+    // Reloads the cards, leaving the panel as it is (after a tag change, which keeps the panel open).
+    // The dividers too: their card counts change when cards are added, moved or deleted
     async function reloadCards() {
         if (!id) return
-        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, ...filter } })
-        setCards(response.data)
+        const [cardsResponse, dividersResponse] = await Promise.all([
+            getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, ...filter } }),
+            getApiDividersByBoxByBoxId({ path: { boxId: id } }),
+        ])
+        setCards(cardsResponse.data)
+        setDividers(dividersResponse.data)
     }
 
     async function refreshCardsAfterMutation() {
@@ -113,10 +132,68 @@ export default function BoxPage() {
         }
     }
 
+    async function renameDivider(divider: DividerDto, name: string) {
+        setDividerError(undefined)
+        try {
+            const updated = (await putApiDividersById({ path: { id: divider.id }, body: { name } })).data
+            setDividers(current => current.map(d => d.id === updated.id ? updated : d))
+        } catch (error) {
+            setDividerError(getErrorMessage(error, `Unable to rename ${divider.name}.`))
+        }
+    }
+
+    // Swaps the divider with its neighbour: shown straight away, put back if the server says no
+    async function moveDivider(index: number, direction: -1 | 1) {
+        if (!id) return
+        const previous = dividers
+        const reordered = [...dividers]
+        ;[reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]]
+
+        setDividers(reordered)
+        setDividerError(undefined)
+        setIsSavingDividers(true)
+        try {
+            const response = await putApiDividersByBoxByBoxIdOrder({
+                path: { boxId: id },
+                body: { dividerIds: reordered.map(d => d.id) },
+            })
+            setDividers(response.data)
+        } catch (error) {
+            setDividers(previous)
+            setDividerError(getErrorMessage(error, "Unable to move the divider."))
+        } finally {
+            setIsSavingDividers(false)
+        }
+    }
+
+    async function deleteDivider(divider: DividerDto) {
+        const count = Number(divider.cardCount)
+        const message = count > 0
+            ? `Delete divider "${divider.name}"? Its ${count} ${count === 1 ? "card stays" : "cards stay"} in this box.`
+            : `Delete divider "${divider.name}"?`
+        if (!window.confirm(message)) return
+
+        setDividerError(undefined)
+        setIsSavingDividers(true)
+        try {
+            await deleteApiDividersById({ path: { id: divider.id } })
+            setDividers(current => current.filter(d => d.id !== divider.id))
+        } catch (error) {
+            setDividerError(getErrorMessage(error, `Unable to delete ${divider.name}.`))
+            return
+        } finally {
+            setIsSavingDividers(false)
+        }
+        // The divider IS deleted at this point: a failed reload mustn't show as "Unable to delete"
+        reloadCards().catch(error => console.error("Refreshing cards failed", error))
+    }
+
     useEffect(() => {
         if (!id) return
-        getApiBoxesById({ path: { id } })
-            .then(res => setBox(res.data))
+        Promise.all([
+            getApiBoxesById({ path: { id } }).then(res => setBox(res.data)),
+            getApiDividersByBoxByBoxId({ path: { boxId: id } }).then(res => setDividers(res.data)),
+        ])
             .finally(() => setLoading(false))
     }, [id])
 
@@ -131,7 +208,45 @@ export default function BoxPage() {
         return () => { isCurrent = false }
     }, [id, sort, desc, filter])
 
-    return loading ? 
+    // A card whose divider isn't in the list (just deleted, say) shows with the loose cards rather than vanishing
+    const dividerIds = new Set(dividers.map(d => d.id))
+    const looseCards = cards.filter(c => !c.dividerId || !dividerIds.has(c.dividerId))
+
+    function renderCard(c: GroupedCardDto) {
+        const isSelected = selection.isSelecting && selection.isStackSelected(c)
+        return (
+            // The stack's first card id: unique, unlike set+number+condition+foil (two stacks of
+            // the same printing can differ by notes or stamp)
+            <div key={c.ids[0]} className='relative flex flex-col items-center'>
+                <img
+                    src={c.scryfallId ? cardImageUrl(c.scryfallId) : undefined}
+                    alt={c.name ?? ''}
+                    className={`w-full rounded-lg shadow transition ${
+                        isSelected ? "ring-4 ring-sky-600" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""
+                    } ${selection.isSelecting ? "cursor-pointer" : ""}`}
+                    onClick={() => clickCard(c)}
+                />
+                {selection.isSelecting && (
+                    <input
+                        type="checkbox"
+                        aria-label={`Select ${c.name ?? "card"}${Number(c.count) > 1 ? ` (${c.count} copies)` : ""}`}
+                        checked={isSelected}
+                        onChange={() => selection.toggleStack(c)}
+                        className="absolute right-2 top-2 size-5 cursor-pointer accent-sky-600"
+                    />
+                )}
+                {Number(c.count) > 1 && (
+                    <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                        {c.count}
+                    </span>
+                )}
+                <span className='text-center text-xs mt-1'>{c.name} ⋆ {c.condition} {c.foilType !== "None" && "⋆ " + c.foilType}</span>
+                <TagList tags={c.tags} className="mt-1 justify-center" />
+            </div>
+        )
+    }
+
+    return loading ?
     (<LoadingIndicator />) : 
     (
         <>
@@ -162,6 +277,7 @@ export default function BoxPage() {
                     {box && (
                         <>
                             <AddNewCardTextBar onAdd={addToBox} />
+                            <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
                             <FilterMenu value={filter} onChange={setFilter} />
                             <SortMenu value={{ sort, desc }} onChange={setSort} />
                             <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
@@ -196,41 +312,40 @@ export default function BoxPage() {
                         </button>
                     </p>
                 )}
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                    {cards.map(c => {
-                        const isSelected = selection.isSelecting && selection.isStackSelected(c)
-                        return (
-                        // The stack's first card id: unique, unlike set+number+condition+foil (two stacks of
-                        // the same printing can differ by notes or stamp)
-                        <div key={c.ids[0]} className='relative flex flex-col items-center'>
-                            <img
-                                src={c.scryfallId ? cardImageUrl(c.scryfallId) : undefined}
-                                alt={c.name ?? ''}
-                                className={`w-full rounded-lg shadow transition ${
-                                    isSelected ? "ring-4 ring-sky-600" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""
-                                } ${selection.isSelecting ? "cursor-pointer" : ""}`}
-                                onClick={() => clickCard(c)}
+                {dividerError && <p role="alert" className="mb-4 text-sm text-rose-700">{dividerError}</p>}
+                {looseCards.length > 0 && (
+                    <>
+                        {dividers.length > 0 && (
+                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Not behind a divider</h2>
+                        )}
+                        <div className={cardGridClass}>{looseCards.map(renderCard)}</div>
+                    </>
+                )}
+                {dividers.map((divider, index) => {
+                    const dividerCards = cards.filter(c => c.dividerId === divider.id)
+                    return (
+                        <section key={divider.id} aria-label={divider.name}>
+                            <DividerHeader
+                                divider={divider}
+                                isFirst={index === 0}
+                                isLast={index === dividers.length - 1}
+                                onRename={name => renameDivider(divider, name)}
+                                onMove={direction => void moveDivider(index, direction)}
+                                onDelete={() => void deleteDivider(divider)}
+                                disabled={isSavingDividers}
                             />
-                            {selection.isSelecting && (
-                                <input
-                                    type="checkbox"
-                                    aria-label={`Select ${c.name ?? "card"}${Number(c.count) > 1 ? ` (${c.count} copies)` : ""}`}
-                                    checked={isSelected}
-                                    onChange={() => selection.toggleStack(c)}
-                                    className="absolute right-2 top-2 size-5 cursor-pointer accent-sky-600"
-                                />
+                            {dividerCards.length > 0 ? (
+                                <div className={cardGridClass}>{dividerCards.map(renderCard)}</div>
+                            ) : (
+                                <p className="text-sm text-slate-500">
+                                    {hasFilter(filter) && Number(divider.cardCount) > 0
+                                        ? "No cards behind this divider match the filter."
+                                        : "No cards behind this divider yet."}
+                                </p>
                             )}
-                            {Number(c.count) > 1 && (
-                                <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
-                                    {c.count}
-                                </span>
-                            )}
-                            <span className='text-center text-xs mt-1'>{c.name} ⋆ {c.condition} {c.foilType !== "None" && "⋆ " + c.foilType}</span>
-                            <TagList tags={c.tags} className="mt-1 justify-center" />
-                        </div>
-                        )
-                    })}
-                </div>
+                        </section>
+                    )
+                })}
             </div>
         </div>
 

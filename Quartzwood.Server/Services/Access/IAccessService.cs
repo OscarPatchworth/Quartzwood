@@ -8,6 +8,7 @@ public interface IAccessService
     Task<bool> CanAccessEntityAsync(Guid entityId);
     Task<bool> CanAccessGroupAsync(Guid groupId);
     Task<bool> CanAccessBoxAsync(Guid boxId);
+    Task<bool> CanAccessDividerAsync(Guid dividerId);
     Task<bool> CanAccessCardAsync(Guid cardId);
     // true only if EVERY id is a card you can access (ids must be distinct)
     Task<bool> CanAccessCardsAsync(IReadOnlyCollection<Guid> cardIds);

@@ -33,6 +33,8 @@ function singleCard(result: CardSearchResultDto): GroupedCardDto {
         count: 1,
         ids: result.ids.slice(0, 1),
         tags: result.tags,
+        // Search results don't say which divider they're behind, and the panel doesn't need it
+        dividerId: null,
     }
 }
 

@@ -8,6 +8,7 @@ using Quartzwood.Server.Services.Accounts;
 using Quartzwood.Server.Services.Backups;
 using Quartzwood.Server.Services.Boxs;
 using Quartzwood.Server.Services.Cards;
+using Quartzwood.Server.Services.Dividers;
 using Quartzwood.Server.Services.Entities;
 using Quartzwood.Server.Services.Groups;
 using Quartzwood.Server.Services.ImportExport;
@@ -66,6 +67,7 @@ builder.Services.AddScoped<ITradeService, TradeService>();
 builder.Services.AddScoped<IEntityCommandService, EntityCommandService>();
 builder.Services.AddScoped<IGroupCommandService, GroupCommandService>();
 builder.Services.AddScoped<IBoxCommandService, BoxCommandService>();
+builder.Services.AddScoped<IDividerService, DividerService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 
 // Access checks: "is the logged-in user a member of the Entity that owns this?"

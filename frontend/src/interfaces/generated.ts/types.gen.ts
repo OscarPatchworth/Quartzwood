@@ -43,6 +43,11 @@ export type AddCardDto = {
     quantity?: number | string;
 };
 
+export type AddDividerDto = {
+    boxId: string;
+    name: string;
+};
+
 export type AddGroupDto = {
     name: string;
     parentGroupId: string;
@@ -160,6 +165,14 @@ export type CardSearchResultDto = {
     price?: null | number | string;
 };
 
+export type DividerDto = {
+    id: string;
+    name: string;
+    sortOrder: number | string;
+    boxId: string;
+    cardCount: number | string;
+};
+
 export type EntityDto = {
     id: string;
     name: string;
@@ -235,6 +248,7 @@ export type GroupedCardDto = {
     count: number | string;
     ids: Array<string>;
     tags: Array<string>;
+    dividerId: null | string;
     price?: null | number | string;
 };
 
@@ -330,6 +344,10 @@ export type RegisterDto = {
     email: string;
     password: string;
     displayName: string;
+};
+
+export type ReorderDividersDto = {
+    dividerIds: Array<string>;
 };
 
 export type ResendConfirmationEmailRequest = {
@@ -448,6 +466,10 @@ export type UpdateCardDto = {
     boxId: null | string;
     acquiredDate: null | string;
     purchasePrice: null | number | string;
+};
+
+export type UpdateDividerDto = {
+    name: string;
 };
 
 export type UpdateEntityDto = {
@@ -1327,6 +1349,147 @@ export type PostApiCardsBulkDeleteResponses = {
 };
 
 export type PostApiCardsBulkDeleteResponse = PostApiCardsBulkDeleteResponses[keyof PostApiCardsBulkDeleteResponses];
+
+export type GetApiDividersByBoxByBoxIdData = {
+    body?: never;
+    path: {
+        boxId: string;
+    };
+    query?: never;
+    url: '/api/dividers/by-box/{boxId}';
+};
+
+export type GetApiDividersByBoxByBoxIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiDividersByBoxByBoxIdError = GetApiDividersByBoxByBoxIdErrors[keyof GetApiDividersByBoxByBoxIdErrors];
+
+export type GetApiDividersByBoxByBoxIdResponses = {
+    /**
+     * OK
+     */
+    200: Array<DividerDto>;
+};
+
+export type GetApiDividersByBoxByBoxIdResponse = GetApiDividersByBoxByBoxIdResponses[keyof GetApiDividersByBoxByBoxIdResponses];
+
+export type PostApiDividersData = {
+    body: AddDividerDto;
+    path?: never;
+    query?: never;
+    url: '/api/dividers';
+};
+
+export type PostApiDividersErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiDividersError = PostApiDividersErrors[keyof PostApiDividersErrors];
+
+export type PostApiDividersResponses = {
+    /**
+     * Created
+     */
+    201: DividerDto;
+};
+
+export type PostApiDividersResponse = PostApiDividersResponses[keyof PostApiDividersResponses];
+
+export type DeleteApiDividersByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/dividers/{id}';
+};
+
+export type DeleteApiDividersByIdErrors = {
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteApiDividersByIdError = DeleteApiDividersByIdErrors[keyof DeleteApiDividersByIdErrors];
+
+export type DeleteApiDividersByIdResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteApiDividersByIdResponse = DeleteApiDividersByIdResponses[keyof DeleteApiDividersByIdResponses];
+
+export type PutApiDividersByIdData = {
+    body: UpdateDividerDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/dividers/{id}';
+};
+
+export type PutApiDividersByIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiDividersByIdError = PutApiDividersByIdErrors[keyof PutApiDividersByIdErrors];
+
+export type PutApiDividersByIdResponses = {
+    /**
+     * OK
+     */
+    200: DividerDto;
+};
+
+export type PutApiDividersByIdResponse = PutApiDividersByIdResponses[keyof PutApiDividersByIdResponses];
+
+export type PutApiDividersByBoxByBoxIdOrderData = {
+    body: ReorderDividersDto;
+    path: {
+        boxId: string;
+    };
+    query?: never;
+    url: '/api/dividers/by-box/{boxId}/order';
+};
+
+export type PutApiDividersByBoxByBoxIdOrderErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiDividersByBoxByBoxIdOrderError = PutApiDividersByBoxByBoxIdOrderErrors[keyof PutApiDividersByBoxByBoxIdOrderErrors];
+
+export type PutApiDividersByBoxByBoxIdOrderResponses = {
+    /**
+     * OK
+     */
+    200: Array<DividerDto>;
+};
+
+export type PutApiDividersByBoxByBoxIdOrderResponse = PutApiDividersByBoxByBoxIdOrderResponses[keyof PutApiDividersByBoxByBoxIdOrderResponses];
 
 export type GetApiEntitiesData = {
     body?: never;

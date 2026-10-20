@@ -264,6 +264,8 @@ public class CardQueryService : ICardQueryService
                 c.Notes,
                 // Tagging 1 of 4 Sol Rings "Trade" splits it into its own stack, so the tag is visible
                 Tags = TagNames.Key(c),
+                // The page shows each divider's cards under it
+                c.DividerId,
             })
             .Select(g => new CardStack<GroupedCardDto>(
                 new GroupedCardDto(
@@ -276,7 +278,8 @@ public class CardQueryService : ICardQueryService
                     g.Key.StampType.ToString(),
                     g.Count(),
                     g.Select(c => c.Id.ToString()).ToList(),
-                    TagNames.Of(g.First())
+                    TagNames.Of(g.First()),
+                    g.Key.DividerId
                 ),
                 g.Key.Name, g.Key.SetCode, g.Key.SetNumber, g.Key.ScryfallId, g.Key.FoilType,
                 g.Max(c => c.AddedAt), TagNames.Of(g.First())
