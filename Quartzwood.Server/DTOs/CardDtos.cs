@@ -17,6 +17,8 @@ public record CardDto(
     string? AlterArtist,
     string? Notes,
     Guid BoxId,
+    // null = not behind any divider
+    Guid? DividerId,
     IEnumerable<string> Tags,
     // In CardPrice.Currency (USD), for the card's foil type; null = no price. Only filled in by GET /api/cards/{id}
     decimal? Price = null

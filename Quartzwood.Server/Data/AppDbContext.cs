@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     public DbSet<Entity> Entities { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<Box> Boxes { get; set; }
+    public DbSet<Divider> Dividers { get; set; }
     public DbSet<CardInstance> Cards { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<CardTag> CardTags { get; set; }
@@ -82,6 +83,20 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
             .WithMany(b => b.Cards)
             .HasForeignKey(c => c.BoxId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Divider → Box: deleting a box deletes its dividers (and its cards, above)
+        modelBuilder.Entity<Divider>()
+            .HasOne(d => d.Box)
+            .WithMany(b => b.Dividers)
+            .HasForeignKey(d => d.BoxId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Card → Divider: deleting a divider keeps its cards, still in the box but behind no divider
+        modelBuilder.Entity<CardInstance>()
+            .HasOne(c => c.Divider)
+            .WithMany(d => d.Cards)
+            .HasForeignKey(c => c.DividerId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // EntityMember composite primary key: a user can only be in an entity once
         modelBuilder.Entity<EntityMember>()

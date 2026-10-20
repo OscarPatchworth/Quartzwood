@@ -116,11 +116,14 @@ public class CardRepository : ICardRepository
                 if (changes.IsSigned is { } isSigned) set.SetProperty(c => c.IsSigned, isSigned);
             });
 
-    // A move is just pointing the cards at another box: the same rows keep their ids, tags and notes
+    // A move is just pointing the cards at another box: the same rows keep their ids, tags and notes.
+    // Their dividers were in the old box, so they land behind none
     public Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId)
         => _context.Cards
             .Where(c => ids.Contains(c.Id))
-            .ExecuteUpdateAsync(set => set.SetProperty(c => c.BoxId, boxId));
+            .ExecuteUpdateAsync(set => set
+                .SetProperty(c => c.BoxId, boxId)
+                .SetProperty(c => c.DividerId, (Guid?)null));
 
     // The cards' CardTags rows go too: the database deletes them itself (ON DELETE CASCADE)
     public Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids)

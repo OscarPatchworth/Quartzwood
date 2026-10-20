@@ -16,6 +16,10 @@ public class CardInstance
     public Guid BoxId { get; set; }
     public Box Box { get; set; } = null!;
 
+    // The divider it's behind, always one in the same box; null = in the box but not behind any divider
+    public Guid? DividerId { get; set; }
+    public Divider? Divider { get; set; }
+
     // Printed
     public string? SetCode { get; set; }
     public string? SetNumber { get; set; }

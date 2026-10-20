@@ -133,6 +133,7 @@ export type CardDto = {
     alterArtist: null | string;
     notes: null | string;
     boxId: string;
+    dividerId: null | string;
     tags: Array<string>;
     price?: null | number | string;
 };

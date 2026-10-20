@@ -139,6 +139,8 @@ public class CardCommandService : ICardCommandService
             if (await _boxes.GetByIdAsync(dto.BoxId.Value) is null)
                 throw new ArgumentException("Box not found.");
             card.BoxId = dto.BoxId.Value;
+            // Its divider was in the old box
+            card.DividerId = null;
         }
         if (dto.AcquiredDate.HasValue) card.AcquiredDate = dto.AcquiredDate.Value;
         if (dto.PurchasePrice.HasValue) card.PurchasePrice = dto.PurchasePrice.Value;
@@ -233,6 +235,7 @@ public class CardCommandService : ICardCommandService
         c.AlterArtist,
         c.Notes,
         c.BoxId,
+        c.DividerId,
         TagNames.Of(c)
     );
 }

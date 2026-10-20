@@ -259,6 +259,9 @@ namespace Quartzwood.Server.Migrations
                     b.Property<int>("Condition")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("DividerId")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("FoilType")
                         .HasColumnType("INTEGER");
 
@@ -303,6 +306,8 @@ namespace Quartzwood.Server.Migrations
 
                     b.HasIndex("BoxId");
 
+                    b.HasIndex("DividerId");
+
                     b.ToTable("Cards");
                 });
 
@@ -319,6 +324,29 @@ namespace Quartzwood.Server.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("CardTags");
+                });
+
+            modelBuilder.Entity("Quartzwood.Server.Models.Divider", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BoxId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoxId");
+
+                    b.ToTable("Dividers");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.Entity", b =>
@@ -485,7 +513,14 @@ namespace Quartzwood.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Quartzwood.Server.Models.Divider", "Divider")
+                        .WithMany("Cards")
+                        .HasForeignKey("DividerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Box");
+
+                    b.Navigation("Divider");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.CardTag", b =>
@@ -505,6 +540,17 @@ namespace Quartzwood.Server.Migrations
                     b.Navigation("Card");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("Quartzwood.Server.Models.Divider", b =>
+                {
+                    b.HasOne("Quartzwood.Server.Models.Box", "Box")
+                        .WithMany("Dividers")
+                        .HasForeignKey("BoxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Box");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.EntityMember", b =>
@@ -563,11 +609,18 @@ namespace Quartzwood.Server.Migrations
             modelBuilder.Entity("Quartzwood.Server.Models.Box", b =>
                 {
                     b.Navigation("Cards");
+
+                    b.Navigation("Dividers");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.CardInstance", b =>
                 {
                     b.Navigation("CardTags");
+                });
+
+            modelBuilder.Entity("Quartzwood.Server.Models.Divider", b =>
+                {
+                    b.Navigation("Cards");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.Entity", b =>

@@ -15,4 +15,5 @@ public class Box
     
     // Navigation
     public ICollection<CardInstance> Cards { get; set; } = new List<CardInstance>();
+    public ICollection<Divider> Dividers { get; set; } = new List<Divider>();
 }

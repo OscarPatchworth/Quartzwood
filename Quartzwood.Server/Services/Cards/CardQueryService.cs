@@ -244,6 +244,7 @@ public class CardQueryService : ICardQueryService
         c.AlterArtist,
         c.Notes,
         c.BoxId,
+        c.DividerId,
         TagNames.Of(c)
     );
 
