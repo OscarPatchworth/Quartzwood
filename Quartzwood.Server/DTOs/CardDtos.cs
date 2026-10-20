@@ -61,7 +61,9 @@ public record AddCardDto(
     DateOnly? AcquiredDate = null,
     decimal? PurchasePrice = null,
     // How many identical copies to add (one lookup, one save)
-    int Quantity = 1
+    int Quantity = 1,
+    // Behind this divider (one in BoxId's box); null = behind none
+    Guid? DividerId = null
 );
 
 // What the API accepts to update a card
@@ -102,6 +104,9 @@ public record CardSearchResultDto(
     List<string> Ids,
     Guid BoxId,
     string BoxName,
+    // The divider in the box they're behind; null = none
+    Guid? DividerId,
+    string? DividerName,
     // Root group first, the box's own group last
     List<LocationStepDto> GroupPath,
     List<string> Tags,
@@ -133,7 +138,9 @@ public record BulkUpdateCardsDto(
 
 public record BulkMoveCardsDto(
     List<Guid> CardIds,
-    Guid BoxId
+    Guid BoxId,
+    // Behind this divider (one in BoxId's box); null = behind none. The box can be the one they're in now
+    Guid? DividerId = null
 );
 
 // How many cards were changed

@@ -253,6 +253,12 @@ function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOp
                     <Link to={`/box/${result.boxId}`} className="font-medium text-sky-800 hover:underline">
                         {result.boxName}
                     </Link>
+                    {result.dividerName && (
+                        <>
+                            <span className="text-slate-400">›</span>
+                            <span className="font-medium text-slate-700">{result.dividerName}</span>
+                        </>
+                    )}
                 </nav>
             </div>
         </li>

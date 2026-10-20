@@ -7,14 +7,14 @@ public interface ICardRepository
     Task<CardInstance?> GetByIdAsync(Guid id);
     Task<IEnumerable<CardInstance>> GetAllAsync();
     Task<IEnumerable<CardInstance>> GetByBoxAsync(Guid boxId);
-    // Cards in the given Entities whose name contains the text, or whose set code is it (empty text = all). Includes Box
+    // Cards in the given Entities whose name contains the text, or whose set code is it (empty text = all). Includes Box and Divider
     // boxId: only that box; groupIds: only boxes directly in those groups
     Task<List<CardInstance>> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text, int take,
         Guid? boxId = null, IReadOnlyCollection<Guid>? groupIds = null);
     // Just the id and name of every named card in the given Entities: small rows, so matching a whole list of
     // names against a big collection stays fast
     Task<List<CardNameRow>> GetNamesByEntitiesAsync(IReadOnlyCollection<Guid> entityIds);
-    // These cards, with their Box and tags (any number of ids)
+    // These cards, with their Box, Divider and tags (any number of ids)
     Task<List<CardInstance>> GetWithBoxByIdsAsync(IReadOnlyCollection<Guid> ids);
     Task AddRangeAsync(IEnumerable<CardInstance> cards);
     Task<CardInstance> UpdateAsync(CardInstance card);
@@ -22,7 +22,7 @@ public interface ICardRepository
 
     // Mass actions: each is ONE SQL statement for all the cards, returning how many rows changed
     Task<int> UpdateManyAsync(IReadOnlyCollection<Guid> ids, CardChanges changes);
-    Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId);
+    Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId, Guid? dividerId);
     Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids);
 }
 

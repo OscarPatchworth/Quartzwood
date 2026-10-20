@@ -3,12 +3,15 @@ import {
     getApiCardsById,
     postApiCards,
     postApiCardsBulkDelete,
+    postApiCardsBulkMove,
     putApiCardsById,
     type AddCardDto,
     type CardDto,
+    type DividerDto,
     type GroupedCardDto,
     type UpdateCardDto,
 } from "../../interfaces/generated.ts"
+import { getErrorMessage } from "../../api/getErrorMessage"
 import { CardDetails } from "./CardDetails"
 import { CardEditForm } from "./CardEditForm"
 import { CardDuplicateListSelect } from "./CardDuplicateListSelect.tsx"
@@ -19,9 +22,12 @@ interface CECProps {
     onMutationComplete?: () => Promise<void>
     // After a tag change: reload the page's list but keep the panel open (several tags in a row is common)
     onTagsChanged?: () => Promise<void>
+    // The card's box's dividers (front first): shows a "Divider" picker to move the card behind one.
+    // Left out on pages that span several boxes
+    dividers?: DividerDto[]
 }
 
-export function CardEditController({cards, onMutationComplete, onTagsChanged}: CECProps){
+export function CardEditController({cards, onMutationComplete, onTagsChanged, dividers}: CECProps){
 
     const [displayCard, setDisplayCard] = useState<CardDto>();
     const [editMode, setEditMode] = useState<boolean>(false);
@@ -133,6 +139,28 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged}: C
         setIsSaving(false)
     }
 
+    // Same cards as Update/Delete: the selected copies, or the shown card when none are picked
+    async function moveToDivider(dividerId: string | null) {
+        if (!displayCard || isSaving) return
+
+        setIsSaving(true)
+        setActionError(undefined)
+        try {
+            await postApiCardsBulkMove({ body: { cardIds: tagCardIds, boxId: displayCard.boxId, dividerId } })
+        } catch (error) {
+            setActionError(getErrorMessage(error, "Could not move the cards. Please try again."))
+            setIsSaving(false)
+            return
+        }
+
+        try {
+            await onMutationComplete?.()
+        } catch {
+            setActionError("Cards were moved, but the box list could not be refreshed.")
+        }
+        setIsSaving(false)
+    }
+
     async function addCardCopy() {
         if (!displayCard || isSaving) return
 
@@ -150,6 +178,8 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged}: C
             alterArtist: displayCard.alterArtist,
             notes: displayCard.notes,
             boxId: displayCard.boxId,
+            // The copy goes next to the original
+            dividerId: displayCard.dividerId,
         }
 
         setIsSaving(true)
@@ -209,6 +239,23 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged}: C
                     <CardDetails card={displayCard} />
                 }
                 {actionError && <p className="px-2 pb-2 text-sm text-rose-700" role="alert">{actionError}</p>}
+                {displayCard && dividers && dividers.length > 0 && (
+                    <label className="flex flex-wrap items-center gap-2 px-2 pb-2 text-sm">
+                        <span className="font-medium text-slate-700">Divider</span>
+                        <select
+                            value={displayCard.dividerId ?? ""}
+                            disabled={isSaving}
+                            onChange={e => void moveToDivider(e.target.value || null)}
+                            className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20 disabled:opacity-60"
+                        >
+                            <option value="">Not behind a divider</option>
+                            {dividers.map(divider => <option key={divider.id} value={divider.id}>{divider.name}</option>)}
+                        </select>
+                        {tagCardIds.length > 1 && (
+                            <span className="w-full text-xs text-slate-500">Moves the {tagCardIds.length} selected copies</span>
+                        )}
+                    </label>
+                )}
                 {displayCard && (
                     <CardTagEditor cardIds={tagCardIds} tags={displayCard.tags} onChanged={afterTagsChanged} />
                 )}

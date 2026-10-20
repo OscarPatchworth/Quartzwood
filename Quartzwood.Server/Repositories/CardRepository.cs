@@ -31,6 +31,7 @@ public class CardRepository : ICardRepository
         var query = _context.Cards
             .AsNoTracking()
             .Include(c => c.Box)
+            .Include(c => c.Divider)
             .Include(c => c.CardTags)
             .ThenInclude(ct => ct.Tag)
             .Where(c => entityIds.Contains(c.Box.Group.EntityId));
@@ -79,6 +80,7 @@ public class CardRepository : ICardRepository
             cards.AddRange(await _context.Cards
                 .AsNoTracking()
                 .Include(c => c.Box)
+                .Include(c => c.Divider)
                 .Include(c => c.CardTags)
                 .ThenInclude(ct => ct.Tag)
                 .Where(c => batch.Contains(c.Id))
@@ -116,14 +118,14 @@ public class CardRepository : ICardRepository
                 if (changes.IsSigned is { } isSigned) set.SetProperty(c => c.IsSigned, isSigned);
             });
 
-    // A move is just pointing the cards at another box: the same rows keep their ids, tags and notes.
-    // Their dividers were in the old box, so they land behind none
-    public Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId)
+    // A move is just pointing the cards at another box (and divider): the same rows keep their ids, tags and notes.
+    // Always sets the divider too, as a divider in the old box would be wrong in the new one
+    public Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId, Guid? dividerId)
         => _context.Cards
             .Where(c => ids.Contains(c.Id))
             .ExecuteUpdateAsync(set => set
                 .SetProperty(c => c.BoxId, boxId)
-                .SetProperty(c => c.DividerId, (Guid?)null));
+                .SetProperty(c => c.DividerId, dividerId));
 
     // The cards' CardTags rows go too: the database deletes them itself (ON DELETE CASCADE)
     public Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids)

@@ -42,6 +42,9 @@ export function MassSearchCardPanel({ entry }: { entry: MassSearchEntryDto }) {
                                         {[row.condition, row.foilType !== "None" && row.foilType, row.stampType !== "None" && row.stampType]
                                             .filter(Boolean).join(" ⋆ ")}
                                     </span>
+                                    {row.dividerName && (
+                                        <span className="block text-xs font-medium text-sky-800">Behind {row.dividerName}</span>
+                                    )}
                                     <TagList tags={row.tags} className="mt-1" />
                                 </span>
                                 <span className="shrink-0 text-sm text-slate-700">

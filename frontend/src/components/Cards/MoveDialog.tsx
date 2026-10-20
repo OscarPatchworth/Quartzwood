@@ -1,23 +1,36 @@
-import { useState, type FormEvent } from "react"
-import { getApiBoxesSearch, postApiCardsBulkMove, type BoxSearchResultDto } from "../../interfaces/generated.ts"
+import { useEffect, useState, type FormEvent } from "react"
+import {
+    getApiBoxesSearch,
+    getApiDividersByBoxByBoxId,
+    postApiCardsBulkMove,
+    type BoxSearchResultDto,
+    type DividerDto,
+} from "../../interfaces/generated.ts"
 import { getErrorMessage } from "../../api/getErrorMessage"
 import { useDebouncedSearch } from "../../hooks/useDebouncedSearch"
 import { SearchInput } from "../misc/SearchInput"
 
 interface MoveDialogProps {
     cardIds: string[]
-    // The box the cards are in now (shown, but can't be picked); none when they come from several boxes
+    // The box the cards are in now; none when they come from several boxes. If it has dividers the dialog
+    // starts on it, since moving cards between its dividers is the usual reason to open it from a box page
     currentBoxId?: string
     onClose: () => void
     // Called after the cards were moved, so the page can reload
     onMoved: (box: BoxSearchResultDto) => Promise<void>
 }
 
-// "Move to...": search your boxes, pick one, confirm. Boxes in Entities you own come first;
-// boxes in Entities shared with you are listed after them, tinted, with the Entity's name
+// "Move to...": search your boxes, pick one (and, if it has dividers, which one to go behind), confirm.
+// Boxes in Entities you own come first; boxes in Entities shared with you are listed after them, tinted,
+// with the Entity's name
 export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDialogProps) {
     const [text, setText] = useState("")
-    const [target, setTarget] = useState<BoxSearchResultDto>()
+    const [chosenBox, setChosenBox] = useState<BoxSearchResultDto>()
+    // The divider picked, and for which box: picking another box goes back to "not behind a divider"
+    const [dividerChoice, setDividerChoice] = useState<{ boxId: string, dividerId: string | null }>()
+    // Each box's dividers, loaded the first time it's picked (or, for the current box, straight away)
+    const [dividersByBox, setDividersByBox] = useState<Record<string, DividerDto[]>>({})
+    const [dividerError, setDividerError] = useState<string>()
     const [isMoving, setIsMoving] = useState(false)
     const [errorMessage, setErrorMessage] = useState<string>()
 
@@ -32,14 +45,40 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
     const owned = boxes?.filter(box => box.isOwned) ?? []
     const shared = boxes?.filter(box => !box.isOwned) ?? []
 
+    // Until another box is picked, a current box with dividers is the target
+    const currentHasDividers = currentBoxId !== undefined && (dividersByBox[currentBoxId]?.length ?? 0) > 0
+    const target = chosenBox ?? (currentHasDividers ? boxes?.find(box => box.id === currentBoxId) : undefined)
+    const targetDividers = target ? dividersByBox[target.id] : undefined
+    const dividerId = dividerChoice && dividerChoice.boxId === target?.id ? dividerChoice.dividerId : null
+    const dividerName = targetDividers?.find(d => d.id === dividerId)?.name
+    // With no dividers to choose between, "moving" cards to the box they're in would change nothing
+    const isAlreadyThere = target !== undefined && target.id === currentBoxId && targetDividers?.length === 0
+
+    const boxToLoad = currentBoxId && !(currentBoxId in dividersByBox) ? currentBoxId
+        : target && !(target.id in dividersByBox) ? target.id
+        : undefined
+    useEffect(() => {
+        if (!boxToLoad) return
+        let isCurrent = true
+        getApiDividersByBoxByBoxId({ path: { boxId: boxToLoad } })
+            .then(res => { if (isCurrent) setDividersByBox(current => ({ ...current, [boxToLoad]: res.data })) })
+            .catch(error => {
+                if (!isCurrent) return
+                setDividerError(getErrorMessage(error, "Could not load the box's dividers."))
+                // Treated as none, so the cards can still be moved into the box itself
+                setDividersByBox(current => ({ ...current, [boxToLoad]: [] }))
+            })
+        return () => { isCurrent = false }
+    }, [boxToLoad])
+
     async function move(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        if (!target) return
+        if (!target || isAlreadyThere) return
 
         setIsMoving(true)
         setErrorMessage(undefined)
         try {
-            await postApiCardsBulkMove({ body: { cardIds, boxId: target.id } })
+            await postApiCardsBulkMove({ body: { cardIds, boxId: target.id, dividerId } })
             await onMoved(target)
             onClose()
         } catch (error) {
@@ -59,10 +98,9 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
             <li key={box.id}>
                 <button
                     type="button"
-                    disabled={isCurrent}
                     aria-pressed={isTarget}
-                    onClick={() => setTarget(box)}
-                    className={`w-full rounded-md border px-3 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                    onClick={() => setChosenBox(box)}
+                    className={`w-full rounded-md border px-3 py-2 text-left transition ${
                         isTarget
                             ? "border-sky-700 bg-sky-50 ring-2 ring-sky-700/30"
                             : box.isOwned
@@ -127,6 +165,40 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                     )}
                 </div>
 
+                {target && (targetDividers === undefined || targetDividers.length > 0) && (
+                    <fieldset className="mt-3 border-t border-slate-200 pt-3">
+                        <legend className="mb-1.5 truncate text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Where in {target.name}?
+                        </legend>
+                        {targetDividers === undefined ? (
+                            <p className="text-sm text-slate-500">Loading dividers...</p>
+                        ) : (
+                            <div className="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto">
+                                {[{ id: null, name: "Not behind a divider" }, ...targetDividers].map(divider => (
+                                    <label
+                                        key={divider.id ?? "none"}
+                                        className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition has-focus-visible:ring-2 has-focus-visible:ring-sky-700/40 ${
+                                            dividerId === divider.id
+                                                ? "border-sky-700 bg-sky-50 font-semibold text-sky-900"
+                                                : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="move-divider"
+                                            checked={dividerId === divider.id}
+                                            onChange={() => setDividerChoice({ boxId: target.id, dividerId: divider.id })}
+                                            className="sr-only"
+                                        />
+                                        {divider.name}
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </fieldset>
+                )}
+                {isAlreadyThere && <p className="mt-3 text-sm text-slate-600">The cards are already in this box.</p>}
+                {dividerError && <p role="alert" className="mt-3 text-sm text-rose-700">{dividerError}</p>}
                 {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
 
                 <div className="mt-4 flex items-center justify-end gap-2">
@@ -140,10 +212,12 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                     </button>
                     <button
                         type="submit"
-                        disabled={isMoving || !target}
-                        className="max-w-60 truncate rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={isMoving || !target || isAlreadyThere || targetDividers === undefined}
+                        className="max-w-72 truncate rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {isMoving ? "Moving..." : target ? `Move ${countLabel} to ${target.name}` : `Move ${countLabel}`}
+                        {isMoving ? "Moving..."
+                            : target ? `Move ${countLabel} to ${target.name}${dividerName ? ` › ${dividerName}` : ""}`
+                            : `Move ${countLabel}`}
                     </button>
                 </div>
             </form>

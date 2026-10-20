@@ -20,6 +20,8 @@ export interface OutgoingCard {
     boxId: string
     boxName: string
     groupPath: LocationStepDto[]
+    // null = not behind a divider (missing in trades saved before dividers existed)
+    dividerName?: string | null
 }
 
 // The whole trade in progress, kept in this browser's localStorage until it's finished or cleared
@@ -52,6 +54,7 @@ export function outgoingFrom(row: CardSearchResultDto, cardId: string): Outgoing
         boxId: row.boxId,
         boxName: row.boxName,
         groupPath: row.groupPath,
+        dividerName: row.dividerName,
     }
 }
 

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Quartzwood.Server.Data;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
@@ -33,6 +34,7 @@ public class CardCommandService : ICardCommandService
         // A missing boxId arrives as Guid.Empty, which would otherwise fail as a DB foreign key error (500)
         if (await _boxes.GetByIdAsync(dto.BoxId) is null)
             throw new ArgumentException("Box not found.");
+        await CheckDividerAsync(dto.DividerId, dto.BoxId);
 
         if (!Enum.TryParse<Condition>(dto.Condition, true, out var condition))
             throw new ArgumentException($"Invalid condition: {dto.Condition}");
@@ -84,6 +86,7 @@ public class CardCommandService : ICardCommandService
                 AlterArtist = dto.AlterArtist,
                 Notes = dto.Notes,
                 BoxId = dto.BoxId,
+                DividerId = dto.DividerId,
                 AcquiredDate = dto.AcquiredDate,
                 PurchasePrice = dto.PurchasePrice,
             };
@@ -198,12 +201,20 @@ public class CardCommandService : ICardCommandService
         return await _cards.UpdateManyAsync(ids, changes);
     }
 
-    public async Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId)
+    public async Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId, Guid? dividerId = null)
     {
         if (!await _boxes.ExistsAsync(boxId))
             throw new ArgumentException("Box not found.");
+        await CheckDividerAsync(dividerId, boxId);
 
-        return await _cards.MoveManyAsync(ids, boxId);
+        return await _cards.MoveManyAsync(ids, boxId, dividerId);
+    }
+
+    // A card's divider must be in the card's own box
+    private async Task CheckDividerAsync(Guid? dividerId, Guid boxId)
+    {
+        if (dividerId is { } id && !await _context.Dividers.AnyAsync(d => d.Id == id && d.BoxId == boxId))
+            throw new ArgumentException("Divider not found in that box.");
     }
 
     public Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids)
@@ -214,7 +225,7 @@ public class CardCommandService : ICardCommandService
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
         var box = await _boxes.AddAsync(new Box { Name = boxName, GroupId = groupId });
-        var moved = await _cards.MoveManyAsync(ids, box.Id);
+        var moved = await _cards.MoveManyAsync(ids, box.Id, null);
         await transaction.CommitAsync();
         return new BulkMoveToNewBoxResultDto(moved, box.Id, box.Name);
     }

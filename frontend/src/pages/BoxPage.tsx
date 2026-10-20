@@ -257,6 +257,7 @@ export default function BoxPage() {
                 cards={selectedCards}
                 onMutationComplete={refreshCardsAfterMutation}
                 onTagsChanged={reloadCards}
+                dividers={dividers}
             />
         )}    
         

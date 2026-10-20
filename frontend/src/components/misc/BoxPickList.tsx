@@ -17,6 +17,8 @@ export interface PickItem {
     boxId: string
     boxName: string
     groupPath: LocationStepDto[]
+    // The divider in the box they're behind; null = none (missing in lists saved before dividers existed)
+    dividerName?: string | null
 }
 
 interface BoxPickListProps {
@@ -75,6 +77,9 @@ export function BoxPickList({ title, items, collected, onToggle, onTickAll, empt
                                                 {[item.setCode && `${item.setCode} #${item.setNumber}`, item.condition,
                                                   item.foilType !== "None" && item.foilType].filter(Boolean).join(" ⋆ ")}
                                             </span>
+                                            {item.dividerName && (
+                                                <span className="block truncate text-xs font-medium text-sky-800">Behind {item.dividerName}</span>
+                                            )}
                                         </span>
                                         <span className="shrink-0 text-sm text-slate-700">{item.price !== null ? formatPrice(item.price) : ""}</span>
                                     </label>
@@ -88,7 +93,8 @@ export function BoxPickList({ title, items, collected, onToggle, onTickAll, empt
     )
 }
 
-// Boxes in the order their locations sort ("Collection › Binders › A" before "... › B"), cards A-Z in each
+// Boxes in the order their locations sort ("Collection › Binders › A" before "... › B"). In each, cards not
+// behind a divider first, then each divider's together (A-Z by divider name), cards A-Z within those
 function groupByBox(items: PickItem[]) {
     const boxes = new Map<string, PickItem[]>()
     for (const item of items) boxes.set(item.boxId, [...(boxes.get(item.boxId) ?? []), item])
@@ -98,7 +104,8 @@ function groupByBox(items: PickItem[]) {
             boxId: boxItems[0].boxId,
             boxName: boxItems[0].boxName,
             path: boxItems[0].groupPath.map(step => step.name).join(" › "),
-            items: [...boxItems].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")),
+            items: [...boxItems].sort((a, b) =>
+                (a.dividerName ?? "").localeCompare(b.dividerName ?? "") || (a.name ?? "").localeCompare(b.name ?? "")),
         }))
         .sort((a, b) => `${a.path} › ${a.boxName}`.localeCompare(`${b.path} › ${b.boxName}`))
 }

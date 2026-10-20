@@ -43,6 +43,7 @@ export function planItems(plan: FetchPlanDto): FetchItem[] {
         boxId: box.boxId,
         boxName: box.boxName,
         groupPath: box.groupPath,
+        dividerName: card.dividerName,
     })))
 }
 

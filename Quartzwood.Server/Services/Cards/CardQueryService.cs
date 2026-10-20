@@ -51,11 +51,12 @@ public class CardQueryService : ICardQueryService
             sorted.Take(rowLimit).Select(x => x.Row with { Price = x.Price }).ToList(), hasMore);
     }
 
-    // Same grouping as the box page, plus the box: identical copies in one box = one row, in location order
+    // Same grouping as the box page, plus the box: identical copies in one box (and divider) = one row, in location order
     private static List<CardStack<CardSearchResultDto>> ToSearchStacks(IEnumerable<CardInstance> cards, GroupPaths paths)
         => cards
             .GroupBy(c => new {
                 c.BoxId,
+                c.DividerId,
                 c.Name,
                 c.SetCode,
                 c.SetNumber,
@@ -69,6 +70,7 @@ public class CardQueryService : ICardQueryService
             .Select(g =>
             {
                 var box = g.First().Box;
+                var divider = g.First().Divider;
                 var row = new CardSearchResultDto(
                     g.Key.Name,
                     g.Key.SetCode,
@@ -81,6 +83,8 @@ public class CardQueryService : ICardQueryService
                     g.Select(c => c.Id.ToString()).ToList(),
                     box.Id,
                     box.Name,
+                    divider?.Id,
+                    divider?.Name,
                     paths.PathTo(box.GroupId),
                     TagNames.Of(g.First())
                 );

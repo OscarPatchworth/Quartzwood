@@ -178,7 +178,7 @@ public class CardsController : ControllerBase
     public async Task<IActionResult> BulkMove(BulkMoveCardsDto dto)
     {
         if (!await _access.CanAccessBoxAsync(dto.BoxId)) return BadRequest("Box not found.");
-        return await RunBulkAsync(dto.CardIds, ids => _command.MoveManyAsync(ids, dto.BoxId));
+        return await RunBulkAsync(dto.CardIds, ids => _command.MoveManyAsync(ids, dto.BoxId, dto.DividerId));
     }
 
     // Add and/or remove tags by name, on one card or many (the card panel and mass edit both use this)
