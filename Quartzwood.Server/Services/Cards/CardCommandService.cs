@@ -119,7 +119,10 @@ public class CardCommandService : ICardCommandService
             updateImage = true;}
         if (dto.SetCode != null) {card.SetCode = dto.SetCode; updateImage = true;}
         if (dto.SetNumber != null) {card.SetNumber = dto.SetNumber; updateImage = true;}
-        if (dto.Name != null) { card.Name = dto.Name; card.NameSource = NameSource.Manual; }
+        // The edit form sends every field, the name included, on every save: only a name that actually
+        // CHANGED counts as the user renaming the card
+        var isRenamed = dto.Name != null && dto.Name != card.Name;
+        if (isRenamed) { card.Name = dto.Name; card.NameSource = NameSource.Manual; }
         if (dto.Language != null) card.Language = dto.Language;
         if (dto.IsProxy.HasValue) card.IsProxy = dto.IsProxy.Value;
         if (dto.IsSigned.HasValue) card.IsSigned = dto.IsSigned.Value;
@@ -136,10 +139,21 @@ public class CardCommandService : ICardCommandService
         if (dto.AcquiredDate.HasValue) card.AcquiredDate = dto.AcquiredDate.Value;
         if (dto.PurchasePrice.HasValue) card.PurchasePrice = dto.PurchasePrice.Value;
 
-        if(updateImage){
-            card.ScryfallId = await _scryfall.GetScryfallId(
-                card.SetCode, card.SetNumber, card.StampType.ToString(), card.IsList, card.Name
-            );
+        if (updateImage)
+        {
+            // A name-only card has no set/number to look up
+            var printing = card.SetCode != null && card.SetNumber != null
+                ? await _scryfall.GetPrintingAsync(card.SetCode, card.SetNumber, card.StampType.ToString(), card.IsList)
+                : null;
+            card.ScryfallId = printing?.Id;
+
+            // A different printing can be a different card (IKO 1 -> IKO 2): take its name from Scryfall,
+            // unless the user typed a new name in this same edit
+            if (printing != null && !isRenamed)
+            {
+                card.Name = printing.Name;
+                card.NameSource = NameSource.Scryfall;
+            }
         }
 
         var updated = await _cards.UpdateAsync(card);

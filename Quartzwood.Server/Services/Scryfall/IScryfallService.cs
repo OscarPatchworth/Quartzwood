@@ -26,7 +26,8 @@ public interface IScryfallService
 {
     Task<ScryfallCard?> GetCardAsync(string setCode, string setNumber);
     Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year);
-    Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, bool isList, string? cardName);
+    // The printing for what's printed on a card (stamped and List cards are filed differently by Scryfall)
+    Task<ScryfallCard?> GetPrintingAsync(string setCode, string setNumber, string stampType, bool isList);
     Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber);
     // Where the card's image lives: size is "small" or "normal"
     Task<string?> GetImageUrlAsync(string scryfallId, string size);

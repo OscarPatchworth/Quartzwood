@@ -44,11 +44,10 @@ public class LocalScryfallService : IScryfallService
         return local ?? await FallbackAsync(() => _api.GetCardAsync(setCode, setNumber), $"card {setCode}/{setNumber}");
     }
 
-    public async Task<string?> GetScryfallId(string setCode, string setNumber, string stampType, bool isList, string? cardName)
+    public Task<ScryfallCard?> GetPrintingAsync(string setCode, string setNumber, string stampType, bool isList)
     {
         var (scryfallSetCode, scryfallSetNumber) = ScryfallPrintingKey.Resolve(setCode, setNumber, stampType, isList);
-        var card = await GetCardAsync(scryfallSetCode, scryfallSetNumber);
-        return card?.Id;
+        return GetCardAsync(scryfallSetCode, scryfallSetNumber);
     }
 
     // Same as the API query: !"name" [year=YYYY] include:extras (game:paper), every printing, oldest first

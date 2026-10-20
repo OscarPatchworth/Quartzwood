@@ -89,12 +89,10 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
     return cards;
 }
 
-public async Task<string?> GetScryfallId(string setCode, string setNumber, string? stampType, bool isList, string? cardName)
+public Task<ScryfallCard?> GetPrintingAsync(string setCode, string setNumber, string stampType, bool isList)
     {
         var (scryfallSetCode, scryfallSetNumber) = ScryfallPrintingKey.Resolve(setCode, setNumber, stampType, isList);
-
-        var responce = await GetCardAsync(scryfallSetCode, scryfallSetNumber);
-        return responce?.Id;
+        return GetCardAsync(scryfallSetCode, scryfallSetNumber);
     }
 
 public async Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName, int? year, string? setNumber)
