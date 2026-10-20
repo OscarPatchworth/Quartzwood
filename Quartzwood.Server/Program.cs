@@ -12,6 +12,7 @@ using Quartzwood.Server.Services.Groups;
 using Quartzwood.Server.Services.ImportExport;
 using Quartzwood.Server.Services.Scryfall;
 using Quartzwood.Server.Services.Tags;
+using Quartzwood.Server.Services.Trades;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,6 +53,7 @@ builder.Services.AddScoped<IBoxQueryService, BoxQueryService>();
 // Command Services
 builder.Services.AddScoped<ICardCommandService, CardCommandService>();
 builder.Services.AddScoped<ITagService, TagService>();
+builder.Services.AddScoped<ITradeService, TradeService>();
 builder.Services.AddScoped<IEntityCommandService, EntityCommandService>();
 builder.Services.AddScoped<IGroupCommandService, GroupCommandService>();
 builder.Services.AddScoped<IBoxCommandService, BoxCommandService>();

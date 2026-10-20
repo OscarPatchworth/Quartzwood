@@ -144,6 +144,7 @@ export type CardSearchResultDto = {
     boxName: string;
     groupPath: Array<LocationStepDto>;
     tags: Array<string>;
+    price?: null | number | string;
 };
 
 export type EntityDto = {
@@ -193,6 +194,7 @@ export type GroupedCardDto = {
     count: number | string;
     ids: Array<string>;
     tags: Array<string>;
+    price?: null | number | string;
 };
 
 export type HttpValidationProblemDetails = {
@@ -292,6 +294,50 @@ export type StringSegment = {
 export type TagDto = {
     id: string;
     name: string;
+};
+
+export type TradeCardDto = {
+    setCode: null | string;
+    setNumber: null | string;
+    name: null | string;
+    condition?: string;
+    foilType?: string;
+    stampType?: string;
+    language?: string;
+    isProxy?: boolean;
+    isSigned?: boolean;
+    isList?: boolean;
+    quantity?: number | string;
+};
+
+export type TradeConfirmDto = {
+    incoming: Array<TradeCardDto>;
+    outgoingCardIds: Array<string>;
+};
+
+export type TradeQuoteDto = {
+    items: Array<TradeQuoteItemDto>;
+    total: number | string;
+};
+
+export type TradeQuoteItemDto = {
+    name: null | string;
+    setCode: null | string;
+    setNumber: null | string;
+    scryfallId: null | string;
+    unitPrice: null | number | string;
+    error: null | string;
+};
+
+export type TradeQuoteRequestDto = {
+    incoming: Array<TradeCardDto>;
+};
+
+export type TradeResultDto = {
+    boxId: string;
+    boxName: string;
+    cardsAdded: number | string;
+    cardsRemoved: number | string;
 };
 
 export type TransferFormatDto = {
@@ -814,6 +860,8 @@ export type GetApiCardsSearchData = {
     path?: never;
     query?: {
         q?: string;
+        boxId?: string;
+        groupId?: string;
         sort?: string;
         desc?: boolean;
         mvMin?: number | string;
@@ -1649,3 +1697,89 @@ export type GetApiTagsResponses = {
 };
 
 export type GetApiTagsResponse = GetApiTagsResponses[keyof GetApiTagsResponses];
+
+export type GetApiTradeOptionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        q?: string;
+        boxId?: string;
+        groupId?: string;
+        sort?: string;
+        desc?: boolean;
+        mvMin?: number | string;
+        mvMax?: number | string;
+        priceMin?: number | string;
+        priceMax?: number | string;
+        tags?: Array<string>;
+    };
+    url: '/api/trade/options';
+};
+
+export type GetApiTradeOptionsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type GetApiTradeOptionsError = GetApiTradeOptionsErrors[keyof GetApiTradeOptionsErrors];
+
+export type GetApiTradeOptionsResponses = {
+    /**
+     * OK
+     */
+    200: CardSearchResponseDto;
+};
+
+export type GetApiTradeOptionsResponse = GetApiTradeOptionsResponses[keyof GetApiTradeOptionsResponses];
+
+export type PostApiTradeQuoteData = {
+    body: TradeQuoteRequestDto;
+    path?: never;
+    query?: never;
+    url: '/api/trade/quote';
+};
+
+export type PostApiTradeQuoteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiTradeQuoteError = PostApiTradeQuoteErrors[keyof PostApiTradeQuoteErrors];
+
+export type PostApiTradeQuoteResponses = {
+    /**
+     * OK
+     */
+    200: TradeQuoteDto;
+};
+
+export type PostApiTradeQuoteResponse = PostApiTradeQuoteResponses[keyof PostApiTradeQuoteResponses];
+
+export type PostApiTradeData = {
+    body: TradeConfirmDto;
+    path?: never;
+    query?: never;
+    url: '/api/trade';
+};
+
+export type PostApiTradeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiTradeError = PostApiTradeErrors[keyof PostApiTradeErrors];
+
+export type PostApiTradeResponses = {
+    /**
+     * OK
+     */
+    200: TradeResultDto;
+};
+
+export type PostApiTradeResponse = PostApiTradeResponses[keyof PostApiTradeResponses];

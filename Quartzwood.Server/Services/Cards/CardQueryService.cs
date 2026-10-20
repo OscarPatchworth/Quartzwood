@@ -26,19 +26,21 @@ public class CardQueryService : ICardQueryService
         _scryfall = scryfall;
     }
 
-    // Empty text = every card (only allowed with a filter: the controller checks)
+    // Empty text = every card (the search endpoint only allows that with a filter).
+    // limit: most rows to return (default SearchLimit)
     public async Task<CardSearchResponseDto> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text,
-        CardListOptions options)
+        CardListOptions options, int? limit = null)
     {
+        // One query for every group in the user's Entities (usually tens of rows): location paths are built
+        // from it in memory, and so is "this group and every group inside it" for the group filter
+        var paths = new GroupPaths(await _groups.GetTreeByEntitiesAsync(entityIds));
+        var groupIds = options.GroupId is { } groupId ? paths.WithDescendants(groupId) : null;
+
         // Ask for one extra card: if it comes back, there are more matches than we load
-        var cards = await _cards.SearchAsync(entityIds, text, SearchLoadLimit + 1);
+        var cards = await _cards.SearchAsync(entityIds, text, SearchLoadLimit + 1, options.BoxId, groupIds);
         var tooManyToLoad = cards.Count > SearchLoadLimit;
         if (tooManyToLoad) cards = cards.Take(SearchLoadLimit).ToList();
         if (cards.Count == 0) return new CardSearchResponseDto([], false);
-
-        // One query for every group in the user's Entities (usually tens of rows),
-        // then each location path is built in memory
-        var paths = new GroupPaths(await _groups.GetTreeByEntitiesAsync(entityIds));
 
         // Same grouping as the box page, plus the box: identical copies in one box = one row
         var stacks = cards
@@ -81,8 +83,10 @@ public class CardQueryService : ICardQueryService
 
         var sorted = await FilterAndSortAsync(stacks, options);
 
-        var hasMore = tooManyToLoad || sorted.Count > SearchLimit;
-        return new CardSearchResponseDto(sorted.Take(SearchLimit).ToList(), hasMore);
+        var rowLimit = limit ?? SearchLimit;
+        var hasMore = tooManyToLoad || sorted.Count > rowLimit;
+        return new CardSearchResponseDto(
+            sorted.Take(rowLimit).Select(x => x.Row with { Price = x.Price }).ToList(), hasMore);
     }
 
     // With its price (one scryfall.db lookup), for the card details panel
@@ -163,7 +167,7 @@ public class CardQueryService : ICardQueryService
             ))
             .ToList();
 
-        return await FilterAndSortAsync(stacks, options);
+        return (await FilterAndSortAsync(stacks, options)).Select(x => x.Row with { Price = x.Price });
     }
 
     // One row of a card list (TRow: what the endpoint returns) plus what filtering/sorting needs to know about it.
@@ -172,13 +176,12 @@ public class CardQueryService : ICardQueryService
         string? ScryfallId, FoilType FoilType, DateTime? AddedAt, IReadOnlyList<string> Tags);
 
     // Looks up every stack's printing in scryfall.db in ONE batched query, drops the stacks the filter
-    // rules out, then sorts the rest with CardSorting's rules
-    private async Task<List<TRow>> FilterAndSortAsync<TRow>(List<CardStack<TRow>> stacks, CardListOptions options)
+    // rules out, then sorts the rest with CardSorting's rules. Returns each row with its price (rows show it)
+    private async Task<List<(TRow Row, decimal? Price)>> FilterAndSortAsync<TRow>(List<CardStack<TRow>> stacks,
+        CardListOptions options)
     {
-        // No filter + sorting by name or added date: nothing needed from scryfall.db, skip the lookup
-        var gameplay = options.NeedsGameplay
-            ? await _scryfall.GetGameplayByIdsAsync(stacks.Select(s => s.ScryfallId).OfType<string>())
-            : [];
+        // Always looked up: every row shows its price (one primary-key query per 1000 printings)
+        var gameplay = await _scryfall.GetGameplayByIdsAsync(stacks.Select(s => s.ScryfallId).OfType<string>());
 
         // Each stack's printing data and price, worked out once
         var withData = stacks.Select(stack =>
@@ -190,6 +193,6 @@ public class CardQueryService : ICardQueryService
         var sorted = CardSorting.Sort(withData.Where(x => options.Matches(x.Printing, x.Price, x.Stack.Tags)),
             x => new CardSortFields(x.Stack.Name, x.Stack.AddedAt, x.Stack.SetCode, x.Stack.SetNumber, x.Printing, x.Price),
             options.Sort, options.Descending);
-        return sorted.Select(x => x.Stack.Row).ToList();
+        return sorted.Select(x => (x.Stack.Row, x.Price)).ToList();
     }
 }

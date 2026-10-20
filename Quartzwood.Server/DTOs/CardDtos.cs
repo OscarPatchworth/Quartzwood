@@ -34,7 +34,9 @@ public record GroupedCardDto(
     int Count,
     List<string> Ids,
     // A-Z; every card in the stack has exactly these (different tags = different stacks)
-    List<string> Tags
+    List<string> Tags,
+    // Each card's price in USD for its foil type (CardPrice); null = no price
+    decimal? Price = null
 );
 
 // What the API accepts to create a card
@@ -98,7 +100,9 @@ public record CardSearchResultDto(
     string BoxName,
     // Root group first, the box's own group last
     List<LocationStepDto> GroupPath,
-    List<string> Tags
+    List<string> Tags,
+    // Each card's price in USD for its foil type (CardPrice); null = no price
+    decimal? Price = null
 );
 
 public record CardSearchResponseDto(

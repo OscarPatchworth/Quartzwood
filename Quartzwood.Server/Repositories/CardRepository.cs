@@ -19,7 +19,8 @@ public class CardRepository : ICardRepository
             .ThenInclude(ct => ct.Tag)
             .FirstOrDefaultAsync(c => c.Id == id);
 
-    public async Task<List<CardInstance>> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text, int take)
+    public async Task<List<CardInstance>> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text, int take,
+        Guid? boxId = null, IReadOnlyCollection<Guid>? groupIds = null)
     {
         // Escape LIKE's wildcards so searching for "50%" or "a_b" matches them literally
         var escaped = text.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
@@ -33,6 +34,10 @@ public class CardRepository : ICardRepository
             .Include(c => c.CardTags)
             .ThenInclude(ct => ct.Tag)
             .Where(c => entityIds.Contains(c.Box.Group.EntityId));
+
+        // Location filters, so a box/group search only ever loads that box's/group's cards
+        if (boxId is { } box) query = query.Where(c => c.BoxId == box);
+        if (groupIds is not null) query = query.Where(c => groupIds.Contains(c.Box.GroupId));
 
         // Empty text = every card (a filter-only search, e.g. all cards with mana value 2-4)
         if (text.Length > 0)

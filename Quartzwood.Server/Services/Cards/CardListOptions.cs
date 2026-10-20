@@ -15,16 +15,18 @@ public record CardListOptions(
     decimal? PriceMin = null,
     decimal? PriceMax = null,
     // Tag names the card must ALL have (anyone's tag with that name counts); null/empty = no tag filter
-    IReadOnlyList<string>? Tags = null
+    IReadOnlyList<string>? Tags = null,
+    // Where the cards are (lists spanning many boxes): one box, or a group and every group inside it.
+    // Unlike the others these narrow the database query itself, before anything is loaded
+    Guid? BoxId = null,
+    Guid? GroupId = null
 )
 {
     private bool HasManaValueFilter => ManaValueMin is not null || ManaValueMax is not null;
     private bool HasPriceFilter => PriceMin is not null || PriceMax is not null;
     private bool HasTagFilter => Tags is { Count: > 0 };
-    public bool HasFilter => HasManaValueFilter || HasPriceFilter || HasTagFilter;
-
-    // Whether filtering or sorting needs the printings' data from scryfall.db (name/added sorts don't)
-    public bool NeedsGameplay => HasFilter || Sort is CardSort.Printed or CardSort.ManaValue or CardSort.Color or CardSort.Price;
+    private bool HasLocationFilter => BoxId is not null || GroupId is not null;
+    public bool HasFilter => HasManaValueFilter || HasPriceFilter || HasTagFilter || HasLocationFilter;
 
     // A card with no mana value / price (no printing in the local data, or no price on Scryfall) can't be
     // shown to be in range, so while that filter is set it's left out

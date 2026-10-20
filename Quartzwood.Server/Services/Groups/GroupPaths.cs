@@ -16,6 +16,23 @@ public class GroupPaths
         _groupsById = groups.ToDictionary(g => g.Id);
     }
 
+    // The group plus every group inside it, at any depth (e.g. "Binders" and each binder group in it).
+    // Empty when the group isn't one of these, so an unknown or someone else's group matches nothing
+    public HashSet<Guid> WithDescendants(Guid groupId)
+    {
+        var result = new HashSet<Guid>();
+        if (!_groupsById.ContainsKey(groupId)) return result;
+
+        var toVisit = new Queue<Guid>([groupId]);
+        while (toVisit.TryDequeue(out var id))
+        {
+            if (!result.Add(id)) continue;   // already seen: a safety net against loops
+            foreach (var child in _groupsById.Values.Where(g => g.ParentGroupId == id))
+                toVisit.Enqueue(child.Id);
+        }
+        return result;
+    }
+
     public List<LocationStepDto> PathTo(Guid groupId)
     {
         if (_cache.TryGetValue(groupId, out var cached)) return cached;
