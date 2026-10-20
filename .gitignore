@@ -225,6 +225,8 @@ __marimo__/
 *.db-wal
 # Card images downloaded from Scryfall (a re-downloadable cache)
 Quartzwood.Server/image-cache/
+# Database backups: full copies of user data (accounts, password hashes), never committed
+Quartzwood.Server/Backups/
 *.sqlite3
 *.pyc
 poetry.lock

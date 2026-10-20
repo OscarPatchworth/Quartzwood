@@ -5,6 +5,7 @@ using Quartzwood.Server.Repositories;
 // Using Services
 using Quartzwood.Server.Services.Access;
 using Quartzwood.Server.Services.Accounts;
+using Quartzwood.Server.Services.Backups;
 using Quartzwood.Server.Services.Boxs;
 using Quartzwood.Server.Services.Cards;
 using Quartzwood.Server.Services.Entities;
@@ -15,7 +16,9 @@ using Quartzwood.Server.Services.Tags;
 using Quartzwood.Server.Services.Trades;
 
 
-var builder = WebApplication.CreateBuilder(args);
+// dotnet run -- --backup-now: take one database backup and exit (e.g. before dotnet ef database update)
+var backupNow = args.Contains("--backup-now");
+var builder = WebApplication.CreateBuilder(args.Where(arg => arg != "--backup-now").ToArray());
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
@@ -95,7 +98,20 @@ builder.Services.AddSingleton<ScryfallImageCache>();
 builder.Services.AddScoped<CollectionTransferService>();
 builder.Services.AddHostedService<ScryfallBulkImporter>();
 
+// Backups of quartzwood.db on a schedule (Backups section of appsettings.json; see BACKUPS.md).
+// One instance is both the background job and what --backup-now calls
+builder.Services.Configure<BackupOptions>(builder.Configuration.GetSection("Backups"));
+builder.Services.AddSingleton<DatabaseBackupService>();
+builder.Services.AddHostedService(services => services.GetRequiredService<DatabaseBackupService>());
+
 var app = builder.Build();
+
+if (backupNow)
+{
+    var path = await app.Services.GetRequiredService<DatabaseBackupService>().BackUpAsync();
+    Console.WriteLine(path is null ? "Nothing to back up: there's no database yet." : $"Backed up the database to {path}");
+    return;
+}
 
 // scryfall.db is a re-downloadable cache, so it's created/upgraded automatically on startup
 // (quartzwood.db, which holds user data, is still only migrated by hand with dotnet ef database update)
