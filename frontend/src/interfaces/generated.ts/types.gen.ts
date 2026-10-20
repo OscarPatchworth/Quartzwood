@@ -86,6 +86,18 @@ export type BulkMoveCardsDto = {
     boxId: string;
 };
 
+export type BulkMoveToNewBoxDto = {
+    cardIds: Array<string>;
+    boxName: string;
+    groupId: string;
+};
+
+export type BulkMoveToNewBoxResultDto = {
+    count: number | string;
+    boxId: string;
+    boxName: string;
+};
+
 export type BulkResultDto = {
     count: number | string;
 };
@@ -158,6 +170,34 @@ export type EntityDto = {
 export type EntityTagHeaderValue = {
     tag?: StringSegment;
     isWeak?: boolean;
+};
+
+export type FetchPlanBoxDto = {
+    boxId: string;
+    boxName: string;
+    groupPath: Array<LocationStepDto>;
+    cards: Array<CardSearchResultDto>;
+};
+
+export type FetchPlanDto = {
+    boxes: Array<FetchPlanBoxDto>;
+    short: Array<FetchShortDto>;
+    cardCount: number | string;
+};
+
+export type FetchPlanRequestDto = {
+    cards: Array<FetchWantDto>;
+};
+
+export type FetchShortDto = {
+    name: string;
+    wanted: number | string;
+    found: number | string;
+};
+
+export type FetchWantDto = {
+    name: string;
+    quantity: number | string;
 };
 
 export type FileContentResult = {
@@ -246,6 +286,31 @@ export type LoginRequest = {
     password: string;
     twoFactorCode?: null | string;
     twoFactorRecoveryCode?: null | string;
+};
+
+export type MassSearchEntryDto = {
+    name: string;
+    wanted: number | string;
+    owned: number | string;
+    scryfallId: null | string;
+    isKnownCard: boolean;
+    stacks: Array<CardSearchResultDto>;
+};
+
+export type MassSearchRequestDto = {
+    text: string;
+};
+
+export type MassSearchResponseDto = {
+    format: string;
+    entries: Array<MassSearchEntryDto>;
+    skipped: Array<MassSearchSkippedLineDto>;
+};
+
+export type MassSearchSkippedLineDto = {
+    lineNumber: number | string;
+    text: string;
+    reason: string;
 };
 
 export type ProblemDetails = {
@@ -891,6 +956,56 @@ export type GetApiCardsSearchResponses = {
 
 export type GetApiCardsSearchResponse = GetApiCardsSearchResponses[keyof GetApiCardsSearchResponses];
 
+export type PostApiCardsMassSearchData = {
+    body: MassSearchRequestDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/mass-search';
+};
+
+export type PostApiCardsMassSearchErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiCardsMassSearchError = PostApiCardsMassSearchErrors[keyof PostApiCardsMassSearchErrors];
+
+export type PostApiCardsMassSearchResponses = {
+    /**
+     * OK
+     */
+    200: MassSearchResponseDto;
+};
+
+export type PostApiCardsMassSearchResponse = PostApiCardsMassSearchResponses[keyof PostApiCardsMassSearchResponses];
+
+export type PostApiCardsMassSearchPlanData = {
+    body: FetchPlanRequestDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/mass-search/plan';
+};
+
+export type PostApiCardsMassSearchPlanErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+};
+
+export type PostApiCardsMassSearchPlanError = PostApiCardsMassSearchPlanErrors[keyof PostApiCardsMassSearchPlanErrors];
+
+export type PostApiCardsMassSearchPlanResponses = {
+    /**
+     * OK
+     */
+    200: FetchPlanDto;
+};
+
+export type PostApiCardsMassSearchPlanResponse = PostApiCardsMassSearchPlanResponses[keyof PostApiCardsMassSearchPlanResponses];
+
 export type DeleteApiCardsByIdData = {
     body?: never;
     path: {
@@ -1153,6 +1268,35 @@ export type PostApiCardsBulkTagsResponses = {
 };
 
 export type PostApiCardsBulkTagsResponse = PostApiCardsBulkTagsResponses[keyof PostApiCardsBulkTagsResponses];
+
+export type PostApiCardsBulkMoveToNewBoxData = {
+    body: BulkMoveToNewBoxDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/bulk/move-to-new-box';
+};
+
+export type PostApiCardsBulkMoveToNewBoxErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiCardsBulkMoveToNewBoxError = PostApiCardsBulkMoveToNewBoxErrors[keyof PostApiCardsBulkMoveToNewBoxErrors];
+
+export type PostApiCardsBulkMoveToNewBoxResponses = {
+    /**
+     * OK
+     */
+    200: BulkMoveToNewBoxResultDto;
+};
+
+export type PostApiCardsBulkMoveToNewBoxResponse = PostApiCardsBulkMoveToNewBoxResponses[keyof PostApiCardsBulkMoveToNewBoxResponses];
 
 export type PostApiCardsBulkDeleteData = {
     body: BulkCardIdsDto;

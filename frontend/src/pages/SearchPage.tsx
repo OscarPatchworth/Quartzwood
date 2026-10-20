@@ -13,6 +13,8 @@ import { withPopup } from '../components/hocs/withPopup.tsx'
 import { RightLongPopupShape } from '../components/hocs/Popups/shapes/RightLongPopupShape.tsx'
 import { CardEditController } from '../components/Cards/CardEditController.tsx'
 import { TagList } from '../components/Tags/TagList'
+import { MassSearch } from '../components/MassSearch/MassSearch'
+import { LoadingIndicator } from '../components/misc/LoadingIndicator.tsx'
 
 // The same details/edit panel as the box page
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
@@ -36,8 +38,49 @@ function singleCard(result: CardSearchResultDto): GroupedCardDto {
 
 const MIN_LENGTH = 2
 
-// Searches every card the user owns and shows where each one is
+type Mode = 'search' | 'list'
+
+// Two ways to search your collection: by name as you type, or a whole list of cards at once (?mode=list)
 export default function SearchPage() {
+    const { account } = useAuth()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const mode: Mode = searchParams.get('mode') === 'list' ? 'list' : 'search'
+
+    // Kept in the URL with the other parameters (the name search's ?q= stays for when you switch back)
+    function changeMode(next: Mode) {
+        setSearchParams(current => {
+            const params = new URLSearchParams(current)
+            if (next === 'list') params.set('mode', 'list')
+            else params.delete('mode')
+            return params
+        })
+    }
+
+    const tabs: [Mode, string][] = [['search', 'Search'], ['list', 'Find a list']]
+
+    return (
+        <div className="p-8">
+            <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
+            <div role="tablist" aria-label="Search mode" className="mb-4 flex gap-1 border-b border-slate-200">
+                {tabs.map(([value, label]) => (
+                    <button key={value} type="button" role="tab" aria-selected={mode === value} onClick={() => changeMode(value)}
+                        className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${mode === value
+                            ? 'border-sky-800 text-sky-900'
+                            : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
+                        {label}
+                    </button>
+                ))}
+            </div>
+            {mode === 'list'
+                // key: a different user on this browser gets their own saved list (and fresh state)
+                ? account ? <MassSearch key={account.id} userId={account.id} /> : <LoadingIndicator />
+                : <CollectionSearch />}
+        </div>
+    )
+}
+
+// Searches every card the user owns by name or set code, and shows where each one is
+function CollectionSearch() {
     // The search lives in the URL (?q=...), so Back from a box returns to the same results
     const [searchParams, setSearchParams] = useSearchParams()
     const [text, setText] = useState(searchParams.get('q') ?? '')
@@ -92,7 +135,7 @@ export default function SearchPage() {
     }
 
     return (
-        <div className="p-8">
+        <div>
             {openCard && (
                 <CardDetailsPopup
                     show
@@ -103,8 +146,6 @@ export default function SearchPage() {
                     onTagsChanged={async () => setRefreshCount(count => count + 1)}
                 />
             )}
-
-            <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
 
             <div className="flex max-w-2xl items-center gap-2">
                 <div className="min-w-0 flex-1">
