@@ -241,6 +241,9 @@ namespace Quartzwood.Server.Migrations
                     b.Property<DateOnly?>("AcquiredDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("AddedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("AlterArtist")
                         .HasColumnType("TEXT");
 

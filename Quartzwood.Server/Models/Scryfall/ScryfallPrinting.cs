@@ -25,6 +25,17 @@ public class ScryfallPrinting
     public string? PromoTypes { get; set; }
     public string? Layout { get; set; }
 
+    // Gameplay data, for sorting/filtering a collection: looked up by each card's ScryfallId when sorting
+    // Mana value ("cmc"): a double because a few joke cards cost half a mana
+    public double? ManaValue { get; set; }
+    // e.g. "{2}{U}{U}"; double-faced cards: the front face's
+    public string? ManaCost { get; set; }
+    // Letters in WUBRG order, e.g. "UR"; "" = colourless; null = unknown
+    public string? Colors { get; set; }
+    public string? ColorIdentity { get; set; }
+    // e.g. "Legendary Creature — Elf Druid"; double-faced: "Front type // Back type"
+    public string? TypeLine { get; set; }
+
     // cards.scryfall.io CDN URLs (front face for double-faced cards)
     public string? ImageSmall { get; set; }
     public string? ImageNormal { get; set; }

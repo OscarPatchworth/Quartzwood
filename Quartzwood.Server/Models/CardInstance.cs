@@ -41,6 +41,8 @@ public class CardInstance
     public DateOnly? AcquiredDate { get; set; }
     public decimal? PurchasePrice { get; set; }
     public string? Notes { get; set; }
+    // When it was added to Quartzwood (null for cards added before this was recorded)
+    public DateTime? AddedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
     public ICollection<CardTag> CardTags { get; set; } = new List<CardTag>();

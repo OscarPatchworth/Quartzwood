@@ -10,4 +10,6 @@ public class ScryfallImportState
     // When we last checked/imported: the refresh interval counts from here
     public DateTimeOffset? ImportedAt { get; set; }
     public int CardCount { get; set; }
+    // Which ScryfallBulkImporter.DataVersion filled the table: an older one means columns are missing, re-import
+    public int DataVersion { get; set; }
 }

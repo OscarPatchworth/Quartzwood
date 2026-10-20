@@ -29,6 +29,9 @@ namespace Quartzwood.Server.Migrations.Scryfall
                     b.Property<int>("CardCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("DataVersion")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTimeOffset?>("ImportedAt")
                         .HasColumnType("TEXT");
 
@@ -46,6 +49,12 @@ namespace Quartzwood.Server.Migrations.Scryfall
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE");
+
+                    b.Property<string>("ColorIdentity")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Colors")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FrontFaceName")
                         .HasColumnType("TEXT")
@@ -69,6 +78,12 @@ namespace Quartzwood.Server.Migrations.Scryfall
                     b.Property<string>("Layout")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ManaCost")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("ManaValue")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -86,6 +101,9 @@ namespace Quartzwood.Server.Migrations.Scryfall
                         .UseCollation("NOCASE");
 
                     b.Property<string>("SetType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TypeLine")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

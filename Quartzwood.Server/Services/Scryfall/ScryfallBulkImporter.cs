@@ -16,6 +16,10 @@ namespace Quartzwood.Server.Services.Scryfall;
 public class ScryfallBulkImporter : BackgroundService
 {
     public const string HttpClientName = "ScryfallBulk";
+    // Bump this when the importer starts keeping a new field: the next check re-imports straight away
+    // instead of waiting up to RefreshDays for the new columns to be filled.
+    // 2 = mana value, mana cost, colours, colour identity, type line
+    public const int DataVersion = 2;
 
     private const string BulkInfoUrl = "https://api.scryfall.com/bulk-data/default-cards";
     // How often to check whether a refresh is due (cheap: one small request at most)
@@ -81,7 +85,8 @@ public class ScryfallBulkImporter : BackgroundService
         }
 
         var hasData = state.CardCount > 0;
-        if (hasData && state.ImportedAt is not null
+        var isCurrentVersion = state.DataVersion >= DataVersion;
+        if (hasData && isCurrentVersion && state.ImportedAt is not null
             && DateTimeOffset.UtcNow - state.ImportedAt < TimeSpan.FromDays(_options.RefreshDays))
         {
             return true;
@@ -92,7 +97,7 @@ public class ScryfallBulkImporter : BackgroundService
             ?? throw new InvalidOperationException("Empty bulk-data response from Scryfall.");
 
         // Scryfall hasn't published anything newer than what we have: just restart the clock
-        if (hasData && state.BulkUpdatedAt is not null && bulk.updated_at <= state.BulkUpdatedAt)
+        if (hasData && isCurrentVersion && state.BulkUpdatedAt is not null && bulk.updated_at <= state.BulkUpdatedAt)
         {
             _logger.LogInformation("Scryfall data is already the latest ({UpdatedAt})", bulk.updated_at);
             state.ImportedAt = DateTimeOffset.UtcNow;
@@ -106,6 +111,7 @@ public class ScryfallBulkImporter : BackgroundService
         state.BulkUpdatedAt = bulk.updated_at;
         state.ImportedAt = DateTimeOffset.UtcNow;
         state.CardCount = count;
+        state.DataVersion = DataVersion;
         await db.SaveChangesAsync(ct);
 
         _logger.LogInformation("Scryfall import finished: {Count} printings", count);
@@ -141,13 +147,16 @@ public class ScryfallBulkImporter : BackgroundService
         insert.CommandText = """
             INSERT OR REPLACE INTO Printings
                 (Id, Name, FrontFaceName, SetCode, SetType, CollectorNumber, Lang, ReleasedAt,
-                 IsPaper, IsPromo, PromoTypes, Layout, ImageSmall, ImageNormal)
+                 IsPaper, IsPromo, PromoTypes, Layout, ImageSmall, ImageNormal,
+                 ManaValue, ManaCost, Colors, ColorIdentity, TypeLine)
             VALUES
                 ($id, $name, $front, $set, $setType, $number, $lang, $released,
-                 $paper, $promo, $promoTypes, $layout, $small, $normal)
+                 $paper, $promo, $promoTypes, $layout, $small, $normal,
+                 $manaValue, $manaCost, $colors, $colorIdentity, $typeLine)
             """;
         var parameters = new[] { "$id", "$name", "$front", "$set", "$setType", "$number", "$lang", "$released",
-                                 "$paper", "$promo", "$promoTypes", "$layout", "$small", "$normal" }
+                                 "$paper", "$promo", "$promoTypes", "$layout", "$small", "$normal",
+                                 "$manaValue", "$manaCost", "$colors", "$colorIdentity", "$typeLine" }
             .Select(name => insert.Parameters.Add(new SqliteParameter { ParameterName = name }))
             .ToArray();
         insert.Prepare();
@@ -160,13 +169,14 @@ public class ScryfallBulkImporter : BackgroundService
             var card = JsonSerializer.Deserialize<BulkCard>(line);
             if (card is null) continue;
 
-            // Double-faced cards keep their images on the faces instead of the card
-            var images = card.image_uris ?? card.card_faces?.FirstOrDefault()?.image_uris;
+            // Double-faced cards keep their images (and colours, mana cost) on the faces instead of the card
+            var front = card.card_faces?.FirstOrDefault();
+            var images = card.image_uris ?? front?.image_uris;
             object?[] values =
             [
                 card.id,
                 card.name,
-                card.card_faces?.FirstOrDefault()?.name,
+                front?.name,
                 card.set,
                 card.set_type,
                 card.collector_number,
@@ -178,6 +188,12 @@ public class ScryfallBulkImporter : BackgroundService
                 card.layout,
                 images?.small,
                 images?.normal,
+                // Reversible cards (e.g. "Sol Ring // Sol Ring") have these on the faces only
+                card.cmc ?? front?.cmc,
+                card.mana_cost ?? front?.mana_cost,
+                ToWubrg(card.colors ?? front?.colors),
+                ToWubrg(card.color_identity),
+                card.type_line ?? front?.type_line,
             ];
             for (var i = 0; i < values.Length; i++)
                 parameters[i].Value = values[i] ?? DBNull.Value;
@@ -190,10 +206,15 @@ public class ScryfallBulkImporter : BackgroundService
         return count;
     }
 
+    // ["R", "U"] -> "UR": always in WUBRG order, so equal colour sets are equal strings. [] -> "" (colourless)
+    private static string? ToWubrg(string[]? colors)
+        => colors is null ? null : string.Concat("WUBRG".Where(letter => colors.Contains(letter.ToString())));
+
     // Only the fields we keep; System.Text.Json ignores the rest of each (large) card object
     private record BulkDataInfo(DateTimeOffset updated_at, string jsonl_download_uri);
     private record BulkImageUris(string? small, string? normal);
-    private record BulkCardFace(string? name, BulkImageUris? image_uris);
+    private record BulkCardFace(string? name, BulkImageUris? image_uris, string? mana_cost, string[]? colors,
+        string? type_line, double? cmc);
     private record BulkCard(
         string id,
         string name,
@@ -207,6 +228,11 @@ public class ScryfallBulkImporter : BackgroundService
         string[]? promo_types,
         string? layout,
         BulkImageUris? image_uris,
-        BulkCardFace[]? card_faces
+        BulkCardFace[]? card_faces,
+        double? cmc,
+        string? mana_cost,
+        string[]? colors,
+        string[]? color_identity,
+        string? type_line
     );
 }
