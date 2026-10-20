@@ -7,6 +7,8 @@ import { useDebouncedSearch } from '../hooks/useDebouncedSearch'
 import { SearchInput } from '../components/misc/SearchInput'
 import { SortMenu } from '../components/misc/SortMenu'
 import { useCardSort } from '../hooks/useCardSort'
+import { FilterMenu } from '../components/misc/FilterMenu'
+import { useCardFilter, hasFilter, describeFilter } from '../hooks/useCardFilter'
 
 const MIN_LENGTH = 2
 
@@ -16,13 +18,17 @@ export default function SearchPage() {
     const [searchParams, setSearchParams] = useSearchParams()
     const [text, setText] = useState(searchParams.get('q') ?? '')
     const { sort, desc, setSort } = useCardSort()
+    const { filter, setFilter } = useCardFilter()
+    const { mvMin, mvMax } = filter
+    const isFiltered = hasFilter(filter)
 
     // Debounce, ignoring out-of-date answers and errors all live in the shared hook.
-    // key: changing the sort runs the search again (the server sorts every match, then returns the first 200)
+    // key: changing the sort or filter runs the search again (the server filters and sorts every match,
+    // then returns the first 200). With a filter, any text works, even none: "every card with mana value 2-4"
     const { result: response, resultQuery, errorMessage, isSearching, isTooShort } = useDebouncedSearch(
         text,
-        async query => (await getApiCardsSearch({ query: { q: query, sort, desc } })).data,
-        { minLength: MIN_LENGTH, key: `${sort}|${desc}` },
+        async query => (await getApiCardsSearch({ query: { q: query, sort, desc, mvMin, mvMax } })).data,
+        { minLength: isFiltered ? 0 : MIN_LENGTH, key: `${sort}|${desc}|${mvMin}|${mvMax}` },
     )
     const query = text.trim()
 
@@ -68,21 +74,24 @@ export default function SearchPage() {
                         autoFocus
                     />
                 </div>
+                <FilterMenu value={filter} onChange={setFilter} />
                 <SortMenu value={{ sort, desc }} onChange={setSort} />
             </div>
 
             <div className="mt-2 min-h-5 text-sm text-slate-600" aria-live="polite">
                 {isTooShort ? (
-                    query.length > 0 && `Type at least ${MIN_LENGTH} characters.`
+                    query.length > 0 && `Type at least ${MIN_LENGTH} characters, or set a filter.`
                 ) : errorMessage ? (
                     <span role="alert" className="text-rose-700">{errorMessage}</span>
                 ) : isSearching && !response ? (
                     "Searching..."
                 ) : response && results.length === 0 ? (
-                    `No cards matching "${resultQuery}".`
+                    // e.g. 'No cards matching "bolt" with MV 5+.' or, with no text, 'No cards with MV 5+.'
+                    `No cards ${resultQuery ? `matching "${resultQuery}"` : ""}${resultQuery && isFiltered ? " " : ""}${isFiltered ? `with ${describeFilter(filter)}` : ""}.`
                 ) : response && (
                     <>
                         {copyCount} {copyCount === 1 ? "card" : "cards"} in {results.length} {results.length === 1 ? "place" : "places"}
+                        {isFiltered && ` with ${describeFilter(filter)}`}
                         {response.hasMore && " (showing the first matches only: try a longer search)"}
                     </>
                 )}

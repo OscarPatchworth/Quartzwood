@@ -7,7 +7,7 @@ public interface ICardRepository
     Task<CardInstance?> GetByIdAsync(Guid id);
     Task<IEnumerable<CardInstance>> GetAllAsync();
     Task<IEnumerable<CardInstance>> GetByBoxAsync(Guid boxId);
-    // Cards in the given Entities whose name contains the text, or whose set code is it. Includes Box
+    // Cards in the given Entities whose name contains the text, or whose set code is it (empty text = all). Includes Box
     Task<List<CardInstance>> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text, int take);
     Task AddRangeAsync(IEnumerable<CardInstance> cards);
     Task<CardInstance> UpdateAsync(CardInstance card);

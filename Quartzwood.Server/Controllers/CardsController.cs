@@ -23,17 +23,24 @@ public class CardsController : ControllerBase
     }
 
     // Searches every card in the Entities you're a member of, by name (partial) or set code (exact).
-    // sort: name (default), added, printed, manaValue, color; desc=true reverses it
+    // sort: name (default), added, printed, manaValue, color; desc=true reverses it.
+    // mvMin/mvMax: mana value range (inclusive). With a filter, the text can be short or empty (every card in range)
     [HttpGet("search")]
     [ProducesResponseType(typeof(CardSearchResponseDto), 200)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] string? sort, [FromQuery] bool desc = false)
+    public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] string? sort, [FromQuery] bool desc = false,
+        [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null)
     {
+        if (CardListOptions.Validate(mvMin, mvMax) is { } error) return BadRequest(error);
+        var options = new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax);
+
         var text = q?.Trim() ?? string.Empty;
-        if (text.Length < 2) return BadRequest("Search for at least 2 characters.");
+        // The 2-character minimum stops a 1-letter search matching half the collection; a filter narrows it anyway
+        if (text.Length < 2 && !options.HasFilter)
+            return BadRequest("Search for at least 2 characters, or set a filter.");
 
         var entityIds = await _access.GetEntityIdsAsync();
-        return Ok(await _query.SearchAsync(entityIds, text, CardSorting.Parse(sort), desc));
+        return Ok(await _query.SearchAsync(entityIds, text, options));
     }
 
     // Cards in Entities you're not a member of are reported as 404, same as ones that don't exist
@@ -58,14 +65,17 @@ public class CardsController : ControllerBase
         return Ok(await _query.GetByBoxAsync(boxId));
     }
 
-    // Same sort options as search
+    // Same sort and filter options as search
     [HttpGet("by-box/{boxId}/grouped")]
     [ProducesResponseType(typeof(IEnumerable<GroupedCardDto>), 200)]
+    [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByBoxGrouped(Guid boxId, [FromQuery] string? sort, [FromQuery] bool desc = false)
+    public async Task<IActionResult> GetByBoxGrouped(Guid boxId, [FromQuery] string? sort, [FromQuery] bool desc = false,
+        [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null)
     {
         if (!await _access.CanAccessBoxAsync(boxId)) return NotFound();
-        return Ok(await _query.GetByBoxGroupedAsync(boxId, CardSorting.Parse(sort), desc));
+        if (CardListOptions.Validate(mvMin, mvMax) is { } error) return BadRequest(error);
+        return Ok(await _query.GetByBoxGroupedAsync(boxId, new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax)));
     }
 
     // Adds dto.Quantity identical copies (default 1) and returns them all

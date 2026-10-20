@@ -802,6 +802,8 @@ export type GetApiCardsSearchData = {
         q?: string;
         sort?: string;
         desc?: boolean;
+        mvMin?: number | string;
+        mvMax?: number | string;
     };
     url: '/api/cards/search';
 };
@@ -944,11 +946,17 @@ export type GetApiCardsByBoxByBoxIdGroupedData = {
     query?: {
         sort?: string;
         desc?: boolean;
+        mvMin?: number | string;
+        mvMax?: number | string;
     };
     url: '/api/cards/by-box/{boxId}/grouped';
 };
 
 export type GetApiCardsByBoxByBoxIdGroupedErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
     /**
      * Not Found
      */

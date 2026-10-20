@@ -10,8 +10,9 @@ public class CardQueryService : ICardQueryService
 {
     // Most rows (stacks of identical cards) one search returns: enough to browse
     private const int SearchLimit = 200;
-    // Most cards one search loads to sort: a search matching more than this should be narrowed
-    private const int SearchLoadLimit = 5000;
+    // Most cards one search loads to filter and sort: enough for a large collection to be searched by
+    // filters alone (no text), ~0.2s. A search matching more than this should be narrowed
+    private const int SearchLoadLimit = 20000;
 
     private readonly ICardRepository _cards;
     private readonly IGroupRepository _groups;
@@ -24,8 +25,9 @@ public class CardQueryService : ICardQueryService
         _scryfall = scryfall;
     }
 
+    // Empty text = every card (only allowed with a filter: the controller checks)
     public async Task<CardSearchResponseDto> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text,
-        CardSort sort, bool descending)
+        CardListOptions options)
     {
         // Ask for one extra card: if it comes back, there are more matches than we load
         var cards = await _cards.SearchAsync(entityIds, text, SearchLoadLimit + 1);
@@ -73,9 +75,9 @@ public class CardQueryService : ICardQueryService
             .OrderBy(s => string.Join("/", s.Row.GroupPath.Select(step => step.Name)) + "/" + s.Row.BoxName)
             .ToList();
 
-        var sorted = await SortAsync(stacks, s => s.Row.ScryfallId,
+        var sorted = await FilterAndSortAsync(stacks, s => s.Row.ScryfallId,
             (s, gameplay) => new CardSortFields(s.Row.Name, s.AddedAt, s.Row.SetCode, s.Row.SetNumber, gameplay),
-            sort, descending);
+            options);
 
         var hasMore = tooManyToLoad || sorted.Count > SearchLimit;
         return new CardSearchResponseDto(sorted.Take(SearchLimit).Select(s => s.Row).ToList(), hasMore);
@@ -118,7 +120,7 @@ public class CardQueryService : ICardQueryService
         c.CardTags.Select(ct => ct.Tag.Name)
     );
 
-    public async Task<IEnumerable<GroupedCardDto>> GetByBoxGroupedAsync(Guid boxId, CardSort sort, bool descending)
+    public async Task<IEnumerable<GroupedCardDto>> GetByBoxGroupedAsync(Guid boxId, CardListOptions options)
     {
         var cards = await _cards.GetByBoxAsync(boxId);
 
@@ -150,24 +152,25 @@ public class CardQueryService : ICardQueryService
             ))
             .ToList();
 
-        var sorted = await SortAsync(stacks, s => s.Row.ScryfallId,
+        var sorted = await FilterAndSortAsync(stacks, s => s.Row.ScryfallId,
             (s, gameplay) => new CardSortFields(s.Row.Name, s.AddedAt, s.Row.SetCode, s.Row.SetNumber, gameplay),
-            sort, descending);
+            options);
         return sorted.Select(s => s.Row);
     }
 
-    // Looks up every stack's printing in scryfall.db in ONE batched query, then sorts with CardSorting's rules
-    private async Task<List<T>> SortAsync<T>(List<T> stacks, Func<T, string?> scryfallId,
-        Func<T, ScryfallGameplay?, CardSortFields> fields, CardSort sort, bool descending)
+    // Looks up every stack's printing in scryfall.db in ONE batched query, drops the stacks the filter
+    // rules out, then sorts the rest with CardSorting's rules
+    private async Task<List<T>> FilterAndSortAsync<T>(List<T> stacks, Func<T, string?> scryfallId,
+        Func<T, ScryfallGameplay?, CardSortFields> fields, CardListOptions options)
     {
-        // Sorting by name or added date doesn't need anything from scryfall.db: skip the lookup
-        var needsGameplay = sort is CardSort.Printed or CardSort.ManaValue or CardSort.Color;
-        var gameplay = needsGameplay
+        // No filter + sorting by name or added date: nothing needed from scryfall.db, skip the lookup
+        var gameplay = options.NeedsGameplay
             ? await _scryfall.GetGameplayByIdsAsync(stacks.Select(scryfallId).OfType<string>())
             : [];
+        ScryfallGameplay? GameplayOf(T stack) => scryfallId(stack) is { } id ? gameplay.GetValueOrDefault(id) : null;
 
-        return CardSorting.Sort(stacks,
-            stack => fields(stack, scryfallId(stack) is { } id ? gameplay.GetValueOrDefault(id) : null),
-            sort, descending);
+        return CardSorting.Sort(stacks.Where(stack => options.Matches(GameplayOf(stack))),
+            stack => fields(stack, GameplayOf(stack)),
+            options.Sort, options.Descending);
     }
 }

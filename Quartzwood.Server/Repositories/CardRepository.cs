@@ -27,12 +27,17 @@ public class CardRepository : ICardRepository
 
         // One query: Entity -> its Groups -> their Boxes -> their Cards, all via indexes,
         // then the name check runs only on those cards. SQLite's LIKE is case-insensitive
-        return await _context.Cards
+        var query = _context.Cards
             .AsNoTracking()
             .Include(c => c.Box)
-            .Where(c => entityIds.Contains(c.Box.Group.EntityId))
-            .Where(c => EF.Functions.Like(c.Name, pattern, @"\")
-                || EF.Functions.Like(c.SetCode, escaped, @"\"))
+            .Where(c => entityIds.Contains(c.Box.Group.EntityId));
+
+        // Empty text = every card (a filter-only search, e.g. all cards with mana value 2-4)
+        if (text.Length > 0)
+            query = query.Where(c => EF.Functions.Like(c.Name, pattern, @"\")
+                || EF.Functions.Like(c.SetCode, escaped, @"\"));
+
+        return await query
             .OrderBy(c => c.Name)
             .Take(take)
             .ToListAsync();

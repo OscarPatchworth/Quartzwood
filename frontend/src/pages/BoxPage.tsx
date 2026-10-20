@@ -20,6 +20,8 @@ import { BulkActionBar } from '../components/Cards/BulkActionBar'
 import { useCardSelection } from '../hooks/useCardSelection'
 import { useCardSort } from '../hooks/useCardSort'
 import { SortMenu } from '../components/misc/SortMenu'
+import { FilterMenu } from '../components/misc/FilterMenu'
+import { useCardFilter, hasFilter } from '../hooks/useCardFilter'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -36,8 +38,10 @@ export default function BoxPage() {
     const [selectedCards, setSelectedCards] = useState<GroupedCardDto>()
     // Select mode for mass edit/delete: clicking a card ticks it instead of opening the edit panel
     const selection = useCardSelection(cards)
-    // Sorted by the server; the choice lives in the URL (?sort=...&desc=true)
+    // Filtered and sorted by the server; both live in the URL (?sort=...&desc=true&mvMin=...&mvMax=...)
     const { sort, desc, setSort } = useCardSort()
+    const { filter, setFilter } = useCardFilter()
+    const { mvMin, mvMax } = filter
 
     function clickCard(groupedCard: GroupedCardDto) {
         if (selection.isSelecting) selection.toggleStack(groupedCard)
@@ -58,7 +62,7 @@ export default function BoxPage() {
 
     async function refreshCardsAfterMutation() {
         if (!id) return
-        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc } })
+        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, mvMin, mvMax } })
         setCards(response.data)
         setSelectedCards(undefined)
         setShowRightPanel(false)
@@ -96,16 +100,16 @@ export default function BoxPage() {
             .finally(() => setLoading(false))
     }, [id])
 
-    // Reloads whenever the box or the sort changes
+    // Reloads whenever the box, the sort or the filter changes
     useEffect(() => {
         if (!id) return
         // If the sort changes again before this answer arrives, the cleanup below marks it stale,
         // so a slow older answer can't replace a newer one
         let isCurrent = true
-        getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc } })
+        getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, mvMin, mvMax } })
             .then(res => { if (isCurrent) setCards(res.data) })
         return () => { isCurrent = false }
-    }, [id, sort, desc])
+    }, [id, sort, desc, mvMin, mvMax])
 
     return loading ? 
     (<LoadingIndicator />) : 
@@ -140,6 +144,7 @@ export default function BoxPage() {
                                 boxId={box.id}
                                 onSuccess={refreshCardsAfterMutation}
                             />
+                            <FilterMenu value={filter} onChange={setFilter} />
                             <SortMenu value={{ sort, desc }} onChange={setSort} />
                             <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
                             <ExportMenu kind="box" id={box.id} />
@@ -165,6 +170,14 @@ export default function BoxPage() {
 
             {/* Extra bottom padding in select mode so the floating bar never covers the last row */}
             <div className={`pl-8 ${selection.isSelecting ? "pb-24" : ""}`}>
+                {cards.length === 0 && hasFilter(filter) && (
+                    <p className="py-8 text-sm text-slate-600">
+                        No cards in this box match the filter.{' '}
+                        <button type="button" onClick={() => setFilter({})} className="font-semibold text-sky-800 hover:underline">
+                            Clear filter
+                        </button>
+                    </p>
+                )}
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                     {cards.map(c => {
                         const isSelected = selection.isSelecting && selection.isStackSelected(c)
