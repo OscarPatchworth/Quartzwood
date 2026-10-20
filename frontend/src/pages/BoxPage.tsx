@@ -38,10 +38,9 @@ export default function BoxPage() {
     const [selectedCards, setSelectedCards] = useState<GroupedCardDto>()
     // Select mode for mass edit/delete: clicking a card ticks it instead of opening the edit panel
     const selection = useCardSelection(cards)
-    // Filtered and sorted by the server; both live in the URL (?sort=...&desc=true&mvMin=...&mvMax=...)
+    // Filtered and sorted by the server; both live in the URL (?sort=...&desc=true&mvMin=...&priceMax=...)
     const { sort, desc, setSort } = useCardSort()
     const { filter, setFilter } = useCardFilter()
-    const { mvMin, mvMax } = filter
 
     function clickCard(groupedCard: GroupedCardDto) {
         if (selection.isSelecting) selection.toggleStack(groupedCard)
@@ -62,7 +61,7 @@ export default function BoxPage() {
 
     async function refreshCardsAfterMutation() {
         if (!id) return
-        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, mvMin, mvMax } })
+        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, ...filter } })
         setCards(response.data)
         setSelectedCards(undefined)
         setShowRightPanel(false)
@@ -106,10 +105,10 @@ export default function BoxPage() {
         // If the sort changes again before this answer arrives, the cleanup below marks it stale,
         // so a slow older answer can't replace a newer one
         let isCurrent = true
-        getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, mvMin, mvMax } })
+        getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, ...filter } })
             .then(res => { if (isCurrent) setCards(res.data) })
         return () => { isCurrent = false }
-    }, [id, sort, desc, mvMin, mvMax])
+    }, [id, sort, desc, filter])
 
     return loading ? 
     (<LoadingIndicator />) : 

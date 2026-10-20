@@ -24,15 +24,17 @@ public class CardsController : ControllerBase
 
     // Searches every card in the Entities you're a member of, by name (partial) or set code (exact).
     // sort: name (default), added, printed, manaValue, color; desc=true reverses it.
-    // mvMin/mvMax: mana value range (inclusive). With a filter, the text can be short or empty (every card in range)
+    // mvMin/mvMax: mana value range, priceMin/priceMax: price range (USD, the card's foil type), all inclusive.
+    // With a filter, the text can be short or empty (every card in range)
     [HttpGet("search")]
     [ProducesResponseType(typeof(CardSearchResponseDto), 200)]
     [ProducesResponseType(400)]
     public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] string? sort, [FromQuery] bool desc = false,
-        [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null)
+        [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null,
+        [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null)
     {
-        if (CardListOptions.Validate(mvMin, mvMax) is { } error) return BadRequest(error);
-        var options = new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax);
+        if (CardListOptions.Validate(mvMin, mvMax, priceMin, priceMax) is { } error) return BadRequest(error);
+        var options = new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax, priceMin, priceMax);
 
         var text = q?.Trim() ?? string.Empty;
         // The 2-character minimum stops a 1-letter search matching half the collection; a filter narrows it anyway
@@ -71,11 +73,13 @@ public class CardsController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByBoxGrouped(Guid boxId, [FromQuery] string? sort, [FromQuery] bool desc = false,
-        [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null)
+        [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null,
+        [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null)
     {
         if (!await _access.CanAccessBoxAsync(boxId)) return NotFound();
-        if (CardListOptions.Validate(mvMin, mvMax) is { } error) return BadRequest(error);
-        return Ok(await _query.GetByBoxGroupedAsync(boxId, new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax)));
+        if (CardListOptions.Validate(mvMin, mvMax, priceMin, priceMax) is { } error) return BadRequest(error);
+        return Ok(await _query.GetByBoxGroupedAsync(boxId,
+            new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax, priceMin, priceMax)));
     }
 
     // Adds dto.Quantity identical copies (default 1) and returns them all

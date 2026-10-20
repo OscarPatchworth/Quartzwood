@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
@@ -19,11 +20,13 @@ public class ScryfallBulkImporter : BackgroundService
     // Bump this when the importer starts keeping a new field: the next check re-imports straight away
     // instead of waiting up to RefreshDays for the new columns to be filled.
     // 2 = mana value, mana cost, colours, colour identity, type line
-    public const int DataVersion = 2;
+    // 3 = USD prices
+    public const int DataVersion = 3;
 
     private const string BulkInfoUrl = "https://api.scryfall.com/bulk-data/default-cards";
-    // How often to check whether a refresh is due (cheap: one small request at most)
-    private static readonly TimeSpan CheckInterval = TimeSpan.FromHours(24);
+    // How often to check whether a refresh is due (cheap: one small request at most). Hourly, so a daily
+    // refresh happens within an hour of being due (a 24h check could just miss it and wait another day)
+    private static readonly TimeSpan CheckInterval = TimeSpan.FromHours(1);
     // Retry sooner while there's no local data at all (e.g. the server started offline)
     private static readonly TimeSpan RetryWithoutData = TimeSpan.FromHours(1);
 
@@ -148,15 +151,18 @@ public class ScryfallBulkImporter : BackgroundService
             INSERT OR REPLACE INTO Printings
                 (Id, Name, FrontFaceName, SetCode, SetType, CollectorNumber, Lang, ReleasedAt,
                  IsPaper, IsPromo, PromoTypes, Layout, ImageSmall, ImageNormal,
-                 ManaValue, ManaCost, Colors, ColorIdentity, TypeLine)
+                 ManaValue, ManaCost, Colors, ColorIdentity, TypeLine,
+                 PriceUsd, PriceUsdFoil, PriceUsdEtched)
             VALUES
                 ($id, $name, $front, $set, $setType, $number, $lang, $released,
                  $paper, $promo, $promoTypes, $layout, $small, $normal,
-                 $manaValue, $manaCost, $colors, $colorIdentity, $typeLine)
+                 $manaValue, $manaCost, $colors, $colorIdentity, $typeLine,
+                 $priceUsd, $priceUsdFoil, $priceUsdEtched)
             """;
         var parameters = new[] { "$id", "$name", "$front", "$set", "$setType", "$number", "$lang", "$released",
                                  "$paper", "$promo", "$promoTypes", "$layout", "$small", "$normal",
-                                 "$manaValue", "$manaCost", "$colors", "$colorIdentity", "$typeLine" }
+                                 "$manaValue", "$manaCost", "$colors", "$colorIdentity", "$typeLine",
+                                 "$priceUsd", "$priceUsdFoil", "$priceUsdEtched" }
             .Select(name => insert.Parameters.Add(new SqliteParameter { ParameterName = name }))
             .ToArray();
         insert.Prepare();
@@ -194,6 +200,9 @@ public class ScryfallBulkImporter : BackgroundService
                 ToWubrg(card.colors ?? front?.colors),
                 ToWubrg(card.color_identity),
                 card.type_line ?? front?.type_line,
+                ParsePrice(card.prices?.usd),
+                ParsePrice(card.prices?.usd_foil),
+                ParsePrice(card.prices?.usd_etched),
             ];
             for (var i = 0; i < values.Length; i++)
                 parameters[i].Value = values[i] ?? DBNull.Value;
@@ -210,8 +219,13 @@ public class ScryfallBulkImporter : BackgroundService
     private static string? ToWubrg(string[]? colors)
         => colors is null ? null : string.Concat("WUBRG".Where(letter => colors.Contains(letter.ToString())));
 
+    // Scryfall sends prices as text ("0.25"); invariant culture so "." is the decimal point on every machine
+    private static decimal? ParsePrice(string? price)
+        => decimal.TryParse(price, NumberStyles.Number, CultureInfo.InvariantCulture, out var parsed) ? parsed : null;
+
     // Only the fields we keep; System.Text.Json ignores the rest of each (large) card object
     private record BulkDataInfo(DateTimeOffset updated_at, string jsonl_download_uri);
+    private record BulkPrices(string? usd, string? usd_foil, string? usd_etched);
     private record BulkImageUris(string? small, string? normal);
     private record BulkCardFace(string? name, BulkImageUris? image_uris, string? mana_cost, string[]? colors,
         string? type_line, double? cmc);
@@ -233,6 +247,7 @@ public class ScryfallBulkImporter : BackgroundService
         string? mana_cost,
         string[]? colors,
         string[]? color_identity,
-        string? type_line
+        string? type_line,
+        BulkPrices? prices
     );
 }

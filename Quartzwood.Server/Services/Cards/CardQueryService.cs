@@ -69,24 +69,29 @@ public class CardQueryService : ICardQueryService
                     box.Name,
                     paths.PathTo(box.GroupId)
                 );
-                return (Row: row, AddedAt: g.Max(c => c.AddedAt));
+                return new CardStack<CardSearchResultDto>(row, g.Key.Name, g.Key.SetCode, g.Key.SetNumber,
+                    g.Key.ScryfallId, g.Key.FoilType, g.Max(c => c.AddedAt));
             })
             // Location order first: the sort below is stable, so equal cards stay in this order (by box)
             .OrderBy(s => string.Join("/", s.Row.GroupPath.Select(step => step.Name)) + "/" + s.Row.BoxName)
             .ToList();
 
-        var sorted = await FilterAndSortAsync(stacks, s => s.Row.ScryfallId,
-            (s, gameplay) => new CardSortFields(s.Row.Name, s.AddedAt, s.Row.SetCode, s.Row.SetNumber, gameplay),
-            options);
+        var sorted = await FilterAndSortAsync(stacks, options);
 
         var hasMore = tooManyToLoad || sorted.Count > SearchLimit;
-        return new CardSearchResponseDto(sorted.Take(SearchLimit).Select(s => s.Row).ToList(), hasMore);
+        return new CardSearchResponseDto(sorted.Take(SearchLimit).ToList(), hasMore);
     }
 
+    // With its price (one scryfall.db lookup), for the card details panel
     public async Task<CardDto?> GetByIdAsync(Guid id)
     {
         var card = await _cards.GetByIdAsync(id);
-        return card is null ? null : ToDto(card);
+        if (card is null) return null;
+
+        var printing = card.ScryfallId is { } scryfallId
+            ? (await _scryfall.GetGameplayByIdsAsync([scryfallId])).GetValueOrDefault(scryfallId)
+            : null;
+        return ToDto(card) with { Price = CardPrice.For(printing, card.FoilType) };
     }
 
     public async Task<IEnumerable<CardDto>> GetAllAsync()
@@ -135,8 +140,8 @@ public class CardQueryService : ICardQueryService
                 c.StampType,
                 c.Notes,
             })
-            .Select(g => (
-                Row: new GroupedCardDto(
+            .Select(g => new CardStack<GroupedCardDto>(
+                new GroupedCardDto(
                     g.Key.Name,
                     g.Key.SetCode,
                     g.Key.SetNumber,
@@ -147,30 +152,38 @@ public class CardQueryService : ICardQueryService
                     g.Count(),
                     g.Select(c => c.Id.ToString()).ToList()
                 ),
-                // A stack's "added" date is its newest copy's: adding another copy brings it back to the top
-                AddedAt: g.Max(c => c.AddedAt)
+                g.Key.Name, g.Key.SetCode, g.Key.SetNumber, g.Key.ScryfallId, g.Key.FoilType,
+                g.Max(c => c.AddedAt)
             ))
             .ToList();
 
-        var sorted = await FilterAndSortAsync(stacks, s => s.Row.ScryfallId,
-            (s, gameplay) => new CardSortFields(s.Row.Name, s.AddedAt, s.Row.SetCode, s.Row.SetNumber, gameplay),
-            options);
-        return sorted.Select(s => s.Row);
+        return await FilterAndSortAsync(stacks, options);
     }
+
+    // One row of a card list (TRow: what the endpoint returns) plus what filtering/sorting needs to know about it.
+    // AddedAt is the stack's newest copy's: adding another copy brings it back to the top
+    private record CardStack<TRow>(TRow Row, string? Name, string? SetCode, string? SetNumber,
+        string? ScryfallId, FoilType FoilType, DateTime? AddedAt);
 
     // Looks up every stack's printing in scryfall.db in ONE batched query, drops the stacks the filter
     // rules out, then sorts the rest with CardSorting's rules
-    private async Task<List<T>> FilterAndSortAsync<T>(List<T> stacks, Func<T, string?> scryfallId,
-        Func<T, ScryfallGameplay?, CardSortFields> fields, CardListOptions options)
+    private async Task<List<TRow>> FilterAndSortAsync<TRow>(List<CardStack<TRow>> stacks, CardListOptions options)
     {
         // No filter + sorting by name or added date: nothing needed from scryfall.db, skip the lookup
         var gameplay = options.NeedsGameplay
-            ? await _scryfall.GetGameplayByIdsAsync(stacks.Select(scryfallId).OfType<string>())
+            ? await _scryfall.GetGameplayByIdsAsync(stacks.Select(s => s.ScryfallId).OfType<string>())
             : [];
-        ScryfallGameplay? GameplayOf(T stack) => scryfallId(stack) is { } id ? gameplay.GetValueOrDefault(id) : null;
 
-        return CardSorting.Sort(stacks.Where(stack => options.Matches(GameplayOf(stack))),
-            stack => fields(stack, GameplayOf(stack)),
+        // Each stack's printing data and price, worked out once
+        var withData = stacks.Select(stack =>
+        {
+            var printing = stack.ScryfallId is { } id ? gameplay.GetValueOrDefault(id) : null;
+            return (Stack: stack, Printing: printing, Price: CardPrice.For(printing, stack.FoilType));
+        });
+
+        var sorted = CardSorting.Sort(withData.Where(x => options.Matches(x.Printing, x.Price)),
+            x => new CardSortFields(x.Stack.Name, x.Stack.AddedAt, x.Stack.SetCode, x.Stack.SetNumber, x.Printing, x.Price),
             options.Sort, options.Descending);
+        return sorted.Select(x => x.Stack.Row).ToList();
     }
 }

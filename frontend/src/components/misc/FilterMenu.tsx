@@ -1,46 +1,57 @@
 import { useRef, useState, type FormEvent } from "react"
-import { describeFilter, hasFilter, type CardFilter } from "../../hooks/useCardFilter"
+import { describeFilter, FilterRanges, hasFilter, type CardFilter } from "../../hooks/useCardFilter"
 
 interface FilterMenuProps {
     value: CardFilter
     onChange: (next: CardFilter) => void
 }
 
-const inputClassName = "w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20"
+// What's typed but not applied yet, per filter key; text, so a half-typed or empty box is allowed
+type Drafts = Record<keyof CardFilter, string>
 
-// "Filter" button + dropdown with a mana value range. Applied with the Apply button or Enter (not on
-// every keystroke: typing "10" shouldn't load the cards for "1" first). Shows the active range on the button
+const inputClassName = "w-24 rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20"
+
+// "Filter" button + dropdown with an "At least / At most" pair for each range (mana value, price).
+// Applied with the Apply button or Enter (not on every keystroke: typing "10" shouldn't load the cards for
+// "1" first). Shows the active filters on the button
 export function FilterMenu({ value, onChange }: FilterMenuProps) {
     const menu = useRef<HTMLDetailsElement>(null)
-    // What's typed but not applied yet; text, so a half-typed or empty box is allowed
-    const [draftMin, setDraftMin] = useState("")
-    const [draftMax, setDraftMax] = useState("")
+    const [drafts, setDrafts] = useState<Drafts>({ mvMin: "", mvMax: "", priceMin: "", priceMax: "" })
     const [error, setError] = useState<string>()
 
     const isActive = hasFilter(value)
     const toNumber = (text: string) => text.trim() === "" ? undefined : Number(text)
 
-    // Opening the menu starts the drafts from the filter that's applied now
+    // Opening the menu starts the drafts from the filters applied now
     function onToggle() {
         if (!menu.current?.open) return
-        setDraftMin(value.mvMin?.toString() ?? "")
-        setDraftMax(value.mvMax?.toString() ?? "")
+        setDrafts({
+            mvMin: value.mvMin?.toString() ?? "",
+            mvMax: value.mvMax?.toString() ?? "",
+            priceMin: value.priceMin?.toString() ?? "",
+            priceMax: value.priceMax?.toString() ?? "",
+        })
         setError(undefined)
     }
 
     function apply(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        const mvMin = toNumber(draftMin)
-        const mvMax = toNumber(draftMax)
-        if ([mvMin, mvMax].some(n => n !== undefined && (!Number.isFinite(n) || n < 0))) {
-            setError("Mana values must be 0 or more.")
-            return
+        const next: CardFilter = {}
+        for (const range of FilterRanges) {
+            const min = toNumber(drafts[range.min])
+            const max = toNumber(drafts[range.max])
+            if ([min, max].some(n => n !== undefined && (!Number.isFinite(n) || n < 0))) {
+                setError(`${range.label}: values must be 0 or more.`)
+                return
+            }
+            if (min !== undefined && max !== undefined && min > max) {
+                setError(`${range.label}: 'At least' is higher than 'at most'.`)
+                return
+            }
+            next[range.min] = min
+            next[range.max] = max
         }
-        if (mvMin !== undefined && mvMax !== undefined && mvMin > mvMax) {
-            setError("'At least' is higher than 'at most'.")
-            return
-        }
-        onChange({ mvMin, mvMax })
+        onChange(next)
         menu.current?.removeAttribute("open")
     }
 
@@ -68,37 +79,35 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                 onSubmit={apply}
                 className="absolute right-0 z-40 mt-1 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-lg"
             >
-                <fieldset>
-                    <legend className="mb-2 text-sm font-semibold text-slate-800">Mana value</legend>
-                    {/* Two rows, so one-sided ranges are obvious: fill in just "At least" for 3+ */}
-                    <div className="grid grid-cols-[5rem_auto] items-center gap-x-3 gap-y-2 text-sm text-slate-600">
-                        <label htmlFor="filter-mv-min">At least</label>
-                        <input
-                            id="filter-mv-min"
-                            type="number"
-                            inputMode="decimal"
-                            min={0}
-                            step="any"
-                            placeholder="Any"
-                            value={draftMin}
-                            onChange={event => setDraftMin(event.target.value)}
-                            className={inputClassName}
-                        />
-                        <label htmlFor="filter-mv-max">At most</label>
-                        <input
-                            id="filter-mv-max"
-                            type="number"
-                            inputMode="decimal"
-                            min={0}
-                            step="any"
-                            placeholder="Any"
-                            value={draftMax}
-                            onChange={event => setDraftMax(event.target.value)}
-                            className={inputClassName}
-                        />
-                    </div>
-                    <p className="mt-2 text-xs text-slate-500">Fill in one or both. Cards without Scryfall data are hidden while filtering.</p>
-                </fieldset>
+                {FilterRanges.map(range => (
+                    <fieldset key={range.label} className="mb-4">
+                        <legend className="mb-2 text-sm font-semibold text-slate-800">{range.label}</legend>
+                        {/* Two rows, so one-sided ranges are obvious: fill in just "At least" for 3+ */}
+                        <div className="grid grid-cols-[5rem_auto] items-center gap-x-3 gap-y-2 text-sm text-slate-600">
+                            {([["At least", range.min], ["At most", range.max]] as const).map(([label, key]) => (
+                                <label key={key} className="contents">
+                                    <span>{label}</span>
+                                    <span className="flex items-center gap-1">
+                                        {range.prefix && <span aria-hidden="true">{range.prefix}</span>}
+                                        <input
+                                            type="number"
+                                            inputMode="decimal"
+                                            min={0}
+                                            step={range.step}
+                                            placeholder="Any"
+                                            value={drafts[key]}
+                                            onChange={event => setDrafts(current => ({ ...current, [key]: event.target.value }))}
+                                            className={inputClassName}
+                                        />
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
+                ))}
+                <p className="text-xs text-slate-500">
+                    Fill in any boxes. Cards without that data (e.g. no Scryfall price) are hidden while it's filtered.
+                </p>
 
                 {error && <p role="alert" className="mt-2 text-sm text-rose-700">{error}</p>}
 

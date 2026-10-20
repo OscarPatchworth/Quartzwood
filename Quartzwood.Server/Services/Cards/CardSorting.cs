@@ -9,6 +9,7 @@ public enum CardSort
     Printed,    // release date of the printing, then set, then collector number
     ManaValue,
     Color,      // W, U, B, R, G, multicolour, colourless, lands
+    Price,      // the card's price for its foil type (see CardPrice)
 }
 
 // What a stack of cards is sorted by: its own values plus its printing's (from scryfall.db)
@@ -17,7 +18,8 @@ public record CardSortFields(
     DateTime? AddedAt,
     string? SetCode,
     string? SetNumber,
-    ScryfallGameplay? Gameplay
+    ScryfallGameplay? Gameplay,
+    decimal? Price
 );
 
 // The sort rules for card lists (box page, collection search), in one place.
@@ -58,6 +60,7 @@ public static class CardSorting
         },
         CardSort.ManaValue => (a, b) => NullsLast(a.Gameplay?.ManaValue, b.Gameplay?.ManaValue, descending),
         CardSort.Color => (a, b) => NullsLast(ColorKey(a.Gameplay), ColorKey(b.Gameplay), descending),
+        CardSort.Price => (a, b) => NullsLast(a.Price, b.Price, descending),
         _ => (a, b) => Flip(string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase), descending),
     };
 

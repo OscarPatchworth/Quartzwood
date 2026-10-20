@@ -13,7 +13,11 @@ public record ScryfallGameplay(
     double? ManaValue,
     string? Colors,
     string? TypeLine,
-    DateOnly? ReleasedAt
+    DateOnly? ReleasedAt,
+    // USD (TCGplayer): normal, foil, etched foil
+    decimal? PriceUsd,
+    decimal? PriceUsdFoil,
+    decimal? PriceUsdEtched
 );
 
 public record ScryfallYearName(

@@ -116,6 +116,7 @@ export type CardDto = {
     notes: null | string;
     boxId: string;
     tags: Array<string>;
+    price?: null | number | string;
 };
 
 export type CardSearchResponseDto = {
@@ -804,6 +805,8 @@ export type GetApiCardsSearchData = {
         desc?: boolean;
         mvMin?: number | string;
         mvMax?: number | string;
+        priceMin?: number | string;
+        priceMax?: number | string;
     };
     url: '/api/cards/search';
 };
@@ -948,6 +951,8 @@ export type GetApiCardsByBoxByBoxIdGroupedData = {
         desc?: boolean;
         mvMin?: number | string;
         mvMax?: number | string;
+        priceMin?: number | string;
+        priceMax?: number | string;
     };
     url: '/api/cards/by-box/{boxId}/grouped';
 };

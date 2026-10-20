@@ -17,7 +17,9 @@ public record CardDto(
     string? AlterArtist,
     string? Notes,
     Guid BoxId,
-    IEnumerable<string> Tags
+    IEnumerable<string> Tags,
+    // In CardPrice.Currency (USD), for the card's foil type; null = no price. Only filled in by GET /api/cards/{id}
+    decimal? Price = null
 );
 
 // What the API returns for a collated group of cards

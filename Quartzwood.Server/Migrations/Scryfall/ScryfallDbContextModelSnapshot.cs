@@ -89,6 +89,15 @@ namespace Quartzwood.Server.Migrations.Scryfall
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE");
 
+                    b.Property<decimal?>("PriceUsd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("PriceUsdEtched")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("PriceUsdFoil")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PromoTypes")
                         .HasColumnType("TEXT");
 

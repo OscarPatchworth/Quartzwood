@@ -8,6 +8,7 @@ export const CardSortOptions = [
     { value: "printed", label: "Printed order", descendingFirst: false },
     { value: "manaValue", label: "Mana value", descendingFirst: false },
     { value: "color", label: "Colour", descendingFirst: false },
+    { value: "price", label: "Price", descendingFirst: true },
 ] as const
 
 // "name" | "added" | ...: worked out from the list above, so the two can't disagree

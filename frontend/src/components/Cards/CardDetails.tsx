@@ -1,5 +1,6 @@
 import type { CardDto } from '../../interfaces/generated.ts'
 import { LoadingIndicator } from '../misc/LoadingIndicator.tsx'
+import { formatPrice } from '../../utils/formatPrice'
 
 interface CardDetailsProps {
     card?: CardDto
@@ -17,6 +18,12 @@ export function CardDetails({card: card}: CardDetailsProps) {
                     <div className="mb-3 border-b border-amber-200 pb-3">
                         <p className="text-lg font-bold uppercase tracking-wide text-stone-800">{card.name}</p>
                         <p className="text-sm text-stone-600">{card.setNumber}-{card.setCode}</p>
+                        {/* TCGplayer market price for this printing and finish (foil cards get the foil price) */}
+                        <p className="mt-1 text-sm text-stone-700" title="TCGplayer market price via Scryfall, updated daily">
+                            {card.price != null
+                                ? <><span className="font-semibold">{formatPrice(card.price)}</span>{card.foilType !== "None" && " (foil)"}</>
+                                : <span className="text-stone-500">No price</span>}
+                        </p>
                     </div>
 
                     <dl className="space-y-2 text-sm text-stone-700 

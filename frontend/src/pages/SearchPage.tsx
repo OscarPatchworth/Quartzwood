@@ -19,7 +19,6 @@ export default function SearchPage() {
     const [text, setText] = useState(searchParams.get('q') ?? '')
     const { sort, desc, setSort } = useCardSort()
     const { filter, setFilter } = useCardFilter()
-    const { mvMin, mvMax } = filter
     const isFiltered = hasFilter(filter)
 
     // Debounce, ignoring out-of-date answers and errors all live in the shared hook.
@@ -27,8 +26,8 @@ export default function SearchPage() {
     // then returns the first 200). With a filter, any text works, even none: "every card with mana value 2-4"
     const { result: response, resultQuery, errorMessage, isSearching, isTooShort } = useDebouncedSearch(
         text,
-        async query => (await getApiCardsSearch({ query: { q: query, sort, desc, mvMin, mvMax } })).data,
-        { minLength: isFiltered ? 0 : MIN_LENGTH, key: `${sort}|${desc}|${mvMin}|${mvMax}` },
+        async query => (await getApiCardsSearch({ query: { q: query, sort, desc, ...filter } })).data,
+        { minLength: isFiltered ? 0 : MIN_LENGTH, key: `${sort}|${desc}|${JSON.stringify(filter)}` },
     )
     const query = text.trim()
 

@@ -36,6 +36,12 @@ public class ScryfallPrinting
     // e.g. "Legendary Creature — Elf Druid"; double-faced: "Front type // Back type"
     public string? TypeLine { get; set; }
 
+    // TCGplayer market prices in US dollars, refreshed daily by Scryfall (null = no price). A printing can have
+    // up to three: normal, foil, and etched foil. CardPrice picks the one matching a card's foil type
+    public decimal? PriceUsd { get; set; }
+    public decimal? PriceUsdFoil { get; set; }
+    public decimal? PriceUsdEtched { get; set; }
+
     // cards.scryfall.io CDN URLs (front face for double-faced cards)
     public string? ImageSmall { get; set; }
     public string? ImageNormal { get; set; }

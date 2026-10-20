@@ -148,7 +148,8 @@ public class LocalScryfallService : IScryfallService
     public Task<Dictionary<string, ScryfallGameplay>> GetGameplayByIdsAsync(IEnumerable<string> scryfallIds)
         => ByIdsAsync(scryfallIds, ids => _db.Printings.AsNoTracking()
             .Where(p => ids.Contains(p.Id))
-            .Select(p => new IdAndValue<ScryfallGameplay>(p.Id, new ScryfallGameplay(p.ManaValue, p.Colors, p.TypeLine, p.ReleasedAt))));
+            .Select(p => new IdAndValue<ScryfallGameplay>(p.Id, new ScryfallGameplay(p.ManaValue, p.Colors, p.TypeLine, p.ReleasedAt,
+                p.PriceUsd, p.PriceUsdFoil, p.PriceUsdEtched))));
 
     // Ids per query: WHERE Id IN (@ids1, ... @ids1000) stays far below SQLite's 32766-parameter limit
     private const int IdsPerQuery = 1000;
