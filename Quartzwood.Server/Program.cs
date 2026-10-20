@@ -16,9 +16,15 @@ using Quartzwood.Server.Services.Tags;
 using Quartzwood.Server.Services.Trades;
 
 
-// dotnet run -- --backup-now: take one database backup and exit (e.g. before dotnet ef database update)
+// Database backup commands (see BACKUPS.md); each does its job and exits instead of starting the server:
+//   dotnet run -- --backup-now                take one backup (e.g. before dotnet ef database update)
+//   dotnet run -- --restore <backup file>     put a backup in place of the database (stop the server first)
 var backupNow = args.Contains("--backup-now");
-var builder = WebApplication.CreateBuilder(args.Where(arg => arg != "--backup-now").ToArray());
+var restoreIndex = Array.IndexOf(args, "--restore");
+var restoreFrom = restoreIndex >= 0 && restoreIndex + 1 < args.Length ? args[restoreIndex + 1] : null;
+var builder = WebApplication.CreateBuilder(args
+    .Where((arg, index) => arg != "--backup-now" && (restoreIndex < 0 || (index != restoreIndex && index != restoreIndex + 1)))
+    .ToArray());
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
@@ -110,6 +116,30 @@ if (backupNow)
 {
     var path = await app.Services.GetRequiredService<DatabaseBackupService>().BackUpAsync();
     Console.WriteLine(path is null ? "Nothing to back up: there's no database yet." : $"Backed up the database to {path}");
+    return;
+}
+
+if (restoreIndex >= 0)
+{
+    if (restoreFrom is null)
+    {
+        Console.WriteLine("Which backup? dotnet run -- --restore Backups/quartzwood-2026-10-20_1305.db");
+        Environment.ExitCode = 1;
+        return;
+    }
+    using var scope = app.Services.CreateScope();
+    var database = scope.ServiceProvider.GetRequiredService<AppDbContext>().Database;
+    try
+    {
+        var messages = await DatabaseRestore.RestoreAsync(restoreFrom, database.GetConnectionString()!,
+            database.GetMigrations().ToList(), app.Services.GetRequiredService<DatabaseBackupService>().Folder);
+        messages.ForEach(Console.WriteLine);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine($"Nothing was changed. {ex.Message}");
+        Environment.ExitCode = 1;
+    }
     return;
 }
 

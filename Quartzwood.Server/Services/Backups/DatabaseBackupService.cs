@@ -25,6 +25,9 @@ public class DatabaseBackupService : BackgroundService
     private readonly string _folder;
     private readonly ILogger<DatabaseBackupService> _logger;
 
+    // Where backups go, as a full path
+    public string Folder => _folder;
+
     public DatabaseBackupService(IServiceScopeFactory scopes, IOptions<BackupOptions> options, IHostEnvironment environment,
         ILogger<DatabaseBackupService> logger)
     {
@@ -119,7 +122,8 @@ public class DatabaseBackupService : BackgroundService
         return finalPath;
     }
 
-    private static async Task<string> CheckAsync(string path, CancellationToken cancellationToken)
+    // "ok" when SQLite can read the whole file back without finding damage
+    public static async Task<string> CheckAsync(string path, CancellationToken cancellationToken = default)
     {
         var builder = new SqliteConnectionStringBuilder { DataSource = path, Mode = SqliteOpenMode.ReadOnly, Pooling = false };
         await using var connection = new SqliteConnection(builder.ToString());
