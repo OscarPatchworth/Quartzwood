@@ -27,6 +27,23 @@ public class AppDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
         modelBuilder.Entity<CardTag>()
             .HasKey(ct => new { ct.CardInstanceId, ct.TagId });
 
+        // Tag -> its owner: deleting a user deletes their tags (and so those tags on cards)
+        modelBuilder.Entity<Tag>()
+            .HasOne(t => t.Owner)
+            .WithMany()
+            .HasForeignKey(t => t.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // NOCASE: "trade" and "Trade" are the same tag, and name lookups/filters ignore case
+        modelBuilder.Entity<Tag>()
+            .Property(t => t.Name)
+            .UseCollation("NOCASE");
+
+        // Each user has at most one tag per name; also makes "my tags" and "my tag called X" index lookups
+        modelBuilder.Entity<Tag>()
+            .HasIndex(t => new { t.OwnerId, t.Name })
+            .IsUnique();
+
         // Group self-referential
         modelBuilder.Entity<Group>()
             .HasOne(g => g.ParentGroup)

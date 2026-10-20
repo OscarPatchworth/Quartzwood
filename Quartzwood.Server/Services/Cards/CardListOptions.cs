@@ -13,22 +13,26 @@ public record CardListOptions(
     double? ManaValueMax = null,
     // The card's price for its foil type (see CardPrice)
     decimal? PriceMin = null,
-    decimal? PriceMax = null
+    decimal? PriceMax = null,
+    // Tag names the card must ALL have (anyone's tag with that name counts); null/empty = no tag filter
+    IReadOnlyList<string>? Tags = null
 )
 {
     private bool HasManaValueFilter => ManaValueMin is not null || ManaValueMax is not null;
     private bool HasPriceFilter => PriceMin is not null || PriceMax is not null;
-    public bool HasFilter => HasManaValueFilter || HasPriceFilter;
+    private bool HasTagFilter => Tags is { Count: > 0 };
+    public bool HasFilter => HasManaValueFilter || HasPriceFilter || HasTagFilter;
 
     // Whether filtering or sorting needs the printings' data from scryfall.db (name/added sorts don't)
     public bool NeedsGameplay => HasFilter || Sort is CardSort.Printed or CardSort.ManaValue or CardSort.Color or CardSort.Price;
 
     // A card with no mana value / price (no printing in the local data, or no price on Scryfall) can't be
     // shown to be in range, so while that filter is set it's left out
-    public bool Matches(ScryfallGameplay? gameplay, decimal? price)
+    public bool Matches(ScryfallGameplay? gameplay, decimal? price, IReadOnlyList<string> tags)
     {
         if (HasManaValueFilter && !InRange(gameplay?.ManaValue, ManaValueMin, ManaValueMax)) return false;
         if (HasPriceFilter && !InRange(price, PriceMin, PriceMax)) return false;
+        if (HasTagFilter && !Tags!.All(wanted => tags.Contains(wanted, StringComparer.OrdinalIgnoreCase))) return false;
         return true;
     }
 

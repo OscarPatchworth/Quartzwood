@@ -90,6 +90,12 @@ export type BulkResultDto = {
     count: number | string;
 };
 
+export type BulkTagsDto = {
+    cardIds: Array<string>;
+    add: null | Array<string>;
+    remove: null | Array<string>;
+};
+
 export type BulkUpdateCardsDto = {
     cardIds: Array<string>;
     condition: null | string;
@@ -137,6 +143,7 @@ export type CardSearchResultDto = {
     boxId: string;
     boxName: string;
     groupPath: Array<LocationStepDto>;
+    tags: Array<string>;
 };
 
 export type EntityDto = {
@@ -185,6 +192,7 @@ export type GroupedCardDto = {
     stampType: string;
     count: number | string;
     ids: Array<string>;
+    tags: Array<string>;
 };
 
 export type HttpValidationProblemDetails = {
@@ -279,6 +287,11 @@ export type StringSegment = {
     length?: number | string;
     value?: null | string;
     hasValue?: boolean;
+};
+
+export type TagDto = {
+    id: string;
+    name: string;
 };
 
 export type TransferFormatDto = {
@@ -807,6 +820,7 @@ export type GetApiCardsSearchData = {
         mvMax?: number | string;
         priceMin?: number | string;
         priceMax?: number | string;
+        tags?: Array<string>;
     };
     url: '/api/cards/search';
 };
@@ -953,6 +967,7 @@ export type GetApiCardsByBoxByBoxIdGroupedData = {
         mvMax?: number | string;
         priceMin?: number | string;
         priceMax?: number | string;
+        tags?: Array<string>;
     };
     url: '/api/cards/by-box/{boxId}/grouped';
 };
@@ -1061,6 +1076,35 @@ export type PostApiCardsBulkMoveResponses = {
 };
 
 export type PostApiCardsBulkMoveResponse = PostApiCardsBulkMoveResponses[keyof PostApiCardsBulkMoveResponses];
+
+export type PostApiCardsBulkTagsData = {
+    body: BulkTagsDto;
+    path?: never;
+    query?: never;
+    url: '/api/cards/bulk/tags';
+};
+
+export type PostApiCardsBulkTagsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiCardsBulkTagsError = PostApiCardsBulkTagsErrors[keyof PostApiCardsBulkTagsErrors];
+
+export type PostApiCardsBulkTagsResponses = {
+    /**
+     * OK
+     */
+    200: BulkResultDto;
+};
+
+export type PostApiCardsBulkTagsResponse = PostApiCardsBulkTagsResponses[keyof PostApiCardsBulkTagsResponses];
 
 export type PostApiCardsBulkDeleteData = {
     body: BulkCardIdsDto;
@@ -1589,3 +1633,19 @@ export type GetApiScryfallCardsByIdImageResponses = {
      */
     200: unknown;
 };
+
+export type GetApiTagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/tags';
+};
+
+export type GetApiTagsResponses = {
+    /**
+     * OK
+     */
+    200: Array<TagDto>;
+};
+
+export type GetApiTagsResponse = GetApiTagsResponses[keyof GetApiTagsResponses];

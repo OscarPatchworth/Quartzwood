@@ -29,6 +29,7 @@ function singleCard(result: CardSearchResultDto): GroupedCardDto {
         stampType: result.stampType,
         count: 1,
         ids: result.ids.slice(0, 1),
+        tags: result.tags,
     }
 }
 

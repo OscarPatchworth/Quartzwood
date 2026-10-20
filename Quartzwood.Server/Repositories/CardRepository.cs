@@ -30,6 +30,8 @@ public class CardRepository : ICardRepository
         var query = _context.Cards
             .AsNoTracking()
             .Include(c => c.Box)
+            .Include(c => c.CardTags)
+            .ThenInclude(ct => ct.Tag)
             .Where(c => entityIds.Contains(c.Box.Group.EntityId));
 
         // Empty text = every card (a filter-only search, e.g. all cards with mana value 2-4)

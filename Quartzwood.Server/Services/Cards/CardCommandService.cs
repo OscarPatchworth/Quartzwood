@@ -2,6 +2,7 @@ using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
 using Quartzwood.Server.Services.Scryfall;
+using Quartzwood.Server.Services.Tags;
 
 namespace Quartzwood.Server.Services.Cards;
 
@@ -219,6 +220,6 @@ public class CardCommandService : ICardCommandService
         c.AlterArtist,
         c.Notes,
         c.BoxId,
-        c.CardTags.Select(ct => ct.Tag.Name)
+        TagNames.Of(c)
     );
 }

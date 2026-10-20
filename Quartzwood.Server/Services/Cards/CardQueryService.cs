@@ -3,6 +3,7 @@ using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
 using Quartzwood.Server.Services.Groups;
 using Quartzwood.Server.Services.Scryfall;
+using Quartzwood.Server.Services.Tags;
 
 namespace Quartzwood.Server.Services.Cards;
 
@@ -51,6 +52,7 @@ public class CardQueryService : ICardQueryService
                 c.FoilType,
                 c.StampType,
                 c.Notes,
+                Tags = TagNames.Key(c),
             })
             .Select(g =>
             {
@@ -67,10 +69,11 @@ public class CardQueryService : ICardQueryService
                     g.Select(c => c.Id.ToString()).ToList(),
                     box.Id,
                     box.Name,
-                    paths.PathTo(box.GroupId)
+                    paths.PathTo(box.GroupId),
+                    TagNames.Of(g.First())
                 );
                 return new CardStack<CardSearchResultDto>(row, g.Key.Name, g.Key.SetCode, g.Key.SetNumber,
-                    g.Key.ScryfallId, g.Key.FoilType, g.Max(c => c.AddedAt));
+                    g.Key.ScryfallId, g.Key.FoilType, g.Max(c => c.AddedAt), row.Tags);
             })
             // Location order first: the sort below is stable, so equal cards stay in this order (by box)
             .OrderBy(s => string.Join("/", s.Row.GroupPath.Select(step => step.Name)) + "/" + s.Row.BoxName)
@@ -122,7 +125,7 @@ public class CardQueryService : ICardQueryService
         c.AlterArtist,
         c.Notes,
         c.BoxId,
-        c.CardTags.Select(ct => ct.Tag.Name)
+        TagNames.Of(c)
     );
 
     public async Task<IEnumerable<GroupedCardDto>> GetByBoxGroupedAsync(Guid boxId, CardListOptions options)
@@ -139,6 +142,8 @@ public class CardQueryService : ICardQueryService
                 c.FoilType,
                 c.StampType,
                 c.Notes,
+                // Tagging 1 of 4 Sol Rings "Trade" splits it into its own stack, so the tag is visible
+                Tags = TagNames.Key(c),
             })
             .Select(g => new CardStack<GroupedCardDto>(
                 new GroupedCardDto(
@@ -150,10 +155,11 @@ public class CardQueryService : ICardQueryService
                     g.Key.FoilType.ToString(),
                     g.Key.StampType.ToString(),
                     g.Count(),
-                    g.Select(c => c.Id.ToString()).ToList()
+                    g.Select(c => c.Id.ToString()).ToList(),
+                    TagNames.Of(g.First())
                 ),
                 g.Key.Name, g.Key.SetCode, g.Key.SetNumber, g.Key.ScryfallId, g.Key.FoilType,
-                g.Max(c => c.AddedAt)
+                g.Max(c => c.AddedAt), TagNames.Of(g.First())
             ))
             .ToList();
 
@@ -163,7 +169,7 @@ public class CardQueryService : ICardQueryService
     // One row of a card list (TRow: what the endpoint returns) plus what filtering/sorting needs to know about it.
     // AddedAt is the stack's newest copy's: adding another copy brings it back to the top
     private record CardStack<TRow>(TRow Row, string? Name, string? SetCode, string? SetNumber,
-        string? ScryfallId, FoilType FoilType, DateTime? AddedAt);
+        string? ScryfallId, FoilType FoilType, DateTime? AddedAt, IReadOnlyList<string> Tags);
 
     // Looks up every stack's printing in scryfall.db in ONE batched query, drops the stacks the filter
     // rules out, then sorts the rest with CardSorting's rules
@@ -181,7 +187,7 @@ public class CardQueryService : ICardQueryService
             return (Stack: stack, Printing: printing, Price: CardPrice.For(printing, stack.FoilType));
         });
 
-        var sorted = CardSorting.Sort(withData.Where(x => options.Matches(x.Printing, x.Price)),
+        var sorted = CardSorting.Sort(withData.Where(x => options.Matches(x.Printing, x.Price, x.Stack.Tags)),
             x => new CardSortFields(x.Stack.Name, x.Stack.AddedAt, x.Stack.SetCode, x.Stack.SetNumber, x.Printing, x.Price),
             options.Sort, options.Descending);
         return sorted.Select(x => x.Stack.Row).ToList();

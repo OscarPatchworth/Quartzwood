@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Services.Access;
+using Quartzwood.Server.Extensions;
 using Quartzwood.Server.Services.Cards;
+using Quartzwood.Server.Services.Tags;
 
 namespace Quartzwood.Server.Controllers;
 
@@ -14,27 +16,30 @@ public class CardsController : ControllerBase
     private readonly ICardQueryService _query;
     private readonly ICardCommandService _command;
     private readonly IAccessService _access;
+    private readonly ITagService _tags;
 
-    public CardsController(ICardQueryService query, ICardCommandService command, IAccessService access)
+    public CardsController(ICardQueryService query, ICardCommandService command, IAccessService access, ITagService tags)
     {
         _query = query;
         _command = command;
         _access = access;
+        _tags = tags;
     }
 
     // Searches every card in the Entities you're a member of, by name (partial) or set code (exact).
     // sort: name (default), added, printed, manaValue, color; desc=true reverses it.
     // mvMin/mvMax: mana value range, priceMin/priceMax: price range (USD, the card's foil type), all inclusive.
+    // tags=Trade&tags=Commander: cards with ALL of those tags (anyone's tag with that name counts).
     // With a filter, the text can be short or empty (every card in range)
     [HttpGet("search")]
     [ProducesResponseType(typeof(CardSearchResponseDto), 200)]
     [ProducesResponseType(400)]
     public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] string? sort, [FromQuery] bool desc = false,
         [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null,
-        [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null)
+        [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null, [FromQuery] string[]? tags = null)
     {
         if (CardListOptions.Validate(mvMin, mvMax, priceMin, priceMax) is { } error) return BadRequest(error);
-        var options = new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax, priceMin, priceMax);
+        var options = new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax, priceMin, priceMax, tags);
 
         var text = q?.Trim() ?? string.Empty;
         // The 2-character minimum stops a 1-letter search matching half the collection; a filter narrows it anyway
@@ -74,12 +79,12 @@ public class CardsController : ControllerBase
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByBoxGrouped(Guid boxId, [FromQuery] string? sort, [FromQuery] bool desc = false,
         [FromQuery] double? mvMin = null, [FromQuery] double? mvMax = null,
-        [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null)
+        [FromQuery] decimal? priceMin = null, [FromQuery] decimal? priceMax = null, [FromQuery] string[]? tags = null)
     {
         if (!await _access.CanAccessBoxAsync(boxId)) return NotFound();
         if (CardListOptions.Validate(mvMin, mvMax, priceMin, priceMax) is { } error) return BadRequest(error);
         return Ok(await _query.GetByBoxGroupedAsync(boxId,
-            new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax, priceMin, priceMax)));
+            new CardListOptions(CardSorting.Parse(sort), desc, mvMin, mvMax, priceMin, priceMax, tags)));
     }
 
     // Adds dto.Quantity identical copies (default 1) and returns them all
@@ -146,6 +151,14 @@ public class CardsController : ControllerBase
         if (!await _access.CanAccessBoxAsync(dto.BoxId)) return BadRequest("Box not found.");
         return await RunBulkAsync(dto.CardIds, ids => _command.MoveManyAsync(ids, dto.BoxId));
     }
+
+    // Add and/or remove tags by name, on one card or many (the card panel and mass edit both use this)
+    [HttpPost("bulk/tags")]
+    [ProducesResponseType(typeof(BulkResultDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public Task<IActionResult> BulkTags(BulkTagsDto dto)
+        => RunBulkAsync(dto.CardIds, ids => _tags.ChangeTagsAsync(ids, dto.Add, dto.Remove, User.GetUserId()));
 
     [HttpPost("bulk/delete")]
     [ProducesResponseType(typeof(BulkResultDto), 200)]

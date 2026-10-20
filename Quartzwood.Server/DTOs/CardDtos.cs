@@ -32,7 +32,9 @@ public record GroupedCardDto(
     string FoilType,
     string StampType,
     int Count,
-    List<string> Ids
+    List<string> Ids,
+    // A-Z; every card in the stack has exactly these (different tags = different stacks)
+    List<string> Tags
 );
 
 // What the API accepts to create a card
@@ -95,7 +97,8 @@ public record CardSearchResultDto(
     Guid BoxId,
     string BoxName,
     // Root group first, the box's own group last
-    List<LocationStepDto> GroupPath
+    List<LocationStepDto> GroupPath,
+    List<string> Tags
 );
 
 public record CardSearchResponseDto(

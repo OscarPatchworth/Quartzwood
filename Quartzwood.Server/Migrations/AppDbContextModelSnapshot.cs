@@ -400,9 +400,17 @@ namespace Quartzwood.Server.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
+
+                    b.Property<Guid>("OwnerId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Tags");
                 });
@@ -534,6 +542,17 @@ namespace Quartzwood.Server.Migrations
                     b.Navigation("Entity");
 
                     b.Navigation("ParentGroup");
+                });
+
+            modelBuilder.Entity("Quartzwood.Server.Models.Tag", b =>
+                {
+                    b.HasOne("Quartzwood.Server.Models.AppUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Quartzwood.Server.Models.AppUser", b =>
