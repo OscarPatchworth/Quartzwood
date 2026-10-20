@@ -18,6 +18,8 @@ import { ImportDialog } from '../components/ImportExport/ImportDialog'
 import { ExportMenu } from '../components/ImportExport/ExportMenu'
 import { BulkActionBar } from '../components/Cards/BulkActionBar'
 import { useCardSelection } from '../hooks/useCardSelection'
+import { useCardSort } from '../hooks/useCardSort'
+import { SortMenu } from '../components/misc/SortMenu'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
@@ -34,6 +36,8 @@ export default function BoxPage() {
     const [selectedCards, setSelectedCards] = useState<GroupedCardDto>()
     // Select mode for mass edit/delete: clicking a card ticks it instead of opening the edit panel
     const selection = useCardSelection(cards)
+    // Sorted by the server; the choice lives in the URL (?sort=...&desc=true)
+    const { sort, desc, setSort } = useCardSort()
 
     function clickCard(groupedCard: GroupedCardDto) {
         if (selection.isSelecting) selection.toggleStack(groupedCard)
@@ -54,8 +58,8 @@ export default function BoxPage() {
 
     async function refreshCardsAfterMutation() {
         if (!id) return
-        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id } })
-        setCards([...response.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
+        const response = await getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc } })
+        setCards(response.data)
         setSelectedCards(undefined)
         setShowRightPanel(false)
     }
@@ -87,14 +91,21 @@ export default function BoxPage() {
 
     useEffect(() => {
         if (!id) return
-        Promise.all([
-            getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id } }),
-            getApiBoxesById({ path: { id } })
-        ]).then(([cardsRes, boxRes]) => {
-            setCards([...cardsRes.data].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')))
-            setBox(boxRes.data)
-        }).finally(() => setLoading(false))
+        getApiBoxesById({ path: { id } })
+            .then(res => setBox(res.data))
+            .finally(() => setLoading(false))
     }, [id])
+
+    // Reloads whenever the box or the sort changes
+    useEffect(() => {
+        if (!id) return
+        // If the sort changes again before this answer arrives, the cleanup below marks it stale,
+        // so a slow older answer can't replace a newer one
+        let isCurrent = true
+        getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc } })
+            .then(res => { if (isCurrent) setCards(res.data) })
+        return () => { isCurrent = false }
+    }, [id, sort, desc])
 
     return loading ? 
     (<LoadingIndicator />) : 
@@ -129,6 +140,7 @@ export default function BoxPage() {
                                 boxId={box.id}
                                 onSuccess={refreshCardsAfterMutation}
                             />
+                            <SortMenu value={{ sort, desc }} onChange={setSort} />
                             <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
                             <ExportMenu kind="box" id={box.id} />
                             <button

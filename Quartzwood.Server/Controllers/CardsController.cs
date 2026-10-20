@@ -22,17 +22,18 @@ public class CardsController : ControllerBase
         _access = access;
     }
 
-    // Searches every card in the Entities you're a member of, by name (partial) or set code (exact)
+    // Searches every card in the Entities you're a member of, by name (partial) or set code (exact).
+    // sort: name (default), added, printed, manaValue, color; desc=true reverses it
     [HttpGet("search")]
     [ProducesResponseType(typeof(CardSearchResponseDto), 200)]
     [ProducesResponseType(400)]
-    public async Task<IActionResult> Search([FromQuery] string? q)
+    public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] string? sort, [FromQuery] bool desc = false)
     {
         var text = q?.Trim() ?? string.Empty;
         if (text.Length < 2) return BadRequest("Search for at least 2 characters.");
 
         var entityIds = await _access.GetEntityIdsAsync();
-        return Ok(await _query.SearchAsync(entityIds, text));
+        return Ok(await _query.SearchAsync(entityIds, text, CardSorting.Parse(sort), desc));
     }
 
     // Cards in Entities you're not a member of are reported as 404, same as ones that don't exist
@@ -57,13 +58,14 @@ public class CardsController : ControllerBase
         return Ok(await _query.GetByBoxAsync(boxId));
     }
 
+    // Same sort options as search
     [HttpGet("by-box/{boxId}/grouped")]
     [ProducesResponseType(typeof(IEnumerable<GroupedCardDto>), 200)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetByBoxGrouped(Guid boxId)
+    public async Task<IActionResult> GetByBoxGrouped(Guid boxId, [FromQuery] string? sort, [FromQuery] bool desc = false)
     {
         if (!await _access.CanAccessBoxAsync(boxId)) return NotFound();
-        return Ok(await _query.GetByBoxGroupedAsync(boxId));
+        return Ok(await _query.GetByBoxGroupedAsync(boxId, CardSorting.Parse(sort), desc));
     }
 
     // Adds dto.Quantity identical copies (default 1) and returns them all

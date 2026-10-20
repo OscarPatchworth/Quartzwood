@@ -7,6 +7,15 @@ public record ScryfallCard(
     string CollectorNumber
 );
 
+// What sorting and filtering a collection needs from a printing.
+// Colors: letters in WUBRG order ("UR"), "" = colourless
+public record ScryfallGameplay(
+    double? ManaValue,
+    string? Colors,
+    string? TypeLine,
+    DateOnly? ReleasedAt
+);
+
 public record ScryfallYearName(
     int Year,
     string Name
@@ -23,6 +32,8 @@ public interface IScryfallService
     Task<string?> GetImageUrlAsync(string scryfallId, string size);
     // Many printings at once by Scryfall id (import/export); ids it can't find are simply left out
     Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds);
+    // Mana value, colours etc. for many printings at once (sorting/filtering); local data only
+    Task<Dictionary<string, ScryfallGameplay>> GetGameplayByIdsAsync(IEnumerable<string> scryfallIds);
     // Card names for the add bar's suggestions as you type: names starting with the text first
     Task<List<string>> AutocompleteAsync(string text, int limit);
 }

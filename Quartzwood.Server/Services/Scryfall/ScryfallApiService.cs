@@ -31,6 +31,10 @@ public class ScryfallApiService : IScryfallService
     public Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds)
         => Task.FromResult(new Dictionary<string, ScryfallCard>());
 
+    // Not worth one API call per card: sorting just puts cards without data last
+    public Task<Dictionary<string, ScryfallGameplay>> GetGameplayByIdsAsync(IEnumerable<string> scryfallIds)
+        => Task.FromResult(new Dictionary<string, ScryfallGameplay>());
+
     // No request needed: this API URL redirects to the image (it does count as an API call when loaded)
     public Task<string?> GetImageUrlAsync(string scryfallId, string size)
         => Task.FromResult<string?>(

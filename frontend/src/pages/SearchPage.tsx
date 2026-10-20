@@ -5,6 +5,8 @@ import { useAuth } from '../auth/useAuth'
 import { cardImageUrl } from '../utils/cardImageUrl'
 import { useDebouncedSearch } from '../hooks/useDebouncedSearch'
 import { SearchInput } from '../components/misc/SearchInput'
+import { SortMenu } from '../components/misc/SortMenu'
+import { useCardSort } from '../hooks/useCardSort'
 
 const MIN_LENGTH = 2
 
@@ -13,25 +15,37 @@ export default function SearchPage() {
     // The search lives in the URL (?q=...), so Back from a box returns to the same results
     const [searchParams, setSearchParams] = useSearchParams()
     const [text, setText] = useState(searchParams.get('q') ?? '')
+    const { sort, desc, setSort } = useCardSort()
 
-    // Debounce, ignoring out-of-date answers and errors all live in the shared hook
+    // Debounce, ignoring out-of-date answers and errors all live in the shared hook.
+    // key: changing the sort runs the search again (the server sorts every match, then returns the first 200)
     const { result: response, resultQuery, errorMessage, isSearching, isTooShort } = useDebouncedSearch(
         text,
-        async query => (await getApiCardsSearch({ query: { q: query } })).data,
-        { minLength: MIN_LENGTH },
+        async query => (await getApiCardsSearch({ query: { q: query, sort, desc } })).data,
+        { minLength: MIN_LENGTH, key: `${sort}|${desc}` },
     )
     const query = text.trim()
 
-    // Once a search has finished, put its text in the URL
+    // Once a search has finished, put its text in the URL. Merged into the current parameters
+    // (a function of `current`), so the ?sort= the sort menu put there stays
     useEffect(() => {
-        if (resultQuery) setSearchParams({ q: resultQuery }, { replace: true })
+        if (!resultQuery) return
+        setSearchParams(current => {
+            const params = new URLSearchParams(current)
+            params.set('q', resultQuery)
+            return params
+        }, { replace: true })
     }, [resultQuery, setSearchParams])
 
     function changeText(nextText: string) {
         setText(nextText)
         // Too short to search: drop ?q= so Back/refresh don't bring an old search back
         if (nextText.trim().length < MIN_LENGTH && searchParams.has('q')) {
-            setSearchParams({}, { replace: true })
+            setSearchParams(current => {
+                const params = new URLSearchParams(current)
+                params.delete('q')
+                return params
+            }, { replace: true })
         }
     }
 
@@ -42,16 +56,19 @@ export default function SearchPage() {
         <div className="p-8">
             <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
 
-            <div className="max-w-2xl">
-                <SearchInput
-                    id="collection-search"
-                    label="Search your collection"
-                    placeholder="Card name or set code, e.g. sol ring or LEA"
-                    value={text}
-                    onChange={changeText}
-                    isSearching={isSearching}
-                    autoFocus
-                />
+            <div className="flex max-w-2xl items-center gap-2">
+                <div className="min-w-0 flex-1">
+                    <SearchInput
+                        id="collection-search"
+                        label="Search your collection"
+                        placeholder="Card name or set code, e.g. sol ring or LEA"
+                        value={text}
+                        onChange={changeText}
+                        isSearching={isSearching}
+                        autoFocus
+                    />
+                </div>
+                <SortMenu value={{ sort, desc }} onChange={setSort} />
             </div>
 
             <div className="mt-2 min-h-5 text-sm text-slate-600" aria-live="polite">

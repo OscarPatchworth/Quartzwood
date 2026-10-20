@@ -800,6 +800,8 @@ export type GetApiCardsSearchData = {
     path?: never;
     query?: {
         q?: string;
+        sort?: string;
+        desc?: boolean;
     };
     url: '/api/cards/search';
 };
@@ -939,7 +941,10 @@ export type GetApiCardsByBoxByBoxIdGroupedData = {
     path: {
         boxId: string;
     };
-    query?: never;
+    query?: {
+        sort?: string;
+        desc?: boolean;
+    };
     url: '/api/cards/by-box/{boxId}/grouped';
 };
 

@@ -6,6 +6,8 @@ interface DebouncedSearchOptions {
     minLength?: number
     // Wait this long after the last keystroke, so typing "sol ring" is 1 request, not 8
     delayMs?: number
+    // Anything besides the text that should start a new search when it changes, e.g. the sort order
+    key?: string
 }
 
 export interface DebouncedSearch<T> {
@@ -27,13 +29,16 @@ export interface DebouncedSearch<T> {
 export function useDebouncedSearch<T>(
     query: string,
     search: (query: string) => Promise<T>,
-    { minLength = 2, delayMs = 300 }: DebouncedSearchOptions = {},
+    { minLength = 2, delayMs = 300, key = "" }: DebouncedSearchOptions = {},
 ): DebouncedSearch<T> {
     const trimmed = query.trim()
     const isTooShort = trimmed.length < minLength
 
+    // What a search is for: the text plus the extra key. "\u0000" can't be typed, so the two never blur together
+    const requestKey = `${trimmed}\u0000${key}`
+
     // One state object, so result/error/query always change together
-    const [settled, setSettled] = useState<{ query: string, result?: T, errorMessage?: string }>()
+    const [settled, setSettled] = useState<{ requestKey: string, query: string, result?: T, errorMessage?: string }>()
 
     // Counts requests: an answer is only used if no newer request has started since
     const latestRequest = useRef(0)
@@ -52,17 +57,17 @@ export function useDebouncedSearch<T>(
             const requestId = ++latestRequest.current
             try {
                 const result = await searchRef.current(trimmed)
-                if (requestId === latestRequest.current) setSettled({ query: trimmed, result })
+                if (requestId === latestRequest.current) setSettled({ requestKey, query: trimmed, result })
             } catch (error) {
                 if (requestId === latestRequest.current) {
-                    setSettled({ query: trimmed, errorMessage: getErrorMessage(error, "Search failed.") })
+                    setSettled({ requestKey, query: trimmed, errorMessage: getErrorMessage(error, "Search failed.") })
                 }
             }
         }, delayMs)
 
-        // Runs when `trimmed` changes again before the delay is up: cancels the pending search
+        // Runs when the text (or key) changes again before the delay is up: cancels the pending search
         return () => clearTimeout(timer)
-    }, [trimmed, isTooShort, delayMs])
+    }, [requestKey, trimmed, isTooShort, delayMs])
 
     if (isTooShort) {
         return { result: undefined, resultQuery: undefined, errorMessage: undefined, isSearching: false, isTooShort }
@@ -71,10 +76,10 @@ export function useDebouncedSearch<T>(
     return {
         result: settled?.result,
         resultQuery: settled?.query,
-        errorMessage: settled?.query === trimmed ? settled.errorMessage : undefined,
+        errorMessage: settled?.requestKey === requestKey ? settled.errorMessage : undefined,
         // Worked out from what we already know instead of stored separately: if the newest answer isn't for
         // the current text, we're still waiting. One less piece of state that could get out of sync
-        isSearching: settled?.query !== trimmed,
+        isSearching: settled?.requestKey !== requestKey,
         isTooShort,
     }
 }

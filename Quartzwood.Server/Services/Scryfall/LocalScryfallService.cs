@@ -140,16 +140,34 @@ public class LocalScryfallService : IScryfallService
     }
 
     // Local only: no API fallback, callers (import/export) fall back to the card's own set/number instead
-    public async Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds)
-    {
-        var ids = scryfallIds.Distinct().ToList();
-        if (ids.Count == 0) return [];
-
-        return await _db.Printings.AsNoTracking()
+    public Task<Dictionary<string, ScryfallCard>> GetCardsByIdsAsync(IEnumerable<string> scryfallIds)
+        => ByIdsAsync(scryfallIds, ids => _db.Printings.AsNoTracking()
             .Where(p => ids.Contains(p.Id))
-            .Select(p => new ScryfallCard(p.Id, p.Name, p.SetCode, p.CollectorNumber))
-            .ToDictionaryAsync(c => c.Id);
+            .Select(p => new IdAndValue<ScryfallCard>(p.Id, new ScryfallCard(p.Id, p.Name, p.SetCode, p.CollectorNumber))));
+
+    // Local only: a card whose printing isn't here just sorts last
+    public Task<Dictionary<string, ScryfallGameplay>> GetGameplayByIdsAsync(IEnumerable<string> scryfallIds)
+        => ByIdsAsync(scryfallIds, ids => _db.Printings.AsNoTracking()
+            .Where(p => ids.Contains(p.Id))
+            .Select(p => new IdAndValue<ScryfallGameplay>(p.Id, new ScryfallGameplay(p.ManaValue, p.Colors, p.TypeLine, p.ReleasedAt))));
+
+    // Ids per query: WHERE Id IN (@ids1, ... @ids1000) stays far below SQLite's 32766-parameter limit
+    private const int IdsPerQuery = 1000;
+
+    // Looks up many printings by id, 1000 per query (each one a primary key lookup), into one dictionary
+    private static async Task<Dictionary<string, T>> ByIdsAsync<T>(
+        IEnumerable<string> scryfallIds, Func<string[], IQueryable<IdAndValue<T>>> query)
+    {
+        var result = new Dictionary<string, T>();
+        foreach (var batch in scryfallIds.Distinct().Chunk(IdsPerQuery))
+        {
+            foreach (var row in await query(batch).ToListAsync())
+                result[row.Id] = row.Value;
+        }
+        return result;
     }
+
+    private record IdAndValue<T>(string Id, T Value);
 
     // year=YYYY: released during that calendar year. Dates are stored as ISO text, so this is a range check
     private static IQueryable<ScryfallPrinting> InYear(IQueryable<ScryfallPrinting> query, int? year)
