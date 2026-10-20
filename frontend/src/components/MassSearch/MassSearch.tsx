@@ -1,11 +1,14 @@
 import { useState, type ChangeEvent } from "react"
-import { postApiCardsMassSearch, type MassSearchEntryDto } from "../../interfaces/generated.ts"
+import { Link } from "react-router-dom"
+import { postApiCardsMassSearch, postApiCardsMassSearchPlan, type MassSearchEntryDto } from "../../interfaces/generated.ts"
 import { getErrorMessage } from "../../api/getErrorMessage"
 import { usePersistentState } from "../../hooks/usePersistentState"
 import { cardImageUrl } from "../../utils/cardImageUrl"
 import { withPopup } from "../hocs/withPopup.tsx"
 import { RightLongPopupShape } from "../hocs/Popups/shapes/RightLongPopupShape.tsx"
 import { MassSearchCardPanel } from "./MassSearchCardPanel"
+import { FetchPickList } from "./FetchPickList"
+import type { FetchOutcome } from "./FinishFetchDialog"
 import { emptyMassSearch, owned, wantedOf, type MassSearchDraft } from "./massSearchTypes"
 
 const CardPanelPopup = withPopup(MassSearchCardPanel, RightLongPopupShape)
@@ -15,13 +18,23 @@ const MAX_FILE_BYTES = 1_000_000
 
 type Show = "all" | "short"
 
+interface MassSearchProps {
+    userId: string
+    personalEntityId: string
+    rootGroupId: string
+}
+
 // Look up a whole list of cards at once: typed, pasted, or imported from a file (deck list or CSV export).
 // Shows each card with how many you have (missing ones in red), and where every copy is.
-// The list and its results are kept in this browser until you clear them
-export function MassSearch({ userId }: { userId: string }) {
+// Optimize fetch then makes a pick list using as few boxes as possible, to move or delete the cards once collected.
+// The list, results and pick list are kept in this browser until you clear them
+export function MassSearch({ userId, personalEntityId, rootGroupId }: MassSearchProps) {
     const [draft, setDraft] = usePersistentState<MassSearchDraft>(`quartzwood.massSearch.${userId}`, emptyMassSearch)
     const [isSearching, setIsSearching] = useState(false)
+    const [isPlanning, setIsPlanning] = useState(false)
     const [errorMessage, setErrorMessage] = useState<string>()
+    // What the last fetch did (moved / deleted), shown above the refreshed results
+    const [outcome, setOutcome] = useState<FetchOutcome>()
 
     // keepWanted: searching the same list again keeps the quantities you changed
     async function search(keepWanted: boolean) {
@@ -44,6 +57,63 @@ export function MassSearch({ userId }: { userId: string }) {
         }
     }
 
+    // Asks the server which copies to take from which boxes, then shows that as a pick list
+    async function optimize() {
+        const cards = (draft.result?.entries ?? [])
+            .map(entry => ({ name: entry.name, quantity: wantedOf(draft, entry) }))
+            .filter(card => card.quantity > 0)
+        if (cards.length === 0) {
+            setErrorMessage("Every card's Want is 0: there's nothing to fetch.")
+            return
+        }
+
+        setIsPlanning(true)
+        setErrorMessage(undefined)
+        setOutcome(undefined)
+        try {
+            const res = await postApiCardsMassSearchPlan({ body: { cards } })
+            if (Number(res.data.cardCount) === 0) {
+                setErrorMessage("None of the cards on the list are in your collection.")
+                return
+            }
+            setDraft(current => ({ ...current, stage: "collecting", plan: res.data, collected: [] }))
+        } catch (error) {
+            setErrorMessage(getErrorMessage(error, "Couldn't work out the fetch. Please try again."))
+        } finally {
+            setIsPlanning(false)
+        }
+    }
+
+    // After the cards were moved or deleted: back to the results, searched again so they show the change
+    function onFetchFinished(result: FetchOutcome) {
+        setOutcome(result)
+        setDraft(current => ({ ...current, stage: "results", plan: null, collected: [] }))
+        void search(true)
+    }
+
+    if (draft.stage === "collecting" && draft.plan) {
+        return (
+            <FetchPickList
+                plan={draft.plan}
+                collected={draft.collected}
+                onToggle={key => setDraft(current => ({
+                    ...current,
+                    collected: current.collected.includes(key)
+                        ? current.collected.filter(k => k !== key)
+                        : [...current.collected, key],
+                }))}
+                onTickAll={ticked => setDraft(current => ({
+                    ...current,
+                    collected: ticked && current.plan ? current.plan.boxes.flatMap(box => box.cards.map(card => card.ids[0])) : [],
+                }))}
+                onBack={() => setDraft(current => ({ ...current, stage: "results" }))}
+                onFinished={onFetchFinished}
+                personalEntityId={personalEntityId}
+                rootGroupId={rootGroupId}
+            />
+        )
+    }
+
     if (draft.stage === "list" || !draft.result) {
         return (
             <ListInput
@@ -64,9 +134,16 @@ export function MassSearch({ userId }: { userId: string }) {
             onEdit={() => setDraft(current => ({ ...current, stage: "list" }))}
             onSearchAgain={() => void search(true)}
             onClear={() => {
-                if (window.confirm("Clear this list and its results?")) setDraft(emptyMassSearch)
+                if (!window.confirm("Clear this list and its results?")) return
+                setDraft(emptyMassSearch)
+                setOutcome(undefined)
             }}
+            onOptimize={() => void optimize()}
+            // A plan made earlier and not finished: carry on with it
+            onResumePlan={draft.plan ? () => setDraft(current => ({ ...current, stage: "collecting" })) : undefined}
             isSearching={isSearching}
+            isPlanning={isPlanning}
+            outcome={outcome}
             errorMessage={errorMessage}
         />
     )
@@ -145,11 +222,16 @@ interface ResultsProps {
     onEdit: () => void
     onSearchAgain: () => void
     onClear: () => void
+    onOptimize: () => void
+    onResumePlan?: () => void
     isSearching: boolean
+    isPlanning: boolean
+    outcome?: FetchOutcome
     errorMessage?: string
 }
 
-function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, isSearching, errorMessage }: ResultsProps) {
+function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOptimize, onResumePlan, isSearching, isPlanning,
+    outcome, errorMessage }: ResultsProps) {
     const [show, setShow] = useState<Show>("all")
     // The card whose side panel is open
     const [openEntry, setOpenEntry] = useState<MassSearchEntryDto>()
@@ -179,8 +261,23 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, isSear
                     {isSearching ? "Searching..." : "Search again"}
                 </button>
                 <button type="button" onClick={onClear} className={secondaryButton}>Clear</button>
+                {onResumePlan && <button type="button" onClick={onResumePlan} className={secondaryButton}>Back to the pick list</button>}
+                <button type="button" onClick={onOptimize} disabled={isPlanning || isSearching || entries.length === missingCount}
+                    title="A pick list of which copies to take from which boxes, opening as few boxes as possible"
+                    className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">
+                    {isPlanning ? "Optimizing..." : "Optimize fetch"}
+                </button>
             </div>
             {errorMessage && <p role="alert" className="mb-3 text-sm text-rose-700">{errorMessage}</p>}
+            {outcome && (
+                <p role="status" className="mb-3 max-w-4xl rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-slate-800">
+                    {outcome.action === "deleted"
+                        ? <>Deleted <strong>{outcome.count}</strong> {outcome.count === 1 ? "card" : "cards"} from your collection.</>
+                        : <>Moved <strong>{outcome.count}</strong> {outcome.count === 1 ? "card" : "cards"} to{" "}
+                            <Link to={`/box/${outcome.boxId}`} className="font-semibold text-sky-800 hover:underline">{outcome.boxName}</Link>.</>}
+                    {isSearching ? " Updating the results..." : " The results below are up to date."}
+                </p>
+            )}
 
             {result.skipped.length > 0 && (
                 <details className="mb-3 max-w-4xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">

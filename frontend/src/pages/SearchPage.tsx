@@ -73,7 +73,9 @@ export default function SearchPage() {
             </div>
             {mode === 'list'
                 // key: a different user on this browser gets their own saved list (and fresh state)
-                ? account ? <MassSearch key={account.id} userId={account.id} /> : <LoadingIndicator />
+                ? account
+                    ? <MassSearch key={account.id} userId={account.id} personalEntityId={account.personalEntityId} rootGroupId={account.rootGroupId} />
+                    : <LoadingIndicator />
                 : <CollectionSearch />}
         </div>
     )

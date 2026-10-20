@@ -10,7 +10,7 @@ interface MoveDialogProps {
     currentBoxId?: string
     onClose: () => void
     // Called after the cards were moved, so the page can reload
-    onMoved: () => Promise<void>
+    onMoved: (box: BoxSearchResultDto) => Promise<void>
 }
 
 // "Move to...": search your boxes, pick one, confirm. Boxes in Entities you own come first;
@@ -40,7 +40,7 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
         setErrorMessage(undefined)
         try {
             await postApiCardsBulkMove({ body: { cardIds, boxId: target.id } })
-            await onMoved()
+            await onMoved(target)
             onClose()
         } catch (error) {
             setErrorMessage(getErrorMessage(error, "Could not move the cards. Please try again."))
