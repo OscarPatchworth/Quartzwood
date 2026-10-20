@@ -41,4 +41,8 @@ public interface IScryfallService
     Task<Dictionary<string, ScryfallGameplay>> GetGameplayByIdsAsync(IEnumerable<string> scryfallIds);
     // Card names for the add bar's suggestions as you type: names starting with the text first
     Task<List<string>> AutocompleteAsync(string text, int limit);
+    // Names as a person typed them -> the card they mean (one printing of it, for the picture), matched with
+    // CardNames' rules (case, accents, one face of a double-faced card). Keyed by CardNames.Normalise(name).
+    // Names that aren't a card are left out; local data only
+    Task<Dictionary<string, ScryfallCard>> FindByNamesAsync(IEnumerable<string> names);
 }

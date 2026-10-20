@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Quartzwood.Server.Data;
 using Quartzwood.Server.Models.Scryfall;
+using Quartzwood.Server.Services.Cards;
 
 namespace Quartzwood.Server.Services.Scryfall;
 
@@ -150,6 +151,58 @@ public class LocalScryfallService : IScryfallService
             .Where(p => ids.Contains(p.Id))
             .Select(p => new IdAndValue<ScryfallGameplay>(p.Id, new ScryfallGameplay(p.ManaValue, p.Colors, p.TypeLine, p.ReleasedAt,
                 p.PriceUsd, p.PriceUsdFoil, p.PriceUsdEtched))));
+
+    public async Task<Dictionary<string, ScryfallCard>> FindByNamesAsync(IEnumerable<string> names)
+    {
+        var wanted = names.Select(CardNames.Normalise).ToHashSet();
+        var result = new Dictionary<string, ScryfallCard>();
+        if (wanted.Count == 0) return result;
+
+        // Every card name (~35k distinct), matched in memory: SQL can't ignore accents the way CardNames does
+        var allNames = await _db.Printings.AsNoTracking()
+            .Where(p => p.IsPaper)
+            .Select(p => p.Name)
+            .Distinct()
+            .ToListAsync();
+
+        // wanted name -> the full card name. Best match first: the full name ("Sol Ring" is Sol Ring), then a face
+        // of a double-faced card ("Delver of Secrets // Insectile Aberration"), and only then a reversible card,
+        // whose faces are the same card twice ("Delver of Secrets // Delver of Secrets", a Secret Lair printing)
+        var fullNames = new Dictionary<string, (string Name, int Rank)>();
+        foreach (var name in allNames)
+        {
+            var normalised = CardNames.Normalise(name);
+            var isReversible = normalised.Contains(" // ") && normalised.Split(" // ").Distinct().Count() == 1;
+            foreach (var key in CardNames.Keys(name).Where(wanted.Contains))
+            {
+                var rank = key == normalised ? 0 : isReversible ? 2 : 1;
+                if (!fullNames.TryGetValue(key, out var current) || rank < current.Rank) fullNames[key] = (name, rank);
+            }
+        }
+
+        // One printing per card for its picture: the newest English one with an image
+        var printings = new Dictionary<string, ScryfallCard>();
+        foreach (var batch in fullNames.Values.Select(v => v.Name).Distinct().Chunk(IdsPerQuery))
+        {
+            var rows = await _db.Printings.AsNoTracking()
+                .Where(p => p.IsPaper && batch.Contains(p.Name))
+                .Select(p => new { p.Id, p.Name, p.SetCode, p.CollectorNumber, p.Lang, p.ReleasedAt, HasImage = p.ImageSmall != null })
+                .ToListAsync();
+            foreach (var card in rows.GroupBy(p => p.Name))
+            {
+                var best = card
+                    .OrderByDescending(p => p.HasImage)
+                    .ThenByDescending(p => p.Lang == "en")
+                    .ThenByDescending(p => p.ReleasedAt)
+                    .First();
+                printings[card.Key] = new ScryfallCard(best.Id, best.Name, best.SetCode, best.CollectorNumber);
+            }
+        }
+
+        foreach (var (key, match) in fullNames)
+            if (printings.TryGetValue(match.Name, out var printing)) result[key] = printing;
+        return result;
+    }
 
     // Ids per query: WHERE Id IN (@ids1, ... @ids1000) stays far below SQLite's 32766-parameter limit
     private const int IdsPerQuery = 1000;

@@ -45,6 +45,43 @@ public class CardsController : ControllerBase
         return Ok(await _query.SearchAsync(entityIds, text, options));
     }
 
+    // ---- Mass search ----
+
+    // Longest list text accepted: a CSV export of a few thousand lines
+    private const int MaxListLength = 1_000_000;
+
+    // Looks up a whole list of cards at once: typed, pasted, or a file's text (plain/deck list or a
+    // Moxfield/ManaBox CSV). Each card comes back with every copy you have and where it is, in the list's order
+    [HttpPost("mass-search")]
+    [ProducesResponseType(typeof(MassSearchResponseDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> MassSearch(MassSearchRequestDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Text)) return BadRequest("The list is empty.");
+        if (dto.Text.Length > MaxListLength) return BadRequest("That list is too long: split it into smaller lists.");
+
+        var entityIds = await _access.GetEntityIdsAsync();
+        return Ok(await _query.MassSearchAsync(entityIds, dto.Text));
+    }
+
+    // Which copies to take out of which boxes to collect these cards, opening as few boxes as possible.
+    // Nothing changes: the cards are then deleted or moved with the bulk endpoints
+    [HttpPost("mass-search/plan")]
+    [ProducesResponseType(typeof(FetchPlanDto), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> PlanFetch(FetchPlanRequestDto dto)
+    {
+        if (dto.Cards.Count == 0) return BadRequest("No cards to fetch.");
+        if (dto.Cards.Count > CardListParser.MaxCards) return BadRequest($"At most {CardListParser.MaxCards} different cards at once.");
+        if (dto.Cards.Any(c => string.IsNullOrWhiteSpace(c.Name))) return BadRequest("Every card needs a name.");
+        if (dto.Cards.Any(c => c.Quantity is < 0 or > CardListParser.MaxQuantity))
+            return BadRequest($"Quantities must be between 0 and {CardListParser.MaxQuantity}.");
+
+        var entityIds = await _access.GetEntityIdsAsync();
+        var cards = dto.Cards.Select(c => new WantedCard(c.Name, c.Quantity)).ToList();
+        return Ok(await _query.PlanFetchAsync(entityIds, cards));
+    }
+
     // Cards in Entities you're not a member of are reported as 404, same as ones that don't exist
 
     [HttpGet("{id}")]
@@ -151,6 +188,30 @@ public class CardsController : ControllerBase
     [ProducesResponseType(404)]
     public Task<IActionResult> BulkTags(BulkTagsDto dto)
         => RunBulkAsync(dto.CardIds, ids => _tags.ChangeTagsAsync(ids, dto.Add, dto.Remove, User.GetUserId()));
+
+    // Creates a box in the group and moves the cards into it (both, or neither)
+    [HttpPost("bulk/move-to-new-box")]
+    [ProducesResponseType(typeof(BulkMoveToNewBoxResultDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> BulkMoveToNewBox(BulkMoveToNewBoxDto dto)
+    {
+        if (!await _access.CanAccessGroupAsync(dto.GroupId)) return BadRequest("Group not found.");
+        var name = dto.BoxName?.Trim() ?? string.Empty;
+        if (name.Length == 0) return BadRequest("Give the new box a name.");
+        if (name.Length > MaxBoxNameLength) return BadRequest($"Box names can be at most {MaxBoxNameLength} characters.");
+
+        BulkMoveToNewBoxResultDto? result = null;
+        var response = await RunBulkAsync(dto.CardIds, async ids =>
+        {
+            result = await _command.MoveToNewBoxAsync(ids, name, dto.GroupId);
+            return result.Count;
+        });
+        // RunBulkAsync's answer is just a count: on success, also say which box was made
+        return result is null ? response : Ok(result);
+    }
+
+    private const int MaxBoxNameLength = 100;
 
     [HttpPost("bulk/delete")]
     [ProducesResponseType(typeof(BulkResultDto), 200)]

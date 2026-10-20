@@ -1,3 +1,4 @@
+using Quartzwood.Server.Data;
 using Quartzwood.Server.DTOs;
 using Quartzwood.Server.Models;
 using Quartzwood.Server.Repositories;
@@ -11,12 +12,14 @@ public class CardCommandService : ICardCommandService
     private readonly ICardRepository _cards;
     private readonly IBoxRepository _boxes;
     private readonly IScryfallService _scryfall;
+    private readonly AppDbContext _context;
 
-    public CardCommandService(ICardRepository cards, IBoxRepository boxes, IScryfallService scryfall)
+    public CardCommandService(ICardRepository cards, IBoxRepository boxes, IScryfallService scryfall, AppDbContext context)
     {
         _cards = cards;
         _boxes = boxes;
         _scryfall = scryfall;
+        _context = context;
     }
 
     // Most copies one request may add: stops a typo like "10000 Sol Ring" filling the database
@@ -203,6 +206,16 @@ public class CardCommandService : ICardCommandService
 
     public Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids)
         => _cards.DeleteManyAsync(ids);
+
+    // One transaction: if the move fails, the new box isn't left behind empty
+    public async Task<BulkMoveToNewBoxResultDto> MoveToNewBoxAsync(IReadOnlyCollection<Guid> ids, string boxName, Guid groupId)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        var box = await _boxes.AddAsync(new Box { Name = boxName, GroupId = groupId });
+        var moved = await _cards.MoveManyAsync(ids, box.Id);
+        await transaction.CommitAsync();
+        return new BulkMoveToNewBoxResultDto(moved, box.Id, box.Name);
+    }
 
     private static CardDto ToDto(CardInstance c) => new(
         c.Id,

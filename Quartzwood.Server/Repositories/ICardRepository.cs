@@ -11,6 +11,11 @@ public interface ICardRepository
     // boxId: only that box; groupIds: only boxes directly in those groups
     Task<List<CardInstance>> SearchAsync(IReadOnlyCollection<Guid> entityIds, string text, int take,
         Guid? boxId = null, IReadOnlyCollection<Guid>? groupIds = null);
+    // Just the id and name of every named card in the given Entities: small rows, so matching a whole list of
+    // names against a big collection stays fast
+    Task<List<CardNameRow>> GetNamesByEntitiesAsync(IReadOnlyCollection<Guid> entityIds);
+    // These cards, with their Box and tags (any number of ids)
+    Task<List<CardInstance>> GetWithBoxByIdsAsync(IReadOnlyCollection<Guid> ids);
     Task AddRangeAsync(IEnumerable<CardInstance> cards);
     Task<CardInstance> UpdateAsync(CardInstance card);
     Task DeleteAsync(Guid id);
@@ -20,6 +25,8 @@ public interface ICardRepository
     Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId);
     Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids);
 }
+
+public record CardNameRow(Guid Id, string Name);
 
 // The fields a mass edit may set; null = leave as is
 public record CardChanges(

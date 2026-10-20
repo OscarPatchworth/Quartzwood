@@ -63,6 +63,30 @@ public class CardRepository : ICardRepository
             .ThenInclude(ct => ct.Tag)
             .ToListAsync();
 
+    public Task<List<CardNameRow>> GetNamesByEntitiesAsync(IReadOnlyCollection<Guid> entityIds)
+        => _context.Cards
+            .AsNoTracking()
+            .Where(c => entityIds.Contains(c.Box.Group.EntityId) && c.Name != null)
+            .Select(c => new CardNameRow(c.Id, c.Name!))
+            .ToListAsync();
+
+    public async Task<List<CardInstance>> GetWithBoxByIdsAsync(IReadOnlyCollection<Guid> ids)
+    {
+        // 1000 ids per query: WHERE Id IN (...) stays far below SQLite's parameter limit
+        var cards = new List<CardInstance>();
+        foreach (var batch in ids.Chunk(1000))
+        {
+            cards.AddRange(await _context.Cards
+                .AsNoTracking()
+                .Include(c => c.Box)
+                .Include(c => c.CardTags)
+                .ThenInclude(ct => ct.Tag)
+                .Where(c => batch.Contains(c.Id))
+                .ToListAsync());
+        }
+        return cards;
+    }
+
     // One SaveChanges for all of them: a single database transaction however many copies there are
     public async Task AddRangeAsync(IEnumerable<CardInstance> cards)
     {

@@ -13,4 +13,6 @@ public interface ICardCommandService
     Task<int> UpdateManyAsync(IReadOnlyCollection<Guid> ids, BulkUpdateCardsDto dto);
     Task<int> MoveManyAsync(IReadOnlyCollection<Guid> ids, Guid boxId);
     Task<int> DeleteManyAsync(IReadOnlyCollection<Guid> ids);
+    // Creates the box (groupId must exist) and moves the cards into it, all or nothing
+    Task<BulkMoveToNewBoxResultDto> MoveToNewBoxAsync(IReadOnlyCollection<Guid> ids, string boxName, Guid groupId);
 }
