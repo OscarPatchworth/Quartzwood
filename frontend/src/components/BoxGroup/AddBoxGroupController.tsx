@@ -49,7 +49,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
     }
 
     return(
-        <div className="flex flex-wrap items-center gap-2 m-4 align-top">
+        <div className="flex flex-wrap items-center gap-2">
             <button
                 type="button"
                 onClick={() => openCreateForm("group")}

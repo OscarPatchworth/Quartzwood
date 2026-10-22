@@ -16,7 +16,7 @@ export default function GroupBoxListCard<T>({
     onNavigate, onDelete, deletingId, emptyMessage, className
 }: EntityListProps<T>) {
     return (
-        <div className={`grid min-w-0 w-[45%] grid-cols-1 content-start gap-4 ${className ?? ''}`}>
+        <div className={`grid min-w-0 grid-cols-1 content-start gap-4 ${className ?? ''}`}>
             <h2 className="mb-1 ml-3 text-lg font-bold uppercase tracking-wide text-fg-muted">{title}</h2>
             <div className="max-h-[60vh] overflow-y-auto pr-2">
                 <div className="grid grid-cols-1 content-start gap-4">

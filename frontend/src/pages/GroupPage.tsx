@@ -128,12 +128,12 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     const isRoot = activeGroup?.parentGroupId === null
 
     return (
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
             {!isRoot && (
                 <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
             )}
 
-            <div className='flex items-start justify-between align-top'>
+            <div className='mb-4 flex flex-wrap items-start justify-between gap-2'>
                 {isRoot ? (
                     <h1 className="mb-4 mt-3 text-2xl font-bold">My Collection</h1>
                 ) : (
@@ -161,7 +161,7 @@ export default function GroupPage({ groupId }: GroupPageProps) {
             {deleteError && <p role="alert" className="mb-4 text-sm text-danger">{deleteError}</p>}
 
             <div className='flex justify-center'>
-                <div className="flex gap-8 px-4 w-[75%] justify-between">
+                <div className="grid w-full max-w-5xl gap-8 md:grid-cols-2 md:px-4">
                    
                     <GroupBoxListCard
                         title="Groups"
@@ -185,7 +185,6 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                         onDelete={b => void deleteBox(b)}
                         deletingId={deletingBoxId}
                         emptyMessage="No boxes found."
-                        className="justify-self-end"
                     />
 
                 </div>

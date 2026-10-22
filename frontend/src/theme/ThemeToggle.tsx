@@ -21,7 +21,7 @@ export function ThemeToggle() {
             className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:text-header-hover"
         >
             <span aria-hidden="true">{labels[preference].icon}</span>
-            {labels[preference].text}
+            <span className="hidden sm:inline">{labels[preference].text}</span>
         </button>
     )
 }

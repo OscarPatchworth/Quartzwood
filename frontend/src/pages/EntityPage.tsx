@@ -19,7 +19,7 @@ export default function EntityPage() {
     if (loading) return <LoadingIndicator />
 
     return (
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
             <button onClick={() => navigate('/')} className="mb-4 text-link hover:underline">← Back</button>
             <h1 className="text-2xl font-bold mb-6">Groups</h1>
             <div className="grid grid-cols-1 gap-4">

@@ -61,7 +61,7 @@ export default function SearchPage() {
     const tabs: [Mode, string][] = [['search', 'Search'], ['list', 'Find a list']]
 
     return (
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
             <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
             <div role="tablist" aria-label="Search mode" className="mb-4 flex gap-1 border-b border-line">
                 {tabs.map(([value, label]) => (
@@ -151,8 +151,8 @@ function CollectionSearch() {
                 />
             )}
 
-            <div className="flex max-w-2xl items-center gap-2">
-                <div className="min-w-0 flex-1">
+            <div className="flex max-w-2xl flex-wrap items-center gap-2">
+                <div className="w-full min-w-0 sm:w-auto sm:flex-1">
                     <SearchInput
                         id="collection-search"
                         label="Search your collection"

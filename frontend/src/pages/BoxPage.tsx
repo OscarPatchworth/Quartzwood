@@ -35,7 +35,7 @@ import { DividerHeader } from '../components/Dividers/DividerHeader'
 
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
-const cardGridClass = "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+const cardGridClass = "grid grid-cols-2 gap-4 @lg:grid-cols-3 @2xl:grid-cols-4 @5xl:grid-cols-6"
 
 
 export default function BoxPage() {
@@ -261,9 +261,9 @@ export default function BoxPage() {
             />
         )}    
         
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
             <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
-            <div className='flex justify-between'>
+            <div className='flex flex-col xl:flex-row xl:items-start xl:justify-between xl:gap-4'>
                 <EditableTitle
                     name={box?.name ?? ''}
                     draftName={draftName}
@@ -272,12 +272,14 @@ export default function BoxPage() {
                     onSave={() => void saveBoxName()}
                     onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
                     onStartEdit={() => setIsEditingName(true)}
-                    className="mb-6 mt-4"
+                    className="mb-3 mt-4 xl:mb-6"
                 />
-                <div className='flex justify-end items-start gap-2 pt-[-10] pb-5'>
+                <div className='flex flex-wrap items-start gap-2 pb-5 xl:flex-nowrap xl:justify-end'>
                     {box && (
                         <>
-                            <AddNewCardTextBar onAdd={addToBox} />
+                            <div className="w-full sm:w-auto sm:min-w-72 sm:flex-1 xl:w-96 xl:flex-none">
+                                <AddNewCardTextBar onAdd={addToBox} />
+                            </div>
                             <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
                             <FilterMenu value={filter} onChange={setFilter} />
                             <SortMenu value={{ sort, desc }} onChange={setSort} />
@@ -304,7 +306,7 @@ export default function BoxPage() {
 
 
             {/* Extra bottom padding in select mode so the floating bar never covers the last row */}
-            <div className={`pl-8 ${selection.isSelecting ? "pb-24" : ""}`}>
+            <div className={`@container sm:pl-8 ${selection.isSelecting ? "pb-24" : ""}`}>
                 {cards.length === 0 && hasFilter(filter) && (
                     <p className="py-8 text-sm text-fg-muted">
                         No cards in this box match the filter.{' '}

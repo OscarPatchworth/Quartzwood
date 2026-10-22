@@ -45,7 +45,7 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
     const ordered = [...rows.filter(x => !x.isOver), ...rows.filter(x => x.isOver)]
 
     return (
-        <section aria-labelledby="options-title" className="rounded-lg border border-line bg-surface p-4">
+        <section aria-labelledby="options-title" className="@container rounded-lg border border-line bg-surface p-4">
             <div className="mb-3 flex flex-wrap items-center gap-2">
                 <h2 id="options-title" className="mr-auto text-lg font-bold text-fg">Trade options</h2>
                 <LocationPicker entityId={personalEntityId} value={location} onChange={setLocation} />
@@ -63,7 +63,7 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
                     : result?.hasMore ? "Showing the first 500: narrow it down with the search or filters." : null}
             </p>
 
-            <ul className={`mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 ${isSearching ? "opacity-60" : ""}`}>
+            <ul className={`mt-2 grid grid-cols-2 gap-4 @lg:grid-cols-3 @2xl:grid-cols-4 @5xl:grid-cols-6 ${isSearching ? "opacity-60" : ""}`}>
                 {ordered.map(({ row, price, availableIds, isOver }) => (
                     <li key={`${row.boxId}-${row.ids[0]}`} className={isOver ? "opacity-40 grayscale hover:opacity-70" : ""}>
                         <button

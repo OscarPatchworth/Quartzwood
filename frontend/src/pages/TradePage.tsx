@@ -129,7 +129,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
         const added = Number(finished.cardsAdded)
         const removed = Number(finished.cardsRemoved)
         return (
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
                 <h1 className="mb-4 text-2xl font-bold">Trade done</h1>
                 <div className="max-w-xl rounded-lg border border-success-line bg-success-soft p-4 text-sm text-fg" role="status">
                     {added > 0 && (
@@ -151,7 +151,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
 
     if (draft.stage === "collecting") {
         return (
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                     <h1 className="mr-auto text-2xl font-bold">Trade: collect the cards</h1>
                     <button type="button" onClick={() => setDraft(current => ({ ...current, stage: "building" }))} className={secondaryButton}>
@@ -179,7 +179,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
     }
 
     return (
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
             <div className="mb-4 flex flex-wrap items-center gap-3">
                 <h1 className="mr-auto text-2xl font-bold">Trade</h1>
                 <button type="button" onClick={clearTrade} disabled={isEmpty} className={secondaryButton}>
