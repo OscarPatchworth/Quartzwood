@@ -72,7 +72,7 @@ public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year
     if (year.HasValue) query += $" year={year}";
     query += " include:extras (game:paper)";
 
-    string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released";
+    string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released&dir=desc";
     var cards = new List<ScryfallCard>();
 
     while (url is not null)
@@ -106,7 +106,7 @@ public async Task<IEnumerable<ScryfallCard>?> SearchPromoAsync(string? cardName,
     if(setNumber != null && !setNumber.IsWhiteSpace() && setNumber.All(char.IsDigit)){ query += $" cn:{setNumber}";}
     if (year.HasValue) query += $" year={year}";
 
-    string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released";
+    string? url = $"https://api.scryfall.com/cards/search?q={Uri.EscapeDataString(query)}&unique=prints&order=released&dir=desc";
     var cards = new List<ScryfallCard>();
 
     while (url is not null)

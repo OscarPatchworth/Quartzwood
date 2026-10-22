@@ -51,7 +51,7 @@ public class LocalScryfallService : IScryfallService
         return GetCardAsync(scryfallSetCode, scryfallSetNumber);
     }
 
-    // Same as the API query: !"name" [year=YYYY] include:extras (game:paper), every printing, oldest first
+    // Same as the API query: !"name" [year=YYYY] include:extras (game:paper), every printing, newest first
     public async Task<IEnumerable<ScryfallCard>?> SearchAsync(string name, int? year)
     {
         var query = _db.Printings.AsNoTracking()
@@ -231,9 +231,10 @@ public class LocalScryfallService : IScryfallService
         return query.Where(p => p.ReleasedAt >= from && p.ReleasedAt < to);
     }
 
+    // Newest printing first: the one you're most likely holding
     private static Task<List<ScryfallCard>> ToCardsAsync(IQueryable<ScryfallPrinting> query)
         => query
-            .OrderBy(p => p.ReleasedAt)
+            .OrderByDescending(p => p.ReleasedAt)
             .ThenBy(p => p.SetCode)
             .ThenBy(p => p.CollectorNumber)
             .Select(p => new ScryfallCard(p.Id, p.Name, p.SetCode, p.CollectorNumber))
