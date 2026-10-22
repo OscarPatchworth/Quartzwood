@@ -82,8 +82,8 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
 
     const option = (value: Choice, label: string, tone = "") => (
         <label className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium ${choice === value
-            ? "border-sky-700 bg-sky-50 ring-2 ring-sky-700/30" : "border-slate-200 hover:bg-slate-50"} ${tone}`}>
-            <input type="radio" name="fetch-choice" value={value} checked={choice === value} onChange={() => setChoice(value)} className="accent-sky-800" />
+            ? "border-accent-line bg-accent-soft ring-2 ring-accent-line/30" : "border-line hover:bg-surface-muted"} ${tone}`}>
+            <input type="radio" name="fetch-choice" value={value} checked={choice === value} onChange={() => setChoice(value)} className="accent-accent-line" />
             {label}
         </label>
     )
@@ -91,13 +91,13 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
     const canSubmit = !isWorking && cardIds.length > 0 && (choice !== "new-box" || boxName.trim().length > 0)
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" onMouseDown={() => !isWorking && onClose()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" onMouseDown={() => !isWorking && onClose()}>
             <form role="dialog" aria-modal="true" aria-labelledby="finish-fetch-title" onSubmit={submit}
                 onMouseDown={event => event.stopPropagation()}
-                className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                <h2 id="finish-fetch-title" className="text-lg font-semibold text-slate-900">What should happen to the {countLabel}?</h2>
+                className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
+                <h2 id="finish-fetch-title" className="text-lg font-semibold text-fg">What should happen to the {countLabel}?</h2>
                 {untickedCount > 0 && (
-                    <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                    <p className="mt-2 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning">
                         {untickedCount} {untickedCount === 1 ? "card isn't" : "cards aren't"} ticked: {untickedCount === 1 ? "it stays" : "they stay"} where {untickedCount === 1 ? "it is" : "they are"}.
                     </p>
                 )}
@@ -107,16 +107,16 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
                     {option("new-box", "Move them to a new box")}
                     {choice === "new-box" && (
                         <div className="space-y-2 pb-1 pl-7">
-                            <label className="block text-sm text-slate-700">
+                            <label className="block text-sm text-fg-muted">
                                 Box name
                                 <input value={boxName} onChange={event => setBoxName(event.target.value)} maxLength={100} autoFocus
                                     placeholder="e.g. Deck: Mono Blue"
-                                    className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                                    className="mt-1 block w-full rounded-md border border-line-strong px-2 py-1.5 text-sm" />
                             </label>
-                            <label className="block text-sm text-slate-700">
+                            <label className="block text-sm text-fg-muted">
                                 In
                                 <select value={groupId} onChange={event => setGroupId(event.target.value)}
-                                    className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm">
+                                    className="mt-1 block w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm">
                                     {groups.length === 0 && <option value={rootGroupId}>Collection</option>}
                                     {groups.map(({ group, depth }) => (
                                         // Non-breaking spaces: normal spaces at the start of an <option> are collapsed
@@ -127,20 +127,20 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
                         </div>
                     )}
                     {option("existing-box", "Move them to one of your boxes...")}
-                    {option("delete", "Delete them from your collection", choice === "delete" ? "" : "text-rose-800")}
-                    {choice === "delete" && <p className="pl-7 text-sm text-rose-700">This can't be undone.</p>}
+                    {option("delete", "Delete them from your collection", choice === "delete" ? "" : "text-danger")}
+                    {choice === "delete" && <p className="pl-7 text-sm text-danger">This can't be undone.</p>}
                 </fieldset>
 
-                {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
+                {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
 
                 <div className="mt-6 flex justify-end gap-2">
                     <button type="button" disabled={isWorking} onClick={onClose}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50">
                         Cancel
                     </button>
                     <button type="submit" disabled={!canSubmit}
-                        className={`rounded-md px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 ${choice === "delete"
-                            ? "bg-rose-700 hover:bg-rose-600" : "bg-sky-800 hover:bg-sky-700"}`}>
+                        className={`rounded-md px-3 py-2 text-sm font-semibold text-on-accent disabled:cursor-not-allowed disabled:opacity-50 ${choice === "delete"
+                            ? "bg-danger-solid hover:bg-danger-hover" : "bg-accent hover:bg-accent-hover"}`}>
                         {isWorking ? "Working..."
                             : choice === "new-box" ? `Move ${countLabel}`
                             : choice === "existing-box" ? "Choose a box..."

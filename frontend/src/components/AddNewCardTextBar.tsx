@@ -171,7 +171,7 @@ export function AddNewCardTextBar({
                     <button
                         type="submit"
                         disabled={isAdding}
-                        className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-fuchsia-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-800 active:translate-y-px disabled:opacity-60"
+                        className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-special px-4 py-2.5 text-sm font-semibold text-on-accent transition hover:bg-special-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-special active:translate-y-px disabled:opacity-60"
                     >
                         <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                             <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -182,17 +182,17 @@ export function AddNewCardTextBar({
             </form>
 
             {lastAdded && text === "" && (
-                <p role="status" className="mt-1 text-right text-xs text-emerald-700">{lastAdded}</p>
+                <p role="status" className="mt-1 text-right text-xs text-success">{lastAdded}</p>
             )}
 
             {showDropdown && (
                 // While a newer lookup runs, the old suggestions stay visible but dimmed and unclickable,
                 // so nothing flickers and you can't add a card for text you've already changed
-                <div className={`absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg ${isSearching ? "pointer-events-none opacity-60" : ""}`}>
+                <div className={`absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-lg border border-line bg-surface shadow-lg ${isSearching ? "pointer-events-none opacity-60" : ""}`}>
                     {addError || lookupError ? (
-                        <p role="alert" className="px-4 py-3 text-sm font-semibold text-rose-700">{addError ?? lookupError}</p>
+                        <p role="alert" className="px-4 py-3 text-sm font-semibold text-danger">{addError ?? lookupError}</p>
                     ) : isAdding ? (
-                        <p className="px-4 py-3 text-sm text-slate-600">Adding...</p>
+                        <p className="px-4 py-3 text-sm text-fg-muted">Adding...</p>
                     ) : lookup && (
                         <SuggestionList
                             lookup={lookup}
@@ -223,11 +223,11 @@ function SuggestionList({ lookup, onPickName, onPickPrinting, onAddPreview }: Su
             return suggestions.names.length === 0
                 ? <Message text={`No cards called "${parsed.name}"`} />
                 : (
-                    <ul className="max-h-70 divide-y divide-slate-100 overflow-y-auto">
+                    <ul className="max-h-70 divide-y divide-line overflow-y-auto">
                         {suggestions.names.map(name => (
                             <li key={name}>
                                 <button type="button" onClick={() => onPickName(name)}
-                                    className="w-full px-4 py-2.5 text-left text-sm text-slate-900 hover:bg-slate-50">
+                                    className="w-full px-4 py-2.5 text-left text-sm text-fg hover:bg-surface-muted">
                                     {name}
                                 </button>
                             </li>
@@ -239,7 +239,7 @@ function SuggestionList({ lookup, onPickName, onPickPrinting, onAddPreview }: Su
             return suggestions.printings.length === 0
                 ? <Message text={`No printings found for "${parsed.name ?? parsed.setNumber}"`} />
                 : (
-                    <ul className="max-h-70 divide-y divide-slate-200 overflow-y-auto">
+                    <ul className="max-h-70 divide-y divide-line overflow-y-auto">
                         {suggestions.printings.map(card => (
                             <li key={card.scryfallId}>
                                 <PrintingRow card={card} label={`${copies}${card.name}`} onClick={() => onPickPrinting(card)} />
@@ -261,12 +261,12 @@ function SuggestionList({ lookup, onPickName, onPickPrinting, onAddPreview }: Su
 function PrintingRow({ card, label, hint, onClick }: { card: ScryfallCardMatch, label: string, hint?: string, onClick: () => void }) {
     return (
         <button type="button" onClick={onClick}
-            className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm hover:bg-slate-50">
+            className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm hover:bg-surface-muted">
             <span className="flex min-w-0 flex-col">
-                <span className="truncate font-medium text-slate-900">{label}</span>
-                <span className="text-xs text-slate-600">
+                <span className="truncate font-medium text-fg">{label}</span>
+                <span className="text-xs text-fg-muted">
                     {card.setCode} #{card.setNumber}
-                    {hint && <span className="ml-2 text-slate-400">· {hint}</span>}
+                    {hint && <span className="ml-2 text-fg-subtle">· {hint}</span>}
                 </span>
             </span>
             <img src={cardImageUrl(card.scryfallId, "small")} alt="" loading="lazy" className="h-16 w-auto shrink-0 rounded" />
@@ -275,5 +275,5 @@ function PrintingRow({ card, label, hint, onClick }: { card: ScryfallCardMatch, 
 }
 
 function Message({ text }: { text: string }) {
-    return <p className="px-4 py-3 text-sm text-slate-600">{text}</p>
+    return <p className="px-4 py-3 text-sm text-fg-muted">{text}</p>
 }

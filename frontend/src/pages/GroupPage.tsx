@@ -130,7 +130,7 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     return (
         <div className="p-8">
             {!isRoot && (
-                <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
+                <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
             )}
 
             <div className='flex items-start justify-between align-top'>
@@ -158,7 +158,7 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                 </div>
             </div>
 
-            {deleteError && <p role="alert" className="mb-4 text-sm text-rose-700">{deleteError}</p>}
+            {deleteError && <p role="alert" className="mb-4 text-sm text-danger">{deleteError}</p>}
 
             <div className='flex justify-center'>
                 <div className="flex gap-8 px-4 w-[75%] justify-between">

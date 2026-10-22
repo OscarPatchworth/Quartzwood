@@ -57,16 +57,16 @@ export function TagInput({ id, label, value, onAdd, onRemove, suggestions, place
 
     return (
         <div className="relative">
-            <div className={`flex flex-wrap items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 focus-within:border-sky-700 focus-within:ring-2 focus-within:ring-sky-700/20 ${disabled ? "opacity-60" : ""}`}>
+            <div className={`flex flex-wrap items-center gap-1 rounded-md border border-line-strong bg-surface px-2 py-1 focus-within:border-accent-line focus-within:ring-2 focus-within:ring-accent-line/20 ${disabled ? "opacity-60" : ""}`}>
                 {value.map(name => (
-                    <span key={name} className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-900">
+                    <span key={name} className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-ink">
                         {name}
                         <button
                             type="button"
                             disabled={disabled}
                             onClick={() => onRemove(name)}
                             aria-label={`Remove tag ${name}`}
-                            className="rounded-full leading-none text-sky-700 hover:text-sky-950"
+                            className="rounded-full leading-none text-link hover:text-accent-ink"
                         >
                             ×
                         </button>
@@ -86,19 +86,19 @@ export function TagInput({ id, label, value, onAdd, onRemove, suggestions, place
                     // Delay closing, so a click on a suggestion still lands before the list disappears
                     onBlur={() => setTimeout(() => setIsOpen(false), 150)}
                     onKeyDown={onKeyDown}
-                    className="min-w-24 flex-1 bg-transparent py-0.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    className="min-w-24 flex-1 bg-transparent py-0.5 text-sm text-fg placeholder:text-fg-subtle focus:outline-none"
                 />
             </div>
 
             {isOpen && !disabled && (matches.length > 0 || isNew) && (
-                <ul role="listbox" className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                <ul role="listbox" className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto rounded-md border border-line bg-surface py-1 shadow-lg">
                     {matches.map(name => (
                         <li key={name} role="option" aria-selected={false}>
                             <button
                                 type="button"
                                 onMouseDown={event => event.preventDefault()}
                                 onClick={() => add(name)}
-                                className="w-full px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-100"
+                                className="w-full px-3 py-1.5 text-left text-sm text-fg-muted hover:bg-surface-sunken"
                             >
                                 {name}
                             </button>
@@ -110,7 +110,7 @@ export function TagInput({ id, label, value, onAdd, onRemove, suggestions, place
                                 type="button"
                                 onMouseDown={event => event.preventDefault()}
                                 onClick={() => add(typed)}
-                                className="w-full px-3 py-1.5 text-left text-sm text-sky-800 hover:bg-slate-100"
+                                className="w-full px-3 py-1.5 text-left text-sm text-link hover:bg-surface-sunken"
                             >
                                 Create "<span className="font-semibold">{typed}</span>"
                             </button>

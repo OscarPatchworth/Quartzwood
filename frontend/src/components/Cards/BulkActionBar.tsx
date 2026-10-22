@@ -60,26 +60,26 @@ export function BulkActionBar({ selection, onChanged, currentBoxId }: BulkAction
             <div
                 role="toolbar"
                 aria-label="Selected cards"
-                className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-lg"
+                className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 shadow-lg"
             >
-                <span className="min-w-28 text-sm font-semibold text-slate-800" aria-live="polite">
+                <span className="min-w-28 text-sm font-semibold text-fg" aria-live="polite">
                     {count === 0 ? "Select cards" : `${countLabel} selected`}
                 </span>
 
                 <button
                     type="button"
-                    className={`${buttonClassName} text-slate-700 hover:bg-slate-100`}
+                    className={`${buttonClassName} text-fg-muted hover:bg-surface-sunken`}
                     onClick={selection.allSelected ? selection.clear : selection.selectAll}
                 >
                     {selection.allSelected ? "Clear" : "Select all"}
                 </button>
 
-                <span className="h-6 w-px bg-slate-200" aria-hidden="true" />
+                <span className="h-6 w-px bg-surface-strong" aria-hidden="true" />
 
                 <button
                     type="button"
                     disabled={count === 0 || isDeleting}
-                    className={`${buttonClassName} border border-sky-300 bg-sky-50 text-sky-900 hover:bg-sky-100`}
+                    className={`${buttonClassName} border border-accent-line/40 bg-accent-soft text-accent-ink hover:bg-accent-soft`}
                     onClick={() => setOpenDialog("edit")}
                 >
                     Edit...
@@ -87,7 +87,7 @@ export function BulkActionBar({ selection, onChanged, currentBoxId }: BulkAction
                 <button
                     type="button"
                     disabled={count === 0 || isDeleting}
-                    className={`${buttonClassName} border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100`}
+                    className={`${buttonClassName} border border-success-line bg-success-soft text-success hover:bg-success-soft-strong`}
                     onClick={() => setOpenDialog("move")}
                 >
                     Move...
@@ -95,19 +95,19 @@ export function BulkActionBar({ selection, onChanged, currentBoxId }: BulkAction
                 <button
                     type="button"
                     disabled={count === 0 || isDeleting}
-                    className={`${buttonClassName} border border-rose-300 bg-rose-50 text-rose-900 hover:bg-rose-100`}
+                    className={`${buttonClassName} border border-danger-line bg-danger-soft text-danger hover:bg-danger-soft-strong`}
                     onClick={deleteSelected}
                 >
                     {isDeleting ? "Deleting..." : "Delete"}
                 </button>
 
-                <span className="h-6 w-px bg-slate-200" aria-hidden="true" />
+                <span className="h-6 w-px bg-surface-strong" aria-hidden="true" />
 
-                <button type="button" className={`${buttonClassName} text-slate-700 hover:bg-slate-100`} onClick={stop}>
+                <button type="button" className={`${buttonClassName} text-fg-muted hover:bg-surface-sunken`} onClick={stop}>
                     Done
                 </button>
 
-                {errorMessage && <p role="alert" className="w-full text-sm text-rose-700">{errorMessage}</p>}
+                {errorMessage && <p role="alert" className="w-full text-sm text-danger">{errorMessage}</p>}
             </div>
 
             {openDialog === "edit" && (

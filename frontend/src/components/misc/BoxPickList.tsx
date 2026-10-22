@@ -41,47 +41,47 @@ export function BoxPickList({ title, items, collected, onToggle, onTickAll, empt
     const allTicked = items.length > 0 && items.every(item => collected.has(item.key))
 
     return (
-        <section aria-label={title} className={`rounded-lg border bg-white p-4 ${className}`}>
+        <section aria-label={title} className={`rounded-lg border bg-surface p-4 ${className}`}>
             <div className="mb-3 flex flex-wrap items-baseline gap-3">
-                <h2 className="mr-auto text-lg font-bold text-slate-900">{title}</h2>
-                <span className="text-sm text-slate-600" aria-live="polite">{collectedCount} of {total} collected</span>
+                <h2 className="mr-auto text-lg font-bold text-fg">{title}</h2>
+                <span className="text-sm text-fg-muted" aria-live="polite">{collectedCount} of {total} collected</span>
                 {items.length > 0 && (
-                    <button type="button" onClick={() => onTickAll(!allTicked)} className="text-sm font-semibold text-sky-800 hover:underline">
+                    <button type="button" onClick={() => onTickAll(!allTicked)} className="text-sm font-semibold text-link hover:underline">
                         {allTicked ? "Untick all" : "Tick all"}
                     </button>
                 )}
             </div>
 
-            {items.length === 0 && <p className="text-sm text-slate-500">{emptyText}</p>}
+            {items.length === 0 && <p className="text-sm text-fg-subtle">{emptyText}</p>}
 
             {byBox.map(({ boxId, boxName, path, items: boxItems }) => (
                 <div key={boxId} className="mb-4 last:mb-0">
-                    <h3 className="font-semibold text-slate-900">{boxName}</h3>
-                    <p className="mb-1 text-xs text-slate-500">{path}</p>
-                    <ul className="divide-y divide-slate-100 rounded-md border border-slate-200">
+                    <h3 className="font-semibold text-fg">{boxName}</h3>
+                    <p className="mb-1 text-xs text-fg-subtle">{path}</p>
+                    <ul className="divide-y divide-line rounded-md border border-line">
                         {boxItems.map(item => {
                             const isCollected = collected.has(item.key)
                             return (
                                 <li key={item.key}>
-                                    <label className={`flex cursor-pointer items-center gap-3 px-3 py-2 ${isCollected ? "bg-emerald-50" : ""}`}>
+                                    <label className={`flex cursor-pointer items-center gap-3 px-3 py-2 ${isCollected ? "bg-success-soft" : ""}`}>
                                         <input type="checkbox" checked={isCollected} onChange={() => onToggle(item.key)}
-                                            className="size-5 shrink-0 accent-emerald-600" />
+                                            className="size-5 shrink-0 accent-success-solid" />
                                         {item.scryfallId && (
                                             <img src={cardImageUrl(item.scryfallId, "small")} alt="" loading="lazy" className="h-12 w-auto shrink-0 rounded" />
                                         )}
                                         <span className="min-w-0 flex-1">
-                                            <span className={`block truncate text-sm font-semibold ${isCollected ? "text-slate-500 line-through" : "text-slate-900"}`}>
+                                            <span className={`block truncate text-sm font-semibold ${isCollected ? "text-fg-subtle line-through" : "text-fg"}`}>
                                                 {item.count > 1 && `${item.count} × `}{item.name ?? "Unnamed card"}
                                             </span>
-                                            <span className="block text-xs text-slate-500">
+                                            <span className="block text-xs text-fg-subtle">
                                                 {[item.setCode && `${item.setCode} #${item.setNumber}`, item.condition,
                                                   item.foilType !== "None" && item.foilType].filter(Boolean).join(" ⋆ ")}
                                             </span>
                                             {item.dividerName && (
-                                                <span className="block truncate text-xs font-medium text-sky-800">Behind {item.dividerName}</span>
+                                                <span className="block truncate text-xs font-medium text-link">Behind {item.dividerName}</span>
                                             )}
                                         </span>
-                                        <span className="shrink-0 text-sm text-slate-700">{item.price !== null ? formatPrice(item.price) : ""}</span>
+                                        <span className="shrink-0 text-sm text-fg-muted">{item.price !== null ? formatPrice(item.price) : ""}</span>
                                     </label>
                                 </li>
                             )

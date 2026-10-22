@@ -1,1 +1,190 @@
 @import "tailwindcss";
+
+/*
+  Theme tokens: colours named by what they're FOR (a panel, body text, a border, a warning),
+  not what they look like. Components use bg-surface, text-fg-muted, border-line... and never palette
+  colours like bg-white or text-slate-700, so a theme only has to change the values below.
+
+  - Light values are on :root, dark values on [data-theme="dark"]. <html data-theme> is set by
+    src/theme/theme.ts (and a small script in index.html, so the page never flashes the wrong theme)
+  - A future colour scheme setting can override any --qw-* value at runtime with
+    document.documentElement.style.setProperty("--qw-accent", "...")
+  - Opacity still works: bg-surface/80, ring-accent-line/30
+*/
+
+/* dark: follows the chosen theme rather than only the operating system's setting */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme inline {
+  /* Backgrounds */
+  --color-page: var(--qw-page);                     /* behind everything */
+  --color-surface: var(--qw-surface);               /* panels, cards, inputs, dialogs */
+  --color-surface-muted: var(--qw-surface-muted);   /* hovered rows, subtle panels */
+  --color-surface-sunken: var(--qw-surface-sunken); /* placeholders, wells */
+  --color-surface-strong: var(--qw-surface-strong); /* pressed / strong neutral */
+  --color-overlay: var(--qw-overlay);               /* dimmed page behind dialogs and panels */
+
+  /* Text */
+  --color-fg: var(--qw-fg);                         /* headings, main text */
+  --color-fg-muted: var(--qw-fg-muted);             /* secondary text, labels */
+  --color-fg-subtle: var(--qw-fg-subtle);           /* hints, placeholders, metadata */
+
+  /* Borders */
+  --color-line: var(--qw-line);                     /* dividers, light borders */
+  --color-line-strong: var(--qw-line-strong);       /* input and button borders */
+
+  /* Accent: primary buttons, links, selection */
+  --color-accent: var(--qw-accent);                 /* primary button fill */
+  --color-accent-hover: var(--qw-accent-hover);
+  --color-on-accent: var(--qw-on-accent);           /* text on any solid colour fill */
+  --color-link: var(--qw-link);                     /* links and text buttons */
+  --color-accent-ink: var(--qw-accent-ink);         /* text on accent-soft */
+  --color-accent-soft: var(--qw-accent-soft);       /* selected / highlighted background */
+  --color-accent-line: var(--qw-accent-line);       /* selected borders, focus rings */
+
+  /* Status: text, soft background, stronger soft background, border, solid fill (+ hover) */
+  --color-danger: var(--qw-danger);
+  --color-danger-soft: var(--qw-danger-soft);
+  --color-danger-soft-strong: var(--qw-danger-soft-strong);
+  --color-danger-line: var(--qw-danger-line);
+  --color-danger-solid: var(--qw-danger-solid);
+  --color-danger-hover: var(--qw-danger-hover);
+
+  --color-warning: var(--qw-warning);
+  --color-warning-soft: var(--qw-warning-soft);
+  --color-warning-soft-strong: var(--qw-warning-soft-strong);
+  --color-warning-line: var(--qw-warning-line);
+  --color-warning-solid: var(--qw-warning-solid);
+
+  --color-success: var(--qw-success);
+  --color-success-soft: var(--qw-success-soft);
+  --color-success-soft-strong: var(--qw-success-soft-strong);
+  --color-success-line: var(--qw-success-line);
+  --color-success-solid: var(--qw-success-solid);
+  --color-success-hover: var(--qw-success-hover);
+
+  /* The add-card button's own colour */
+  --color-special: var(--qw-special);
+  --color-special-hover: var(--qw-special-hover);
+
+  /* Top bar (dark in both themes) */
+  --color-header: var(--qw-header);
+  --color-header-fg: var(--qw-header-fg);
+  --color-header-muted: var(--qw-header-muted);
+  --color-header-hover: var(--qw-header-hover);
+}
+
+:root {
+  color-scheme: light;
+
+  --qw-page: var(--color-white);
+  --qw-surface: var(--color-white);
+  --qw-surface-muted: var(--color-slate-50);
+  --qw-surface-sunken: var(--color-slate-100);
+  --qw-surface-strong: var(--color-slate-200);
+  --qw-overlay: oklch(12.9% 0.042 264.695 / 0.4);
+
+  --qw-fg: var(--color-slate-900);
+  --qw-fg-muted: var(--color-slate-700);
+  --qw-fg-subtle: var(--color-slate-500);
+
+  --qw-line: var(--color-slate-200);
+  --qw-line-strong: var(--color-slate-300);
+
+  --qw-accent: var(--color-sky-800);
+  --qw-accent-hover: var(--color-sky-700);
+  --qw-on-accent: var(--color-white);
+  --qw-link: var(--color-sky-800);
+  --qw-accent-ink: var(--color-sky-900);
+  --qw-accent-soft: var(--color-sky-50);
+  --qw-accent-line: var(--color-sky-700);
+
+  --qw-danger: var(--color-rose-700);
+  --qw-danger-soft: var(--color-rose-50);
+  --qw-danger-soft-strong: var(--color-rose-100);
+  --qw-danger-line: var(--color-rose-200);
+  --qw-danger-solid: var(--color-rose-700);
+  --qw-danger-hover: var(--color-rose-600);
+
+  --qw-warning: var(--color-amber-900);
+  --qw-warning-soft: var(--color-amber-50);
+  --qw-warning-soft-strong: var(--color-amber-200);
+  --qw-warning-line: var(--color-amber-200);
+  --qw-warning-solid: var(--color-amber-500);
+
+  --qw-success: var(--color-emerald-800);
+  --qw-success-soft: var(--color-emerald-50);
+  --qw-success-soft-strong: var(--color-emerald-100);
+  --qw-success-line: var(--color-emerald-200);
+  --qw-success-solid: var(--color-emerald-700);
+  --qw-success-hover: var(--color-emerald-600);
+
+  --qw-special: var(--color-fuchsia-800);
+  --qw-special-hover: var(--color-fuchsia-700);
+
+  --qw-header: var(--color-gray-800);
+  --qw-header-fg: var(--color-white);
+  --qw-header-muted: var(--color-gray-500);
+  --qw-header-hover: var(--color-gray-300);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;   /* native controls (scrollbars, selects, date pickers) go dark too */
+
+  --qw-page: var(--color-slate-950);
+  --qw-surface: var(--color-slate-900);
+  --qw-surface-muted: oklch(27.9% 0.041 260.031 / 0.6);  /* slate-800, 60% */
+  --qw-surface-sunken: var(--color-slate-800);
+  --qw-surface-strong: var(--color-slate-700);
+  --qw-overlay: oklch(0% 0 0 / 0.6);
+
+  --qw-fg: var(--color-slate-100);
+  --qw-fg-muted: var(--color-slate-300);
+  --qw-fg-subtle: var(--color-slate-400);
+
+  --qw-line: var(--color-slate-800);
+  --qw-line-strong: var(--color-slate-600);
+
+  --qw-accent: var(--color-sky-700);
+  --qw-accent-hover: var(--color-sky-600);
+  --qw-on-accent: var(--color-white);
+  --qw-link: var(--color-sky-300);
+  --qw-accent-ink: var(--color-sky-100);
+  --qw-accent-soft: oklch(29.3% 0.066 243.157 / 0.7);    /* sky-950, 70% */
+  --qw-accent-line: var(--color-sky-400);
+
+  --qw-danger: var(--color-rose-300);
+  --qw-danger-soft: oklch(27.1% 0.105 12.094 / 0.5);     /* rose-950, 50% */
+  --qw-danger-soft-strong: oklch(41% 0.159 10.272 / 0.6); /* rose-900, 60% */
+  --qw-danger-line: var(--color-rose-800);
+  --qw-danger-solid: var(--color-rose-700);
+  --qw-danger-hover: var(--color-rose-600);
+
+  --qw-warning: var(--color-amber-200);
+  --qw-warning-soft: oklch(27.9% 0.077 45.635 / 0.5);    /* amber-950, 50% */
+  --qw-warning-soft-strong: oklch(41.4% 0.112 45.904 / 0.7); /* amber-900, 70% */
+  --qw-warning-line: var(--color-amber-900);
+  --qw-warning-solid: var(--color-amber-400);
+
+  --qw-success: var(--color-emerald-300);
+  --qw-success-soft: oklch(26.2% 0.051 172.552 / 0.5);   /* emerald-950, 50% */
+  --qw-success-soft-strong: oklch(37.8% 0.077 168.94 / 0.6); /* emerald-900, 60% */
+  --qw-success-line: var(--color-emerald-800);
+  --qw-success-solid: var(--color-emerald-700);
+  --qw-success-hover: var(--color-emerald-600);
+
+  --qw-special: var(--color-fuchsia-700);
+  --qw-special-hover: var(--color-fuchsia-600);
+
+  --qw-header: var(--color-slate-900);
+  --qw-header-fg: var(--color-slate-100);
+  --qw-header-muted: var(--color-slate-500);
+  --qw-header-hover: var(--color-slate-300);
+}
+
+@layer base {
+  body {
+    background-color: var(--qw-page);
+    color: var(--qw-fg);
+  }
+}

@@ -16,7 +16,7 @@ interface BulkEditDialogProps {
 const LEAVE = ""
 type YesNo = typeof LEAVE | "yes" | "no"
 
-const selectClassName = "w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20"
+const selectClassName = "w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm text-fg focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/20"
 
 // Mass edit: only fields that don't change WHICH printing a card is. Every field starts as
 // "Leave as is", and only the ones you change are sent, so e.g. setting Condition keeps each card's own foil
@@ -69,7 +69,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
     // One labelled row of the form
     const row = (label: string, control: React.ReactNode) => (
         <label className="grid grid-cols-[7rem_1fr] items-center gap-3 text-sm">
-            <span className="font-semibold text-slate-600">{label}</span>
+            <span className="font-semibold text-fg-muted">{label}</span>
             {control}
         </label>
     )
@@ -83,7 +83,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
             onMouseDown={() => !isSaving && onClose()}
         >
             <form
@@ -92,10 +92,10 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                 aria-labelledby="bulk-edit-title"
                 onMouseDown={event => event.stopPropagation()}
                 onSubmit={save}
-                className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+                className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
             >
-                <h2 id="bulk-edit-title" className="text-lg font-semibold text-slate-900">Edit {countLabel}</h2>
-                <p className="mb-4 mt-1 text-sm text-slate-500">
+                <h2 id="bulk-edit-title" className="text-lg font-semibold text-fg">Edit {countLabel}</h2>
+                <p className="mb-4 mt-1 text-sm text-fg-subtle">
                     Only the fields you change are updated. Set, number and name can't be mass edited.
                     Removing a tag removes it whoever added it.
                 </p>
@@ -131,7 +131,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                     )}
                     {/* Not wrapped in a <label> like the rows above: the tag box has its own buttons inside */}
                     <div className="grid grid-cols-[7rem_1fr] items-start gap-3 text-sm">
-                        <span className="pt-1.5 font-semibold text-slate-600">Add tags</span>
+                        <span className="pt-1.5 font-semibold text-fg-muted">Add tags</span>
                         <TagInput
                             id="bulk-add-tags"
                             label="Tags to add to every selected card"
@@ -141,7 +141,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                             onRemove={name => setAddTags(current => current.filter(tag => tag !== name))}
                             placeholder="None"
                         />
-                        <span className="pt-1.5 font-semibold text-slate-600">Remove tags</span>
+                        <span className="pt-1.5 font-semibold text-fg-muted">Remove tags</span>
                         <TagInput
                             id="bulk-remove-tags"
                             label="Tags to remove from every selected card"
@@ -154,21 +154,21 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                     </div>
                 </div>
 
-                {errorMessage && <p role="alert" className="mt-4 text-sm text-rose-700">{errorMessage}</p>}
+                {errorMessage && <p role="alert" className="mt-4 text-sm text-danger">{errorMessage}</p>}
 
                 <div className="mt-6 flex justify-end gap-2">
                     <button
                         type="button"
                         disabled={isSaving}
                         onClick={onClose}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSaving || !hasChanges}
-                        className="rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-md bg-accent px-3 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isSaving ? "Saving..." : `Update ${countLabel}`}
                     </button>

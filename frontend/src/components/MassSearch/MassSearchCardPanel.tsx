@@ -12,11 +12,11 @@ export function MassSearchCardPanel({ entry }: { entry: MassSearchEntryDto }) {
 
     return (
         <div>
-            <h2 className="mb-3 pr-6 text-xl font-bold text-slate-900">{entry.name}</h2>
+            <h2 className="mb-3 pr-6 text-xl font-bold text-fg">{entry.name}</h2>
             {entry.scryfallId && (
                 <img src={cardImageUrl(entry.scryfallId)} alt="" className="mx-auto mb-3 w-56 rounded-lg shadow" />
             )}
-            <p className="mb-4 text-sm text-slate-700">
+            <p className="mb-4 text-sm text-fg-muted">
                 {ownedCount === 0
                     ? entry.isKnownCard ? "You don't have this card." : "No card has this name on Scryfall: check the spelling."
                     : <>You have <strong>{ownedCount}</strong> {ownedCount === 1 ? "copy" : "copies"} in {boxes.length} {boxes.length === 1 ? "box" : "boxes"}.</>}
@@ -24,30 +24,30 @@ export function MassSearchCardPanel({ entry }: { entry: MassSearchEntryDto }) {
 
             {boxes.map(box => (
                 <section key={box.boxId} className="mb-4">
-                    <Link to={`/box/${box.boxId}`} className="font-semibold text-sky-800 hover:underline">{box.boxName}</Link>
-                    <p className="mb-1 text-xs text-slate-500">{box.path}</p>
-                    <ul className="divide-y divide-slate-100 rounded-md border border-slate-200">
+                    <Link to={`/box/${box.boxId}`} className="font-semibold text-link hover:underline">{box.boxName}</Link>
+                    <p className="mb-1 text-xs text-fg-subtle">{box.path}</p>
+                    <ul className="divide-y divide-line rounded-md border border-line">
                         {box.rows.map(row => (
                             <li key={row.ids[0]} className="flex items-center gap-3 px-3 py-2">
                                 {row.scryfallId ? (
                                     <img src={cardImageUrl(row.scryfallId, "small")} alt="" loading="lazy" className="h-14 w-auto shrink-0 rounded" />
                                 ) : (
-                                    <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">?</div>
+                                    <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded bg-surface-sunken text-xs text-fg-subtle">?</div>
                                 )}
                                 <span className="min-w-0 flex-1">
-                                    <span className="block text-sm font-semibold text-slate-900">
+                                    <span className="block text-sm font-semibold text-fg">
                                         {Number(row.count)} × {row.setCode ? `${row.setCode} #${row.setNumber}` : "No printing"}
                                     </span>
-                                    <span className="block text-xs text-slate-500">
+                                    <span className="block text-xs text-fg-subtle">
                                         {[row.condition, row.foilType !== "None" && row.foilType, row.stampType !== "None" && row.stampType]
                                             .filter(Boolean).join(" ⋆ ")}
                                     </span>
                                     {row.dividerName && (
-                                        <span className="block text-xs font-medium text-sky-800">Behind {row.dividerName}</span>
+                                        <span className="block text-xs font-medium text-link">Behind {row.dividerName}</span>
                                     )}
                                     <TagList tags={row.tags} className="mt-1" />
                                 </span>
-                                <span className="shrink-0 text-sm text-slate-700">
+                                <span className="shrink-0 text-sm text-fg-muted">
                                     {row.price !== null && row.price !== undefined ? formatPrice(Number(row.price)) : ""}
                                 </span>
                             </li>

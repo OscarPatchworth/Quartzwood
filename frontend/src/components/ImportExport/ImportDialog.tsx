@@ -64,14 +64,14 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
             <button
                 type="button"
                 onClick={open}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted"
             >
                 Import
             </button>
 
             {isOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
                     onMouseDown={() => !isImporting && setIsOpen(false)}
                 >
                     <form
@@ -80,16 +80,16 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                         aria-labelledby="import-title"
                         onMouseDown={event => event.stopPropagation()}
                         onSubmit={runImport}
-                        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-white p-6 shadow-xl"
+                        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-surface p-6 shadow-xl"
                     >
-                        <h2 id="import-title" className="mb-4 text-lg font-semibold text-slate-900">Import cards into this box</h2>
+                        <h2 id="import-title" className="mb-4 text-lg font-semibold text-fg">Import cards into this box</h2>
 
                         <div className="mb-2 flex items-center gap-3">
-                            <label className="cursor-pointer rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                            <label className="cursor-pointer rounded-md border border-line-strong px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-muted">
                                 Choose file...
                                 <input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={chooseFile} className="sr-only" />
                             </label>
-                            {fileName && <span className="truncate text-sm text-slate-600">{fileName}</span>}
+                            {fileName && <span className="truncate text-sm text-fg-muted">{fileName}</span>}
                         </div>
 
                         <textarea
@@ -98,28 +98,28 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                             placeholder={PLACEHOLDER}
                             aria-label="Cards to import"
                             rows={10}
-                            className="w-full resize-y rounded-md border border-slate-300 px-3 py-2 font-mono text-xs outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20"
+                            className="w-full resize-y rounded-md border border-line-strong px-3 py-2 font-mono text-xs outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
                         />
 
-                        {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
+                        {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
 
                         {result && (
                             <div className="mt-3 min-h-0 overflow-y-auto text-sm" aria-live="polite">
-                                <p className="text-slate-800">
+                                <p className="text-fg">
                                     Added <strong>{result.cardsAdded}</strong> {Number(result.cardsAdded) === 1 ? "card" : "cards"} ({result.linesAdded} {Number(result.linesAdded) === 1 ? "line" : "lines"}) from a {result.format}.
                                 </p>
                                 {result.failed.length > 0 && (
                                     <>
-                                        <p className="mt-2 font-medium text-rose-700">
+                                        <p className="mt-2 font-medium text-danger">
                                             {result.failed.length} {result.failed.length === 1 ? "line" : "lines"} couldn't be imported:
                                         </p>
-                                        <ul className="mt-1 divide-y divide-rose-100 rounded-md border border-rose-200 bg-rose-50">
+                                        <ul className="mt-1 divide-y divide-danger-line rounded-md border border-danger-line bg-danger-soft">
                                             {result.failed.map(failure => (
                                                 <li key={failure.line} className="px-3 py-2">
-                                                    <p className="font-mono text-xs text-slate-700">
-                                                        <span className="text-slate-400">Line {failure.line}: </span>{failure.text}
+                                                    <p className="font-mono text-xs text-fg-muted">
+                                                        <span className="text-fg-subtle">Line {failure.line}: </span>{failure.text}
                                                     </p>
-                                                    <p className="text-xs text-rose-700">{failure.reason}</p>
+                                                    <p className="text-xs text-danger">{failure.reason}</p>
                                                 </li>
                                             ))}
                                         </ul>
@@ -133,14 +133,14 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                                 type="button"
                                 disabled={isImporting}
                                 onClick={() => setIsOpen(false)}
-                                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                                className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
                             >
                                 {result ? "Close" : "Cancel"}
                             </button>
                             <button
                                 type="submit"
                                 disabled={isImporting || !content.trim() || result !== undefined}
-                                className="rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-md bg-accent px-3 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {isImporting ? "Importing..." : "Import"}
                             </button>

@@ -179,7 +179,7 @@ function ListInput({ text, onTextChange, onSearch, onBackToResults, isSearching,
 
     return (
         <form onSubmit={event => { event.preventDefault(); onSearch() }} className="max-w-2xl">
-            <label htmlFor="mass-search-list" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="mass-search-list" className="mb-1 block text-sm font-medium text-fg-muted">
                 Cards to find, one per line
             </label>
             <textarea
@@ -189,25 +189,25 @@ function ListInput({ text, onTextChange, onSearch, onBackToResults, isSearching,
                 rows={14}
                 spellCheck={false}
                 placeholder={"4 Lightning Bolt\n1 Sol Ring (C21) 263\nCounterspell\n\nPaste a deck list, or import a .txt / .csv export (Moxfield, ManaBox...)"}
-                className="w-full rounded-lg border border-slate-300 bg-white p-3 font-mono text-sm shadow-sm focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/30"
+                className="w-full rounded-lg border border-line-strong bg-surface p-3 font-mono text-sm shadow-sm focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/30"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-fg-subtle">
                 No number means 1 copy. Set codes and collector numbers are fine but ignored: any printing counts.
             </p>
 
-            {(errorMessage || fileError) && <p role="alert" className="mt-2 text-sm text-rose-700">{fileError ?? errorMessage}</p>}
+            {(errorMessage || fileError) && <p role="alert" className="mt-2 text-sm text-danger">{fileError ?? errorMessage}</p>}
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
                 <button type="submit" disabled={isSearching || isEmpty}
-                    className="rounded-lg bg-sky-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50">
+                    className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-sm hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50">
                     {isSearching ? "Searching..." : "Find cards"}
                 </button>
-                <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus-within:ring-2 focus-within:ring-sky-700/30">
+                <label className="cursor-pointer rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted focus-within:ring-2 focus-within:ring-accent-line/30">
                     Import a file
                     <input type="file" accept=".txt,.csv,.dec,text/plain,text/csv" onChange={event => void importFile(event)} className="sr-only" />
                 </label>
                 {onBackToResults && (
-                    <button type="button" onClick={onBackToResults} className="text-sm font-semibold text-sky-800 hover:underline">
+                    <button type="button" onClick={onBackToResults} className="text-sm font-semibold text-link hover:underline">
                         Back to the results
                     </button>
                 )}
@@ -242,18 +242,18 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOpti
     const shortCount = entries.filter(isShort).length
     const missingCount = entries.filter(entry => owned(entry) === 0).length
     const shown = show === "short" ? entries.filter(isShort) : entries
-    const secondaryButton = "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+    const secondaryButton = "rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted disabled:opacity-50"
 
     return (
         <div>
             {openEntry && <CardPanelPopup show onClose={() => setOpenEntry(undefined)} entry={openEntry} />}
 
             <div className="mb-3 flex flex-wrap items-center gap-2">
-                <p className="mr-auto text-sm text-slate-700" aria-live="polite">
+                <p className="mr-auto text-sm text-fg-muted" aria-live="polite">
                     <strong>{entries.length - missingCount}</strong> of {entries.length} cards found
                     {shortCount > 0 && <>, <strong>{shortCount}</strong> with fewer copies than wanted</>}
                     {draft.searchedAt && (
-                        <span className="text-slate-500"> · searched {new Date(draft.searchedAt).toLocaleString()}</span>
+                        <span className="text-fg-subtle"> · searched {new Date(draft.searchedAt).toLocaleString()}</span>
                     )}
                 </p>
                 <button type="button" onClick={onEdit} className={secondaryButton}>Edit list</button>
@@ -264,23 +264,23 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOpti
                 {onResumePlan && <button type="button" onClick={onResumePlan} className={secondaryButton}>Back to the pick list</button>}
                 <button type="button" onClick={onOptimize} disabled={isPlanning || isSearching || entries.length === missingCount}
                     title="A pick list of which copies to take from which boxes, opening as few boxes as possible"
-                    className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">
+                    className="rounded-lg bg-success-solid px-4 py-2 text-sm font-semibold text-on-accent shadow-sm hover:bg-success-hover disabled:cursor-not-allowed disabled:opacity-50">
                     {isPlanning ? "Optimizing..." : "Optimize fetch"}
                 </button>
             </div>
-            {errorMessage && <p role="alert" className="mb-3 text-sm text-rose-700">{errorMessage}</p>}
+            {errorMessage && <p role="alert" className="mb-3 text-sm text-danger">{errorMessage}</p>}
             {outcome && (
-                <p role="status" className="mb-3 max-w-4xl rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-slate-800">
+                <p role="status" className="mb-3 max-w-4xl rounded-lg border border-success-line bg-success-soft px-3 py-2 text-sm text-fg">
                     {outcome.action === "deleted"
                         ? <>Deleted <strong>{outcome.count}</strong> {outcome.count === 1 ? "card" : "cards"} from your collection.</>
                         : <>Moved <strong>{outcome.count}</strong> {outcome.count === 1 ? "card" : "cards"} to{" "}
-                            <Link to={`/box/${outcome.boxId}`} className="font-semibold text-sky-800 hover:underline">{outcome.boxName}</Link>.</>}
+                            <Link to={`/box/${outcome.boxId}`} className="font-semibold text-link hover:underline">{outcome.boxName}</Link>.</>}
                     {isSearching ? " Updating the results..." : " The results below are up to date."}
                 </p>
             )}
 
             {result.skipped.length > 0 && (
-                <details className="mb-3 max-w-4xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <details className="mb-3 max-w-4xl rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-warning">
                     <summary className="cursor-pointer font-semibold">
                         {result.skipped.length} {result.skipped.length === 1 ? "line" : "lines"} of the list couldn't be read
                     </summary>
@@ -292,19 +292,19 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOpti
                 </details>
             )}
 
-            <div role="group" aria-label="Show" className="mb-2 inline-flex rounded-lg border border-slate-300 bg-white p-0.5 text-sm">
+            <div role="group" aria-label="Show" className="mb-2 inline-flex rounded-lg border border-line-strong bg-surface p-0.5 text-sm">
                 {([["all", `All (${entries.length})`], ["short", `Not enough (${shortCount})`]] as const).map(([value, label]) => (
                     <button key={value} type="button" aria-pressed={show === value} onClick={() => setShow(value)}
-                        className={`rounded-md px-3 py-1 font-medium ${show === value ? "bg-sky-800 text-white" : "text-slate-700 hover:bg-slate-50"}`}>
+                        className={`rounded-md px-3 py-1 font-medium ${show === value ? "bg-accent text-on-accent" : "text-fg-muted hover:bg-surface-muted"}`}>
                         {label}
                     </button>
                 ))}
             </div>
 
             {shown.length === 0 ? (
-                <p className="text-sm text-slate-600">You have enough copies of every card on the list.</p>
+                <p className="text-sm text-fg-muted">You have enough copies of every card on the list.</p>
             ) : (
-                <ul className={`max-w-4xl divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 bg-white ${isSearching ? "opacity-60" : ""}`}>
+                <ul className={`max-w-4xl divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface ${isSearching ? "opacity-60" : ""}`}>
                     {shown.map(entry => (
                         <EntryRow key={entry.name} entry={entry} wanted={wantedOf(draft, entry)}
                             onWantedChange={quantity => onWantedChange(entry.name, quantity)}
@@ -327,7 +327,7 @@ interface EntryRowProps {
 function EntryRow({ entry, wanted, onWantedChange, onOpen }: EntryRowProps) {
     const ownedCount = owned(entry)
     const boxCount = new Set(entry.stacks.map(stack => stack.boxId)).size
-    const tone = ownedCount === 0 ? "bg-rose-50" : ownedCount < wanted ? "bg-amber-50" : ""
+    const tone = ownedCount === 0 ? "bg-danger-soft" : ownedCount < wanted ? "bg-warning-soft" : ""
 
     return (
         <li className={`flex items-center gap-4 p-3 ${tone}`}>
@@ -336,26 +336,26 @@ function EntryRow({ entry, wanted, onWantedChange, onOpen }: EntryRowProps) {
                     <img src={cardImageUrl(entry.scryfallId, "small")} alt="" loading="lazy"
                         className={`h-16 w-auto rounded ${ownedCount === 0 ? "opacity-60" : ""}`} />
                 ) : (
-                    <div className="flex h-16 w-11 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">?</div>
+                    <div className="flex h-16 w-11 items-center justify-center rounded bg-surface-sunken text-xs text-fg-subtle">?</div>
                 )}
             </button>
 
             <div className="min-w-0 flex-1">
-                <button type="button" onClick={onOpen} className="block max-w-full cursor-pointer truncate text-left font-semibold text-slate-900 hover:underline">
+                <button type="button" onClick={onOpen} className="block max-w-full cursor-pointer truncate text-left font-semibold text-fg hover:underline">
                     {entry.name}
                 </button>
-                <p className={`text-sm ${ownedCount === 0 ? "text-rose-800" : ownedCount < wanted ? "text-amber-900" : "text-slate-600"}`}>
+                <p className={`text-sm ${ownedCount === 0 ? "text-danger" : ownedCount < wanted ? "text-warning" : "text-fg-muted"}`}>
                     {ownedCount === 0
                         ? entry.isKnownCard ? "Not in your collection" : "No card has this name: check the spelling"
                         : <>You have {ownedCount} in {boxCount} {boxCount === 1 ? "box" : "boxes"}{ownedCount < wanted && <>: {wanted - ownedCount} short</>}</>}
                 </p>
             </div>
 
-            <label className="flex shrink-0 items-center gap-2 text-sm text-slate-700">
+            <label className="flex shrink-0 items-center gap-2 text-sm text-fg-muted">
                 Want
                 <input type="number" min={0} max={1000} value={wanted}
                     onChange={event => onWantedChange(Math.max(0, Math.min(1000, Math.floor(Number(event.target.value) || 0))))}
-                    className="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-right" />
+                    className="w-16 rounded-md border border-line-strong bg-surface px-2 py-1 text-right" />
             </label>
         </li>
     )

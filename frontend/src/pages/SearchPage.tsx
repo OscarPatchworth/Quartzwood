@@ -63,12 +63,12 @@ export default function SearchPage() {
     return (
         <div className="p-8">
             <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
-            <div role="tablist" aria-label="Search mode" className="mb-4 flex gap-1 border-b border-slate-200">
+            <div role="tablist" aria-label="Search mode" className="mb-4 flex gap-1 border-b border-line">
                 {tabs.map(([value, label]) => (
                     <button key={value} type="button" role="tab" aria-selected={mode === value} onClick={() => changeMode(value)}
                         className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${mode === value
-                            ? 'border-sky-800 text-sky-900'
-                            : 'border-transparent text-slate-600 hover:text-slate-900'}`}>
+                            ? 'border-accent-line text-accent-ink'
+                            : 'border-transparent text-fg-muted hover:text-fg'}`}>
                         {label}
                     </button>
                 ))}
@@ -167,11 +167,11 @@ function CollectionSearch() {
                 <SortMenu value={{ sort, desc }} onChange={setSort} />
             </div>
 
-            <div className="mt-2 min-h-5 text-sm text-slate-600" aria-live="polite">
+            <div className="mt-2 min-h-5 text-sm text-fg-muted" aria-live="polite">
                 {isTooShort ? (
                     query.length > 0 && `Type at least ${MIN_LENGTH} characters, or set a filter.`
                 ) : errorMessage ? (
-                    <span role="alert" className="text-rose-700">{errorMessage}</span>
+                    <span role="alert" className="text-danger">{errorMessage}</span>
                 ) : isSearching && !response ? (
                     "Searching..."
                 ) : response && results.length === 0 ? (
@@ -187,7 +187,7 @@ function CollectionSearch() {
             </div>
 
             {results.length > 0 && (
-                <ul className={`mt-4 max-w-4xl divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white ${isSearching ? "opacity-60" : ""}`}>
+                <ul className={`mt-4 max-w-4xl divide-y divide-line rounded-lg border border-line bg-surface ${isSearching ? "opacity-60" : ""}`}>
                     {results.map(result => (
                         <SearchResultRow key={`${result.boxId}-${result.ids[0]}`} result={result} onOpen={() => setOpenCard(singleCard(result))} />
                     ))}
@@ -213,10 +213,10 @@ function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOp
                     />
                 ) : (
                     // Manually-named cards have no Scryfall image
-                    <div className="flex h-16 w-11 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">?</div>
+                    <div className="flex h-16 w-11 items-center justify-center rounded bg-surface-sunken text-xs text-fg-subtle">?</div>
                 )}
                 {Number(result.count) > 1 && (
-                    <span className="absolute -left-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-sky-800 px-1 text-xs font-bold text-white">
+                    <span className="absolute -left-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-on-accent">
                         {result.count}
                     </span>
                 )}
@@ -226,11 +226,11 @@ function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOp
                 <button
                     type="button"
                     onClick={onOpen}
-                    className="block max-w-full cursor-pointer truncate text-left font-semibold text-slate-900 hover:underline"
+                    className="block max-w-full cursor-pointer truncate text-left font-semibold text-fg hover:underline"
                 >
                     {result.name ?? "Unnamed card"}
                 </button>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-fg-subtle">
                     {[result.setCode && `${result.setCode} #${result.setNumber}`, result.condition,
                       result.foilType !== "None" && result.foilType, result.stampType !== "None" && result.stampType]
                         .filter(Boolean).join(" ⋆ ")}
@@ -243,20 +243,20 @@ function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOp
                         <span key={step.id} className="flex items-center gap-1">
                             <Link
                                 to={step.id === account?.rootGroupId ? "/collection" : `/group/${step.id}`}
-                                className="text-sky-800 hover:underline"
+                                className="text-link hover:underline"
                             >
                                 {step.name}
                             </Link>
-                            <span className="text-slate-400">›</span>
+                            <span className="text-fg-subtle">›</span>
                         </span>
                     ))}
-                    <Link to={`/box/${result.boxId}`} className="font-medium text-sky-800 hover:underline">
+                    <Link to={`/box/${result.boxId}`} className="font-medium text-link hover:underline">
                         {result.boxName}
                     </Link>
                     {result.dividerName && (
                         <>
-                            <span className="text-slate-400">›</span>
-                            <span className="font-medium text-slate-700">{result.dividerName}</span>
+                            <span className="text-fg-subtle">›</span>
+                            <span className="font-medium text-fg-muted">{result.dividerName}</span>
                         </>
                     )}
                 </nav>

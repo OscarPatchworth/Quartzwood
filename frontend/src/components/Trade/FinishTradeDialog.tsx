@@ -38,32 +38,32 @@ export function FinishTradeDialog({ draft, onClose, onFinished }: FinishTradeDia
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
             onMouseDown={() => !isFinishing && onClose()}>
             <div role="dialog" aria-modal="true" aria-labelledby="finish-title"
                 onMouseDown={event => event.stopPropagation()}
-                className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                <h2 id="finish-title" className="text-lg font-semibold text-slate-900">Finish this trade?</h2>
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700">
+                className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
+                <h2 id="finish-title" className="text-lg font-semibold text-fg">Finish this trade?</h2>
+                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
                     {receiving > 0 && <li>Add <strong>{receiving}</strong> {receiving === 1 ? "card" : "cards"} to 'Cards from Trade' in your collection</li>}
                     {giving > 0 && <li>Remove <strong>{giving}</strong> {giving === 1 ? "card" : "cards"} you're giving from your collection</li>}
                 </ul>
                 {notCollected > 0 && (
-                    <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                    <p className="mt-3 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning">
                         {notCollected} {notCollected === 1 ? "card isn't" : "cards aren't"} ticked as collected yet.
                     </p>
                 )}
-                <p className="mt-3 text-sm text-slate-500">This can't be undone.</p>
+                <p className="mt-3 text-sm text-fg-subtle">This can't be undone.</p>
 
-                {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
+                {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
 
                 <div className="mt-6 flex justify-end gap-2">
                     <button type="button" disabled={isFinishing} onClick={onClose}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50">
                         Cancel
                     </button>
                     <button type="button" disabled={isFinishing} onClick={() => void finish()}
-                        className="rounded-md bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-50">
+                        className="rounded-md bg-success-solid px-3 py-2 text-sm font-semibold text-on-accent hover:bg-success-hover disabled:opacity-50">
                         {isFinishing ? "Finishing..." : "Finish trade"}
                     </button>
                 </div>

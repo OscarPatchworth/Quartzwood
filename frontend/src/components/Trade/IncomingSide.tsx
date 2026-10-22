@@ -17,16 +17,16 @@ interface IncomingSideProps {
     onRemove: (key: string) => void
 }
 
-const selectClassName = "rounded border border-slate-300 bg-white px-1 py-0.5 text-xs text-slate-800"
+const selectClassName = "rounded border border-line-strong bg-surface px-1 py-0.5 text-xs text-fg"
 
 // Side 1, "You receive": cards typed in with the add bar (same suggestions and syntax as adding to a box),
 // with condition / foil / quantity editable here, each priced for its finish
 export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteError, onAdd, onChange, onRemove }: IncomingSideProps) {
     return (
-        <section aria-labelledby="incoming-title" className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-4">
-            <h2 id="incoming-title" className="mb-3 flex items-baseline justify-between text-lg font-bold text-slate-900">
+        <section aria-labelledby="incoming-title" className="rounded-lg border border-success-line bg-success-soft/40 p-4">
+            <h2 id="incoming-title" className="mb-3 flex items-baseline justify-between text-lg font-bold text-fg">
                 You receive
-                <span className={`text-emerald-800 ${isPricing ? "opacity-50" : ""}`}>{formatPrice(total)}</span>
+                <span className={`text-success ${isPricing ? "opacity-50" : ""}`}>{formatPrice(total)}</span>
             </h2>
 
             <AddNewCardTextBar
@@ -36,12 +36,12 @@ export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteErro
                 buttonLabel="Add"
             />
 
-            {quoteError && <p role="alert" className="mt-2 text-sm text-rose-700">{quoteError}</p>}
+            {quoteError && <p role="alert" className="mt-2 text-sm text-danger">{quoteError}</p>}
 
             {incoming.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-500">Nothing yet: add the cards you're getting.</p>
+                <p className="mt-4 text-sm text-fg-subtle">Nothing yet: add the cards you're getting.</p>
             ) : (
-                <ul className="mt-3 divide-y divide-emerald-100">
+                <ul className="mt-3 divide-y divide-success-line">
                     {incoming.map((item, index) => {
                         const quote = quoteItems[index]
                         const quantity = Number(item.card.quantity ?? 1)
@@ -51,14 +51,14 @@ export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteErro
                                 {quote?.scryfallId ? (
                                     <img src={cardImageUrl(quote.scryfallId, "small")} alt="" loading="lazy" className="h-14 w-auto shrink-0 rounded" />
                                 ) : (
-                                    <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded bg-slate-100 text-xs text-slate-400">?</div>
+                                    <div className="flex h-14 w-10 shrink-0 items-center justify-center rounded bg-surface-sunken text-xs text-fg-subtle">?</div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-semibold text-slate-900">
+                                    <p className="truncate text-sm font-semibold text-fg">
                                         {quote?.name ?? item.card.name ?? `${item.card.setCode} ${item.card.setNumber}`}
                                     </p>
-                                    <p className="text-xs text-slate-500">{item.card.setCode && `${item.card.setCode.toUpperCase()} #${item.card.setNumber}`}</p>
-                                    {quote?.error && <p className="text-xs text-rose-700">{quote.error}</p>}
+                                    <p className="text-xs text-fg-subtle">{item.card.setCode && `${item.card.setCode.toUpperCase()} #${item.card.setNumber}`}</p>
+                                    {quote?.error && <p className="text-xs text-danger">{quote.error}</p>}
                                     <div className="mt-1 flex flex-wrap items-center gap-1">
                                         <select aria-label="Condition" className={selectClassName} value={item.card.condition ?? "NM"}
                                             onChange={event => onChange(item.key, { condition: event.target.value })}>
@@ -68,23 +68,23 @@ export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteErro
                                             onChange={event => onChange(item.key, { foilType: event.target.value })}>
                                             {FoilTypeOptions.map(value => <option key={value} value={value}>{value === "None" ? "Non-foil" : value}</option>)}
                                         </select>
-                                        <label className="flex items-center gap-1 text-xs text-slate-600">
+                                        <label className="flex items-center gap-1 text-xs text-fg-muted">
                                             ×
                                             <input type="number" min={1} max={1000} aria-label="Quantity" value={quantity}
                                                 onChange={event => onChange(item.key, { quantity: Math.max(1, Math.floor(Number(event.target.value) || 1)) })}
-                                                className="w-14 rounded border border-slate-300 px-1 py-0.5 text-xs" />
+                                                className="w-14 rounded border border-line-strong px-1 py-0.5 text-xs" />
                                         </label>
                                     </div>
                                 </div>
                                 <div className="shrink-0 text-right">
-                                    <p className="text-sm font-semibold text-slate-900">
+                                    <p className="text-sm font-semibold text-fg">
                                         {isPricing ? "…" : unitPrice !== null ? formatPrice(unitPrice * quantity) : "No price"}
                                     </p>
                                     {!isPricing && unitPrice !== null && quantity > 1 && (
-                                        <p className="text-xs text-slate-500">{formatPrice(unitPrice)} each</p>
+                                        <p className="text-xs text-fg-subtle">{formatPrice(unitPrice)} each</p>
                                     )}
                                     <button type="button" onClick={() => onRemove(item.key)}
-                                        className="mt-1 text-xs text-rose-700 hover:underline">
+                                        className="mt-1 text-xs text-danger hover:underline">
                                         Remove
                                     </button>
                                 </div>

@@ -11,7 +11,7 @@ interface FilterMenuProps {
 // What's typed but not applied yet, per range key; text, so a half-typed or empty box is allowed
 type Drafts = Record<Exclude<keyof CardFilter, "tags">, string>
 
-const inputClassName = "w-24 rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-700/20"
+const inputClassName = "w-24 rounded-md border border-line-strong px-2 py-1.5 text-sm text-fg focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/20"
 
 // "Filter" button + dropdown with an "At least / At most" pair for each range (mana value, price).
 // Applied with the Apply button or Enter (not on every keystroke: typing "10" shouldn't load the cards for
@@ -72,8 +72,8 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                 title="Filter cards"
                 className={`inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm ${
                     isActive
-                        ? "border-sky-700 bg-sky-50 text-sky-900 hover:bg-sky-100"
-                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        ? "border-accent-line bg-accent-soft text-accent-ink hover:bg-accent-soft"
+                        : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
                 }`}
             >
                 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
@@ -83,13 +83,13 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
             </summary>
             <form
                 onSubmit={apply}
-                className="absolute right-0 z-40 mt-1 w-72 rounded-lg border border-slate-200 bg-white p-4 shadow-lg"
+                className="absolute right-0 z-40 mt-1 w-72 rounded-lg border border-line bg-surface p-4 shadow-lg"
             >
                 {FilterRanges.map(range => (
                     <fieldset key={range.label} className="mb-4">
-                        <legend className="mb-2 text-sm font-semibold text-slate-800">{range.label}</legend>
+                        <legend className="mb-2 text-sm font-semibold text-fg">{range.label}</legend>
                         {/* Two rows, so one-sided ranges are obvious: fill in just "At least" for 3+ */}
-                        <div className="grid grid-cols-[5rem_auto] items-center gap-x-3 gap-y-2 text-sm text-slate-600">
+                        <div className="grid grid-cols-[5rem_auto] items-center gap-x-3 gap-y-2 text-sm text-fg-muted">
                             {([["At least", range.min], ["At most", range.max]] as const).map(([label, key]) => (
                                 <label key={key} className="contents">
                                     <span>{label}</span>
@@ -112,7 +112,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                     </fieldset>
                 ))}
                 <fieldset className="mb-4">
-                    <legend className="mb-2 text-sm font-semibold text-slate-800">Tags <span className="font-normal text-slate-500">(cards with all of them)</span></legend>
+                    <legend className="mb-2 text-sm font-semibold text-fg">Tags <span className="font-normal text-fg-subtle">(cards with all of them)</span></legend>
                     <TagInput
                         id="filter-tags"
                         label="Filter by tag"
@@ -123,23 +123,23 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                         placeholder="Any"
                     />
                 </fieldset>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-fg-subtle">
                     Fill in any boxes. Cards without that data (e.g. no Scryfall price) are hidden while it's filtered.
                 </p>
 
-                {error && <p role="alert" className="mt-2 text-sm text-rose-700">{error}</p>}
+                {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
 
                 <div className="mt-3 flex justify-end gap-2">
                     {isActive && (
                         <button
                             type="button"
                             onClick={clear}
-                            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                            className="rounded-md border border-line-strong px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-muted"
                         >
                             Clear
                         </button>
                     )}
-                    <button type="submit" className="rounded-md bg-sky-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-sky-700">
+                    <button type="submit" className="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-on-accent hover:bg-accent-hover">
                         Apply
                     </button>
                 </div>

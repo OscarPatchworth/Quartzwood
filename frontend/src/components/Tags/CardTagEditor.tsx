@@ -37,8 +37,8 @@ export function CardTagEditor({ cardIds, tags, onChanged }: CardTagEditorProps) 
 
     return (
         <div className="mt-3 px-1">
-            <p className="mb-1 text-sm font-semibold text-stone-600">
-                Tags{cardIds.length > 1 && <span className="font-normal text-stone-500"> (for {cardIds.length} copies)</span>}
+            <p className="mb-1 text-sm font-semibold text-fg-muted">
+                Tags{cardIds.length > 1 && <span className="font-normal text-fg-subtle"> (for {cardIds.length} copies)</span>}
             </p>
             <TagInput
                 id="card-tags"
@@ -49,7 +49,7 @@ export function CardTagEditor({ cardIds, tags, onChanged }: CardTagEditorProps) 
                 onRemove={name => void change({ remove: [name] })}
                 disabled={isSaving}
             />
-            {errorMessage && <p role="alert" className="mt-1 text-sm text-rose-700">{errorMessage}</p>}
+            {errorMessage && <p role="alert" className="mt-1 text-sm text-danger">{errorMessage}</p>}
         </div>
     )
 }

@@ -45,9 +45,9 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
     const ordered = [...rows.filter(x => !x.isOver), ...rows.filter(x => x.isOver)]
 
     return (
-        <section aria-labelledby="options-title" className="rounded-lg border border-slate-200 bg-white p-4">
+        <section aria-labelledby="options-title" className="rounded-lg border border-line bg-surface p-4">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h2 id="options-title" className="mr-auto text-lg font-bold text-slate-900">Trade options</h2>
+                <h2 id="options-title" className="mr-auto text-lg font-bold text-fg">Trade options</h2>
                 <LocationPicker entityId={personalEntityId} value={location} onChange={setLocation} />
                 <FilterMenu value={filter} onChange={setFilter} />
                 <SortMenu value={{ sort, desc }} onChange={setSort} />
@@ -57,8 +57,8 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
                     value={text} onChange={setText} isSearching={isSearching} />
             </div>
 
-            <p className="mt-2 min-h-5 text-sm text-slate-600" aria-live="polite">
-                {errorMessage ? <span role="alert" className="text-rose-700">{errorMessage}</span>
+            <p className="mt-2 min-h-5 text-sm text-fg-muted" aria-live="polite">
+                {errorMessage ? <span role="alert" className="text-danger">{errorMessage}</span>
                     : result && ordered.length === 0 ? "No cards to offer with these filters."
                     : result?.hasMore ? "Showing the first 500: narrow it down with the search or filters." : null}
             </p>
@@ -70,22 +70,22 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
                             type="button"
                             onClick={() => onPick(row, availableIds[0])}
                             title={isOver ? "Worth more than what's left to give: you can still add it" : "Add one copy to 'You give'"}
-                            className="relative flex w-full flex-col items-center rounded-lg p-1 text-left transition hover:bg-slate-50"
+                            className="relative flex w-full flex-col items-center rounded-lg p-1 text-left transition hover:bg-surface-muted"
                         >
                             {/* The price, big: a span (a heading isn't allowed inside a button) */}
-                            <span className="mb-1 text-base font-bold text-slate-900">{price !== null ? formatPrice(price) : "No price"}</span>
+                            <span className="mb-1 text-base font-bold text-fg">{price !== null ? formatPrice(price) : "No price"}</span>
                             {row.scryfallId ? (
                                 <img src={cardImageUrl(row.scryfallId)} alt={row.name ?? ""} loading="lazy" className="w-full rounded-lg shadow" />
                             ) : (
-                                <div className="flex aspect-[5/7] w-full items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-400">{row.name}</div>
+                                <div className="flex aspect-[5/7] w-full items-center justify-center rounded-lg bg-surface-sunken text-sm text-fg-subtle">{row.name}</div>
                             )}
                             {availableIds.length > 1 && (
-                                <span className="absolute left-2 top-9 flex h-6 min-w-6 items-center justify-center rounded-full bg-white/80 px-1 text-sm font-bold text-black">
+                                <span className="absolute left-2 top-9 flex h-6 min-w-6 items-center justify-center rounded-full bg-surface/80 px-1 text-sm font-bold text-fg">
                                     {availableIds.length}
                                 </span>
                             )}
                             <span className="mt-1 text-center text-xs">{row.name} ⋆ {row.condition}{row.foilType !== "None" && ` ⋆ ${row.foilType}`}</span>
-                            <span className="text-center text-xs text-slate-500">{row.boxName}</span>
+                            <span className="text-center text-xs text-fg-subtle">{row.boxName}</span>
                         </button>
                         <TagList tags={row.tags} className="mt-1 justify-center" />
                     </li>

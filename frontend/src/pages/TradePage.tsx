@@ -122,8 +122,8 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
     // Finishing would fail on a card the server can't find, so it has to be fixed (or removed) first
     const problemCount = quote.items.filter(item => item.error).length
     const canConfirm = !isEmpty && !quote.isPricing && problemCount === 0
-    const secondaryButton = "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
-    const primaryButton = "rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+    const secondaryButton = "rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted disabled:opacity-50"
+    const primaryButton = "rounded-lg bg-success-solid px-4 py-2 text-sm font-semibold text-on-accent shadow-sm hover:bg-success-hover disabled:cursor-not-allowed disabled:opacity-50"
 
     if (finished) {
         const added = Number(finished.cardsAdded)
@@ -131,11 +131,11 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
         return (
             <div className="p-8">
                 <h1 className="mb-4 text-2xl font-bold">Trade done</h1>
-                <div className="max-w-xl rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-slate-800" role="status">
+                <div className="max-w-xl rounded-lg border border-success-line bg-success-soft p-4 text-sm text-fg" role="status">
                     {added > 0 && (
                         <p>
                             Added <strong>{added}</strong> {added === 1 ? "card" : "cards"} to{" "}
-                            <Link to={`/box/${finished.boxId}`} className="font-semibold text-sky-800 hover:underline">{finished.boxName}</Link>.
+                            <Link to={`/box/${finished.boxId}`} className="font-semibold text-link hover:underline">{finished.boxName}</Link>.
                         </p>
                     )}
                     {removed > 0 && (
@@ -161,7 +161,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
                         Finish trade
                     </button>
                 </div>
-                <p className="mb-4 text-sm text-slate-600">
+                <p className="mb-4 text-sm text-fg-muted">
                     Nothing in your collection has changed yet. Tick each card off as you take it out of its box,
                     then press Finish trade. This list stays here if you close the page.
                 </p>
@@ -192,7 +192,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
                 </button>
             </div>
             {problemCount > 0 && (
-                <p role="alert" className="mb-4 text-sm text-rose-700">
+                <p role="alert" className="mb-4 text-sm text-danger">
                     {problemCount === 1
                         ? "1 card you'd receive has a problem (shown in red): fix or remove it to continue."
                         : `${problemCount} cards you'd receive have problems (shown in red): fix or remove them to continue.`}
@@ -214,7 +214,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
             </div>
 
             {/* The balance, in words, so it's clear which way it leans */}
-            <p className="my-4 rounded-lg bg-slate-100 px-4 py-3 text-sm text-slate-800" aria-live="polite">
+            <p className="my-4 rounded-lg bg-surface-sunken px-4 py-3 text-sm text-fg" aria-live="polite">
                 {isEmpty ? "Add what you're getting, then pick what you're giving from your cards below."
                     : cents(remaining) > 0 ? <>You can still give <strong>{formatPrice(remaining)}</strong> more to even it up. Cards worth more than that are greyed out.</>
                     : cents(remaining) < 0 ? <>You're giving <strong>{formatPrice(-remaining)}</strong> more than you get.</>

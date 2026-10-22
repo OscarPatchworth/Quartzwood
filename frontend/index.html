@@ -4,7 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>Quartzwood</title>
+    <script>
+      // The theme before anything is drawn (no flash of light mode). Same rules as src/theme/theme.ts
+      (function () {
+        var saved = null
+        try { saved = localStorage.getItem("quartzwood.theme") } catch (e) {}
+        var dark = saved === "dark" || (saved !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        document.documentElement.dataset.theme = dark ? "dark" : "light"
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -29,25 +29,25 @@ export function FetchPickList({ plan, collected, onToggle, onTickAll, onBack, on
     return (
         <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h2 className="mr-auto text-lg font-bold text-slate-900">Collect the cards</h2>
+                <h2 className="mr-auto text-lg font-bold text-fg">Collect the cards</h2>
                 <button type="button" onClick={onBack}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    className="rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted">
                     Back to the results
                 </button>
                 <button type="button" onClick={() => setIsFinishOpen(true)} disabled={tickedIds.length === 0}
                     title={tickedIds.length === 0 ? "Tick the cards as you take them out first" : undefined}
-                    className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">
+                    className="rounded-lg bg-success-solid px-4 py-2 text-sm font-semibold text-on-accent shadow-sm hover:bg-success-hover disabled:cursor-not-allowed disabled:opacity-50">
                     Done collecting
                 </button>
             </div>
-            <p className="mb-3 max-w-4xl text-sm text-slate-600">
+            <p className="mb-3 max-w-4xl text-sm text-fg-muted">
                 Open <strong>{boxCount}</strong> {boxCount === 1 ? "box" : "boxes"} to collect <strong>{total}</strong> {total === 1 ? "card" : "cards"}:
                 the fewest boxes that have them. Nothing in your collection has changed yet. Tick each card as you take it out,
                 then press Done collecting to move or delete the ticked ones. This list stays here if you close the page.
             </p>
 
             {plan.short.length > 0 && (
-                <div role="status" className="mb-3 max-w-4xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <div role="status" className="mb-3 max-w-4xl rounded-lg border border-warning-line bg-warning-soft px-3 py-2 text-sm text-warning">
                     <p className="font-semibold">Not enough copies in your collection:</p>
                     <p>{plan.short.map(s => `${s.name} (${Number(s.found)} of ${Number(s.wanted)})`).join(", ")}</p>
                 </div>
@@ -60,7 +60,7 @@ export function FetchPickList({ plan, collected, onToggle, onTickAll, onBack, on
                 onToggle={onToggle}
                 onTickAll={onTickAll}
                 emptyText="None of the cards are in your collection."
-                className="max-w-4xl border-slate-200"
+                className="max-w-4xl border-line"
             />
 
             {isFinishOpen && (

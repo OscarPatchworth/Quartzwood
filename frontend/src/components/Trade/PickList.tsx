@@ -24,20 +24,20 @@ export function PickList({ outgoing, incoming, quoteItems, collected, onToggle, 
                 onToggle={onToggle}
                 onTickAll={onTickAll}
                 emptyText="You're not giving any cards in this trade."
-                className="border-rose-200"
+                className="border-danger-line"
             />
 
-            <section aria-labelledby="receive-summary-title" className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-4">
-                <h2 id="receive-summary-title" className="mb-1 text-lg font-bold text-slate-900">You receive</h2>
-                <p className="mb-2 text-xs text-slate-500">These go into the 'Cards from Trade' box in your collection.</p>
+            <section aria-labelledby="receive-summary-title" className="rounded-lg border border-success-line bg-success-soft/40 p-4">
+                <h2 id="receive-summary-title" className="mb-1 text-lg font-bold text-fg">You receive</h2>
+                <p className="mb-2 text-xs text-fg-subtle">These go into the 'Cards from Trade' box in your collection.</p>
                 {incoming.length === 0 ? (
-                    <p className="text-sm text-slate-500">Nothing.</p>
+                    <p className="text-sm text-fg-subtle">Nothing.</p>
                 ) : (
-                    <ul className="space-y-1 text-sm text-slate-800">
+                    <ul className="space-y-1 text-sm text-fg">
                         {incoming.map((item, index) => (
                             <li key={item.key}>
                                 {Number(item.card.quantity ?? 1)} × {quoteItems[index]?.name ?? item.card.name ?? `${item.card.setCode} ${item.card.setNumber}`}
-                                <span className="text-xs text-slate-500">
+                                <span className="text-xs text-fg-subtle">
                                     {" "}({item.card.condition ?? "NM"}{item.card.foilType && item.card.foilType !== "None" ? `, ${item.card.foilType}` : ""})
                                 </span>
                             </li>

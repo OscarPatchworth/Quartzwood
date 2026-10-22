@@ -9,7 +9,7 @@ export function withPopup<T extends {}>(
         if (!show) return null
         return (
             <>
-                <div className="fixed inset-0 bg-black/50 z-10" onClick={onClose} />
+                <div className="fixed inset-0 bg-overlay z-10" onClick={onClose} />
                 <Shape context={<WrappedComponent {...(rest as unknown as T)} />} />
             </>
         )

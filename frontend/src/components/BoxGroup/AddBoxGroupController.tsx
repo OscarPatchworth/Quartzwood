@@ -53,7 +53,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
             <button
                 type="button"
                 onClick={() => openCreateForm("group")}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-rose-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-800 active:translate-y-px"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-danger-solid px-4 py-2 text-sm font-semibold text-on-accent shadow-sm transition hover:bg-danger-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger-solid active:translate-y-px"
             >
                 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                     <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -63,7 +63,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
             <button
                 type="button"
                 onClick={() => openCreateForm("box")}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-sky-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-800 active:translate-y-px"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-sm transition hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-line active:translate-y-px"
             >
                 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                     <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -73,7 +73,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
 
             {createType && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
                     onMouseDown={() => !isSaving && setCreateType(undefined)}
                 >
                     <form
@@ -82,12 +82,12 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
                         aria-labelledby="create-item-title"
                         onMouseDown={event => event.stopPropagation()}
                         onSubmit={createItem}
-                        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+                        className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
                     >
-                        <h2 id="create-item-title" className="mb-4 text-lg font-semibold text-slate-900">
+                        <h2 id="create-item-title" className="mb-4 text-lg font-semibold text-fg">
                             Add {createType}
                         </h2>
-                        <label htmlFor="create-item-name" className="mb-1 block text-sm font-medium text-slate-700">
+                        <label htmlFor="create-item-name" className="mb-1 block text-sm font-medium text-fg-muted">
                             Name
                         </label>
                         <input
@@ -95,22 +95,22 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
                             autoFocus
                             value={name}
                             onChange={event => setName(event.target.value)}
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20"
+                            className="w-full rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
                         />
-                        {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
+                        {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
                         <div className="mt-6 flex justify-end gap-2">
                             <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={() => setCreateType(undefined)}
-                                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                                className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSaving || !name.trim() || !groupId}
-                                className="rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-md bg-accent px-3 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {isSaving ? "Creating..." : "Create"}
                             </button>

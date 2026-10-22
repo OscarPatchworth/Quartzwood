@@ -3,8 +3,8 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { getErrorMessage } from '../api/getErrorMessage'
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20"
-const labelClass = "mb-1 block text-sm font-medium text-slate-700"
+const inputClass = "w-full rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
+const labelClass = "mb-1 block text-sm font-medium text-fg-muted"
 
 export default function RegisterPage() {
     const { account, register } = useAuth()
@@ -40,8 +40,8 @@ export default function RegisterPage() {
 
     return (
         <div className="flex justify-center p-8">
-            <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-                <h1 className="mb-6 text-2xl font-bold text-slate-900">Create an account</h1>
+            <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-line bg-surface p-6 shadow-sm">
+                <h1 className="mb-6 text-2xl font-bold text-fg">Create an account</h1>
 
                 <label htmlFor="register-name" className={labelClass}>Display name</label>
                 <input
@@ -75,7 +75,7 @@ export default function RegisterPage() {
                     onChange={event => setPassword(event.target.value)}
                     className={inputClass}
                 />
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-fg-subtle">
                     At least 6 characters, with an uppercase letter, a lowercase letter, a digit and a symbol.
                 </p>
 
@@ -90,18 +90,18 @@ export default function RegisterPage() {
                     className={inputClass}
                 />
 
-                {errorMessage && <p role="alert" className="mt-4 text-sm text-rose-700">{errorMessage}</p>}
+                {errorMessage && <p role="alert" className="mt-4 text-sm text-danger">{errorMessage}</p>}
 
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="mt-6 w-full rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="mt-6 w-full rounded-md bg-accent px-3 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {isSubmitting ? "Creating account..." : "Create account"}
                 </button>
 
-                <p className="mt-4 text-center text-sm text-slate-600">
-                    Already have an account? <Link to="/login" className="text-sky-800 hover:underline">Log in</Link>
+                <p className="mt-4 text-center text-sm text-fg-muted">
+                    Already have an account? <Link to="/login" className="text-link hover:underline">Log in</Link>
                 </p>
             </form>
         </div>

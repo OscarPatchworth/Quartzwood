@@ -42,7 +42,7 @@ export function AddDividerButton({ boxId, onCreated }: AddDividerButtonProps) {
             <button
                 type="button"
                 onClick={open}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted"
             >
                 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                     <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -52,7 +52,7 @@ export function AddDividerButton({ boxId, onCreated }: AddDividerButtonProps) {
 
             {isOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
                     onMouseDown={() => !isSaving && setIsOpen(false)}
                 >
                     <form
@@ -61,13 +61,13 @@ export function AddDividerButton({ boxId, onCreated }: AddDividerButtonProps) {
                         aria-labelledby="add-divider-title"
                         onMouseDown={event => event.stopPropagation()}
                         onSubmit={create}
-                        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+                        className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
                     >
-                        <h2 id="add-divider-title" className="mb-1 text-lg font-semibold text-slate-900">
+                        <h2 id="add-divider-title" className="mb-1 text-lg font-semibold text-fg">
                             Add divider
                         </h2>
-                        <p className="mb-4 text-sm text-slate-600">It goes at the back of the box.</p>
-                        <label htmlFor="add-divider-name" className="mb-1 block text-sm font-medium text-slate-700">
+                        <p className="mb-4 text-sm text-fg-muted">It goes at the back of the box.</p>
+                        <label htmlFor="add-divider-name" className="mb-1 block text-sm font-medium text-fg-muted">
                             Name
                         </label>
                         <input
@@ -76,22 +76,22 @@ export function AddDividerButton({ boxId, onCreated }: AddDividerButtonProps) {
                             maxLength={100}
                             value={name}
                             onChange={event => setName(event.target.value)}
-                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-sky-700 focus:ring-2 focus:ring-sky-700/20"
+                            className="w-full rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
                         />
-                        {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
+                        {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
                         <div className="mt-6 flex justify-end gap-2">
                             <button
                                 type="button"
                                 disabled={isSaving}
                                 onClick={() => setIsOpen(false)}
-                                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                                className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSaving || !name.trim()}
-                                className="rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-md bg-accent px-3 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {isSaving ? "Adding..." : "Add"}
                             </button>

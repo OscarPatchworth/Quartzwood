@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getApiBreadcrumbById, type BreadcrumbDto } from '../interfaces/generated.ts'
 import { useAuth } from '../auth/useAuth'
+import { ThemeToggle } from '../theme/ThemeToggle'
 
 export default function Header() {
     const { account, isLoading, logout } = useAuth()
@@ -22,27 +23,27 @@ export default function Header() {
     }, [id, location.pathname])
 
     return (
-        <header className="bg-gray-800 text-white p-4 flex items-center gap-2 text-sm">
-            <Link to="/" className="font-bold text-lg hover:text-gray-300">
+        <header className="bg-header text-header-fg p-4 flex items-center gap-2 text-sm">
+            <Link to="/" className="font-bold text-lg hover:text-header-hover">
                 Quartzwood
             </Link>
 
             {/* The collection (root group) is the start of every breadcrumb, and doubles as the main nav link */}
             {account && (
                 <>
-                    <span className="text-gray-500">|</span>
-                    <Link to="/collection" className="hover:text-gray-300">Collection</Link>
+                    <span className="text-header-muted">|</span>
+                    <Link to="/collection" className="hover:text-header-hover">Collection</Link>
                 </>
             )}
 
             {breadcrumb?.hasCollapsed && (
                 <>
-                    <span className="text-gray-500">›</span>
-                    <span className="text-gray-500">...</span>
-                    <span className="text-gray-500">›</span>
+                    <span className="text-header-muted">›</span>
+                    <span className="text-header-muted">...</span>
+                    <span className="text-header-muted">›</span>
                     <Link
                         to={`/group/${breadcrumb.parentGroupId}`}
-                        className="hover:text-gray-300"
+                        className="hover:text-header-hover"
                     >
                         {breadcrumb.parentGroupName}
                     </Link>
@@ -51,31 +52,32 @@ export default function Header() {
 
             {breadcrumb?.boxName && (
                 <>
-                    <span className="text-gray-500">›</span>
-                    <span className="text-white">{breadcrumb.boxName}</span>
+                    <span className="text-header-muted">›</span>
+                    <span className="text-header-fg">{breadcrumb.boxName}</span>
                 </>
             )}
 
             {/* Right side: account. Hidden until the initial session check finishes to avoid a flash of "Log in" */}
             {!isLoading && (
                 <div className="ml-auto flex items-center gap-4">
+                    <ThemeToggle />
                     {account ? (
                         <>
-                            <Link to="/search" className="hover:text-gray-300">Search</Link>
-                            <Link to="/trade" className="hover:text-gray-300">Trade</Link>
-                            <span className="text-gray-300">{account.displayName}</span>
+                            <Link to="/search" className="hover:text-header-hover">Search</Link>
+                            <Link to="/trade" className="hover:text-header-hover">Trade</Link>
+                            <span className="text-header-hover">{account.displayName}</span>
                             <button
                                 type="button"
                                 onClick={() => void logout().then(() => navigate('/login'))}
-                                className="hover:text-gray-300"
+                                className="hover:text-header-hover"
                             >
                                 Log out
                             </button>
                         </>
                     ) : (
                         <>
-                            <Link to="/login" className="hover:text-gray-300">Log in</Link>
-                            <Link to="/register" className="hover:text-gray-300">Register</Link>
+                            <Link to="/login" className="hover:text-header-hover">Log in</Link>
+                            <Link to="/register" className="hover:text-header-hover">Register</Link>
                         </>
                     )}
                 </div>

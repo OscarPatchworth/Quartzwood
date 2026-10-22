@@ -102,20 +102,20 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                     onClick={() => setChosenBox(box)}
                     className={`w-full rounded-md border px-3 py-2 text-left transition ${
                         isTarget
-                            ? "border-sky-700 bg-sky-50 ring-2 ring-sky-700/30"
+                            ? "border-accent-line bg-accent-soft ring-2 ring-accent-line/30"
                             : box.isOwned
-                                ? "border-slate-200 bg-white hover:bg-slate-50"
-                                : "border-amber-200 bg-amber-50 hover:bg-amber-100"
+                                ? "border-line bg-surface hover:bg-surface-muted"
+                                : "border-warning-line bg-warning-soft hover:bg-warning-soft-strong"
                     }`}
                 >
                     <span className="flex items-center justify-between gap-2">
-                        <span className="truncate font-semibold text-slate-900">{box.name}</span>
-                        {isCurrent && <span className="shrink-0 text-xs text-slate-500">Current box</span>}
+                        <span className="truncate font-semibold text-fg">{box.name}</span>
+                        {isCurrent && <span className="shrink-0 text-xs text-fg-subtle">Current box</span>}
                         {!isCurrent && !box.isOwned && (
-                            <span className="shrink-0 rounded bg-amber-200 px-1.5 py-0.5 text-xs font-medium text-amber-900">Shared</span>
+                            <span className="shrink-0 rounded bg-warning-soft-strong px-1.5 py-0.5 text-xs font-medium text-warning">Shared</span>
                         )}
                     </span>
-                    <span className="block truncate border-t border-slate-200/70 pt-0.5 text-xs text-slate-500">{path}</span>
+                    <span className="block truncate border-t border-line/70 pt-0.5 text-xs text-fg-subtle">{path}</span>
                 </button>
             </li>
         )
@@ -123,7 +123,7 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
             onMouseDown={() => !isMoving && onClose()}
         >
             <form
@@ -132,9 +132,9 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                 aria-labelledby="move-title"
                 onMouseDown={event => event.stopPropagation()}
                 onSubmit={move}
-                className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-white p-6 shadow-xl"
+                className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-surface p-6 shadow-xl"
             >
-                <h2 id="move-title" className="mb-3 text-lg font-semibold text-slate-900">Move {countLabel} to...</h2>
+                <h2 id="move-title" className="mb-3 text-lg font-semibold text-fg">Move {countLabel} to...</h2>
 
                 <SearchInput
                     id="move-box-search"
@@ -147,40 +147,40 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                 />
 
                 <div className="mt-3 min-h-40 overflow-y-auto pr-1" aria-live="polite">
-                    {searchError && <p role="alert" className="text-sm text-rose-700">{searchError}</p>}
+                    {searchError && <p role="alert" className="text-sm text-danger">{searchError}</p>}
                     {boxes && boxes.length === 0 && (
-                        <p className="py-6 text-center text-sm text-slate-500">No boxes match "{text.trim()}".</p>
+                        <p className="py-6 text-center text-sm text-fg-subtle">No boxes match "{text.trim()}".</p>
                     )}
                     {owned.length > 0 && (
                         <>
-                            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Your boxes</h3>
+                            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-fg-subtle">Your boxes</h3>
                             <ul className="flex flex-col gap-1.5">{owned.map(boxButton)}</ul>
                         </>
                     )}
                     {shared.length > 0 && (
                         <>
-                            <h3 className="mb-1 mt-4 text-xs font-semibold uppercase tracking-wide text-amber-700">Shared with you</h3>
+                            <h3 className="mb-1 mt-4 text-xs font-semibold uppercase tracking-wide text-warning">Shared with you</h3>
                             <ul className="flex flex-col gap-1.5">{shared.map(boxButton)}</ul>
                         </>
                     )}
                 </div>
 
                 {target && (targetDividers === undefined || targetDividers.length > 0) && (
-                    <fieldset className="mt-3 border-t border-slate-200 pt-3">
-                        <legend className="mb-1.5 truncate text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <fieldset className="mt-3 border-t border-line pt-3">
+                        <legend className="mb-1.5 truncate text-xs font-semibold uppercase tracking-wide text-fg-subtle">
                             Where in {target.name}?
                         </legend>
                         {targetDividers === undefined ? (
-                            <p className="text-sm text-slate-500">Loading dividers...</p>
+                            <p className="text-sm text-fg-subtle">Loading dividers...</p>
                         ) : (
                             <div className="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto">
                                 {[{ id: null, name: "Not behind a divider" }, ...targetDividers].map(divider => (
                                     <label
                                         key={divider.id ?? "none"}
-                                        className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition has-focus-visible:ring-2 has-focus-visible:ring-sky-700/40 ${
+                                        className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition has-focus-visible:ring-2 has-focus-visible:ring-accent-line/40 ${
                                             dividerId === divider.id
-                                                ? "border-sky-700 bg-sky-50 font-semibold text-sky-900"
-                                                : "border-slate-300 text-slate-700 hover:bg-slate-50"
+                                                ? "border-accent-line bg-accent-soft font-semibold text-accent-ink"
+                                                : "border-line-strong text-fg-muted hover:bg-surface-muted"
                                         }`}
                                     >
                                         <input
@@ -197,23 +197,23 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                         )}
                     </fieldset>
                 )}
-                {isAlreadyThere && <p className="mt-3 text-sm text-slate-600">The cards are already in this box.</p>}
-                {dividerError && <p role="alert" className="mt-3 text-sm text-rose-700">{dividerError}</p>}
-                {errorMessage && <p role="alert" className="mt-3 text-sm text-rose-700">{errorMessage}</p>}
+                {isAlreadyThere && <p className="mt-3 text-sm text-fg-muted">The cards are already in this box.</p>}
+                {dividerError && <p role="alert" className="mt-3 text-sm text-danger">{dividerError}</p>}
+                {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
 
                 <div className="mt-4 flex items-center justify-end gap-2">
                     <button
                         type="button"
                         disabled={isMoving}
                         onClick={onClose}
-                        className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isMoving || !target || isAlreadyThere || targetDividers === undefined}
-                        className="max-w-72 truncate rounded-md bg-sky-800 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="max-w-72 truncate rounded-md bg-accent px-3 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isMoving ? "Moving..."
                             : target ? `Move ${countLabel} to ${target.name}${dividerName ? ` › ${dividerName}` : ""}`

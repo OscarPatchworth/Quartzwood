@@ -222,7 +222,7 @@ export default function BoxPage() {
                     src={c.scryfallId ? cardImageUrl(c.scryfallId) : undefined}
                     alt={c.name ?? ''}
                     className={`w-full rounded-lg shadow transition ${
-                        isSelected ? "ring-4 ring-sky-600" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""
+                        isSelected ? "ring-4 ring-accent-line" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""
                     } ${selection.isSelecting ? "cursor-pointer" : ""}`}
                     onClick={() => clickCard(c)}
                 />
@@ -232,11 +232,11 @@ export default function BoxPage() {
                         aria-label={`Select ${c.name ?? "card"}${Number(c.count) > 1 ? ` (${c.count} copies)` : ""}`}
                         checked={isSelected}
                         onChange={() => selection.toggleStack(c)}
-                        className="absolute right-2 top-2 size-5 cursor-pointer accent-sky-600"
+                        className="absolute right-2 top-2 size-5 cursor-pointer accent-accent-line"
                     />
                 )}
                 {Number(c.count) > 1 && (
-                    <span className="absolute top-2 left-2 bg-white/70 text-black text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                    <span className="absolute top-2 left-2 bg-surface/70 text-fg text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
                         {c.count}
                     </span>
                 )}
@@ -262,7 +262,7 @@ export default function BoxPage() {
         )}    
         
         <div className="p-8">
-            <button onClick={() => navigate(-1)} className="mb-4 text-blue-500 hover:underline">← Back</button>
+            <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
             <div className='flex justify-between'>
                 <EditableTitle
                     name={box?.name ?? ''}
@@ -290,8 +290,8 @@ export default function BoxPage() {
                                 onClick={selection.isSelecting ? selection.stop : selection.start}
                                 className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 ${
                                     selection.isSelecting
-                                        ? "border-sky-700 bg-sky-700 text-white hover:bg-sky-800"
-                                        : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                                        ? "border-accent-line bg-accent-hover text-on-accent hover:bg-accent"
+                                        : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
                                 }`}
                             >
                                 {selection.isSelecting ? "Done" : "Select"}
@@ -306,18 +306,18 @@ export default function BoxPage() {
             {/* Extra bottom padding in select mode so the floating bar never covers the last row */}
             <div className={`pl-8 ${selection.isSelecting ? "pb-24" : ""}`}>
                 {cards.length === 0 && hasFilter(filter) && (
-                    <p className="py-8 text-sm text-slate-600">
+                    <p className="py-8 text-sm text-fg-muted">
                         No cards in this box match the filter.{' '}
-                        <button type="button" onClick={() => setFilter({})} className="font-semibold text-sky-800 hover:underline">
+                        <button type="button" onClick={() => setFilter({})} className="font-semibold text-link hover:underline">
                             Clear filter
                         </button>
                     </p>
                 )}
-                {dividerError && <p role="alert" className="mb-4 text-sm text-rose-700">{dividerError}</p>}
+                {dividerError && <p role="alert" className="mb-4 text-sm text-danger">{dividerError}</p>}
                 {looseCards.length > 0 && (
                     <>
                         {dividers.length > 0 && (
-                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Not behind a divider</h2>
+                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-fg-subtle">Not behind a divider</h2>
                         )}
                         <div className={cardGridClass}>{looseCards.map(renderCard)}</div>
                     </>
@@ -338,7 +338,7 @@ export default function BoxPage() {
                             {dividerCards.length > 0 ? (
                                 <div className={cardGridClass}>{dividerCards.map(renderCard)}</div>
                             ) : (
-                                <p className="text-sm text-slate-500">
+                                <p className="text-sm text-fg-subtle">
                                     {hasFilter(filter) && Number(divider.cardCount) > 0
                                         ? "No cards behind this divider match the filter."
                                         : "No cards behind this divider yet."}
