@@ -1,3 +1,4 @@
+//#region Imports
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
@@ -32,7 +33,8 @@ import { FilterMenu } from '../components/misc/FilterMenu'
 import { useCardFilter, hasFilter } from '../hooks/useCardFilter'
 import { AddDividerButton } from '../components/Dividers/AddDividerButton'
 import { DividerHeader } from '../components/Dividers/DividerHeader'
-
+//#endregion
+//#region setup vars + funcs
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
 
 const cardGridClass = "grid grid-cols-2 gap-4 @lg:grid-cols-3 @2xl:grid-cols-4 @5xl:grid-cols-6"
@@ -246,6 +248,10 @@ export default function BoxPage() {
         )
     }
 
+//#endregion
+//#region Return
+//#endregion
+
     return loading ?
     (<LoadingIndicator />) : 
     (
@@ -261,47 +267,63 @@ export default function BoxPage() {
             />
         )}    
         
-        <div className="p-4 sm:p-8">
-            <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
-            <div className='flex flex-col xl:flex-row xl:items-start xl:justify-between xl:gap-4'>
-                <EditableTitle
-                    name={box?.name ?? ''}
-                    draftName={draftName}
-                    isEditing={isEditingName}
-                    onDraftChange={setDraftName}
-                    onSave={() => void saveBoxName()}
-                    onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
-                    onStartEdit={() => setIsEditingName(true)}
-                    className="mb-3 mt-4 xl:mb-6"
-                />
-                <div className='flex flex-wrap items-start gap-2 pb-5 xl:flex-nowrap xl:justify-end'>
-                    {box && (
-                        <>
-                            <div className="w-full sm:w-auto sm:min-w-72 sm:flex-1 xl:w-96 xl:flex-none">
-                                <AddNewCardTextBar onAdd={addToBox} />
-                            </div>
-                            <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
-                            <FilterMenu value={filter} onChange={setFilter} />
-                            <SortMenu value={{ sort, desc }} onChange={setSort} />
-                            <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
-                            <ExportMenu kind="box" id={box.id} />
-                            <button
-                                type="button"
-                                aria-pressed={selection.isSelecting}
-                                disabled={cards.length === 0}
-                                onClick={selection.isSelecting ? selection.stop : selection.start}
-                                className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 ${
-                                    selection.isSelecting
-                                        ? "border-accent-line bg-accent-hover text-on-accent hover:bg-accent"
-                                        : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
-                                }`}
-                            >
-                                {selection.isSelecting ? "Done" : "Select"}
-                            </button>
-                        </>
-                    )}
+        <div >
+            <div className='bg-slate-700 p-4 mb-5 '>
+                <div className='flex justify-between'>
+                    <div className='flex flex-col xl:flex-row xl:items-start xl:justify-between'>
+                        <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
+                        <div className='pt-5'>
+                            <EditableTitle
+                            name={box?.name ?? ''}
+                            draftName={draftName}
+                            isEditing={isEditingName}
+                            onDraftChange={setDraftName}
+                            onSave={() => void saveBoxName()}
+                            onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
+                            onStartEdit={() => setIsEditingName(true)}
+                            className="mb-3 mt-4 xl:mb-6"
+                            />
+                        </div>
+                    </div>
+                    <div className='flex flex-col'>
+                        <div className='flex flex-wrap items-start gap-2 pb-3 xl:flex-nowrap xl:justify-end'>
+                            {box && (
+                                <>
+                                    <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
+                                    <FilterMenu value={filter} onChange={setFilter} />
+                                    <SortMenu value={{ sort, desc }} onChange={setSort} />
+                                </>
+                            )}
+                        </div>
+                        <div className='flex flex-wrap items-start gap-2 pb-5 mr-6 xl:flex-nowrap xl:justify-end'>
+                            {box && (
+                                <>
+                                    <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
+                                    <ExportMenu kind="box" id={box.id} />
+                                    <button
+                                        type="button"
+                                        aria-pressed={selection.isSelecting}
+                                        disabled={cards.length === 0}
+                                        onClick={selection.isSelecting ? selection.stop : selection.start}
+                                        className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 ${
+                                            selection.isSelecting
+                                                ? "border-accent-line bg-accent-hover text-on-accent hover:bg-accent"
+                                                : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
+                                        }`}
+                                    >
+                                        {selection.isSelecting ? "Done" : "Select"}
+                                    </button>
+                                </>
+                             )}
+                        </div>
+                    </div>
                 </div>
+            </div>
 
+            <div className="fixed inset-x-0 bottom-0 z-10 flex justify-end bg-slate-800 p-2">
+                <div className="w-full sm:w-96">
+                    <AddNewCardTextBar onAdd={addToBox} />
+                </div>
             </div>
 
 
