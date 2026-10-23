@@ -168,7 +168,11 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                         items={groups}
                         getId={g => g.id}
                         getName={g => g.name}
-                        getSubtitle={g => `${g.childGroupNames.length} items`}
+                        getSubtitle={g => {
+                            const groups = g.childGroupNames.length
+                            const boxes = g.boxNames.length
+                            return `${groups} ${groups === 1 ? 'group' : 'groups'}, ${boxes} ${boxes === 1 ? 'box' : 'boxes'}`
+                        }}
                         onNavigate={g => navigate(`/group/${g.id}`)}
                         onDelete={g => void deleteGroup(g)}
                         deletingId={deletingBoxId}

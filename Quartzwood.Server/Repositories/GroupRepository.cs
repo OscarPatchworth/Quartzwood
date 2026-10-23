@@ -40,6 +40,7 @@ public class GroupRepository : IGroupRepository
     public async Task<IEnumerable<Group>> GetByParentGroupAsync(Guid parentGroupId)
         => await _context.Groups
             .Where(g => g.ParentGroupId == parentGroupId)
+            .Include(g => g.ChildGroups)
             .Include(g => g.Boxes)
             .ToListAsync();
 
