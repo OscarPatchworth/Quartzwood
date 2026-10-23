@@ -47,7 +47,7 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
     return (
         <section aria-labelledby="options-title" className="@container rounded-lg border border-line bg-surface p-4">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h2 id="options-title" className="mr-auto text-lg font-bold text-fg">Trade options</h2>
+                <h2 id="options-title" className="mr-auto text-heading text-fg">Trade options</h2>
                 <LocationPicker entityId={personalEntityId} value={location} onChange={setLocation} />
                 <FilterMenu value={filter} onChange={setFilter} />
                 <SortMenu value={{ sort, desc }} onChange={setSort} />

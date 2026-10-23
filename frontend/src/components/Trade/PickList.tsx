@@ -28,7 +28,7 @@ export function PickList({ outgoing, incoming, quoteItems, collected, onToggle, 
             />
 
             <section aria-labelledby="receive-summary-title" className="rounded-lg border border-success-line bg-success-soft/40 p-4">
-                <h2 id="receive-summary-title" className="mb-1 text-lg font-bold text-fg">You receive</h2>
+                <h2 id="receive-summary-title" className="mb-1 text-heading text-fg">You receive</h2>
                 <p className="mb-2 text-xs text-fg-subtle">These go into the 'Cards from Trade' box in your collection.</p>
                 {incoming.length === 0 ? (
                     <p className="text-sm text-fg-subtle">Nothing.</p>

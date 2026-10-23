@@ -23,7 +23,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
             <div className="mb-3 border-b border-warning-line pb-3">
                 <input
                     aria-label="Card name"
-                    className="w-full rounded-md border border-transparent bg-transparent px-1 py-1 text-lg font-bold uppercase text-fg focus:border-warning-line focus:bg-surface focus:outline-none focus:ring-2 focus:ring-warning-line"
+                    className="w-full rounded-md border border-transparent bg-transparent px-1 py-1 font-display text-xl font-semibold text-fg focus:border-warning-line focus:bg-surface focus:outline-none focus:ring-2 focus:ring-warning-line"
                     value={card.name ?? ""}
                     onChange={event => updateField("name", event.target.value)}
                 />

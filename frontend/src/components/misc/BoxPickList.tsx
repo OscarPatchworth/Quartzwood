@@ -43,7 +43,7 @@ export function BoxPickList({ title, items, collected, onToggle, onTickAll, empt
     return (
         <section aria-label={title} className={`rounded-lg border bg-surface p-4 ${className}`}>
             <div className="mb-3 flex flex-wrap items-baseline gap-3">
-                <h2 className="mr-auto text-lg font-bold text-fg">{title}</h2>
+                <h2 className="mr-auto text-heading text-fg">{title}</h2>
                 <span className="text-sm text-fg-muted" aria-live="polite">{collectedCount} of {total} collected</span>
                 {items.length > 0 && (
                     <button type="button" onClick={() => onTickAll(!allTicked)} className="text-sm font-semibold text-link hover:underline">

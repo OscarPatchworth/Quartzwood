@@ -15,6 +15,39 @@
 /* dark: follows the chosen theme rather than only the operating system's setting */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/*
+  Typography
+  - Sen for everything you read and click; Inter is its fallback for characters Sen lacks (Sen only covers Latin)
+  - Amaranth, a rounded humanist sans, for headings: page titles, section headings, card names, the logo.
+    h1/h2/h3 use it automatically; anything else can opt in with font-display
+  - Text styles by role, so changing one changes it everywhere:
+      text-title    page titles (grows a little with the screen: 26px on a phone, 34px on a wide screen)
+      text-heading  section and dialog headings
+      eyebrow       small uppercase labels ("GROUPS", "YOUR BOXES"); pair with a size: eyebrow text-xs
+  All fonts are installed from npm (@fontsource / @fontsource-variable) and imported in main.tsx
+*/
+@theme {
+  --font-sans: "Sen Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-display: "Amaranth", ui-sans-serif, system-ui, sans-serif;
+
+  --text-title: clamp(1.625rem, 1.3rem + 1.2vw, 2.125rem);
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.015em;
+  --text-title--font-weight: 400;
+
+  --text-heading: 1.1875rem;
+  --text-heading--line-height: 1.3;
+  --text-heading--letter-spacing: -0.005em;
+  --text-heading--font-weight: 400;
+}
+
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 @theme inline {
   /* Backgrounds */
   --color-page: var(--qw-page);                     /* behind everything */
@@ -183,8 +216,28 @@
 }
 
 @layer base {
+  /* A border with no colour class uses the line colour (Tailwind's own default is the text colour,
+     which would be bright white in dark mode) */
+  *, ::before, ::after, ::backdrop, ::file-selector-button {
+    border-color: var(--qw-line);
+  }
+
   body {
     background-color: var(--qw-page);
     color: var(--qw-fg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Every digit the same width, so prices, counts and quantities line up in lists */
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-variant-numeric: normal;
+    text-wrap: balance;   /* long headings break into even lines instead of leaving one word alone */
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }

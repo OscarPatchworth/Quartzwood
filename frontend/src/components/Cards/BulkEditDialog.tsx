@@ -94,7 +94,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                 onSubmit={save}
                 className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
             >
-                <h2 id="bulk-edit-title" className="text-lg font-semibold text-fg">Edit {countLabel}</h2>
+                <h2 id="bulk-edit-title" className="text-heading text-fg">Edit {countLabel}</h2>
                 <p className="mb-4 mt-1 text-sm text-fg-subtle">
                     Only the fields you change are updated. Set, number and name can't be mass edited.
                     Removing a tag removes it whoever added it.

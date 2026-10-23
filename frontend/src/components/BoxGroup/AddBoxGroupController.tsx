@@ -84,7 +84,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
                         onSubmit={createItem}
                         className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
                     >
-                        <h2 id="create-item-title" className="mb-4 text-lg font-semibold text-fg">
+                        <h2 id="create-item-title" className="mb-4 text-heading text-fg">
                             Add {createType}
                         </h2>
                         <label htmlFor="create-item-name" className="mb-1 block text-sm font-medium text-fg-muted">

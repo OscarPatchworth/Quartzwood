@@ -21,15 +21,15 @@ export default function EntityPage() {
     return (
         <div className="p-4 sm:p-8">
             <button onClick={() => navigate('/')} className="mb-4 text-link hover:underline">← Back</button>
-            <h1 className="text-2xl font-bold mb-6">Groups</h1>
+            <h1 className="text-title mb-6">Groups</h1>
             <div className="grid grid-cols-1 gap-4">
                 {groups.map(g => (
                     <div
                         key={g.id}
                         onClick={() => navigate(`/group/${g.id}`)}
-                        className="p-4 border rounded cursor-pointer hover:bg-surface-sunken"
+                        className="p-4 border border-line-strong rounded cursor-pointer hover:bg-surface-sunken"
                     >
-                        <h2 className="text-lg font-semibold">{g.name}</h2>
+                        <h2 className="text-heading">{g.name}</h2>
                         {g.description && <p className="text-sm text-fg-subtle">{g.description}</p>}
                     </div>
                 ))}

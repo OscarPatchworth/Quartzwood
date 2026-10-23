@@ -319,7 +319,7 @@ export default function BoxPage() {
                 {looseCards.length > 0 && (
                     <>
                         {dividers.length > 0 && (
-                            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-fg-subtle">Not behind a divider</h2>
+                            <h2 className="mb-3 eyebrow text-xs text-fg-subtle">Not behind a divider</h2>
                         )}
                         <div className={cardGridClass}>{looseCards.map(renderCard)}</div>
                     </>

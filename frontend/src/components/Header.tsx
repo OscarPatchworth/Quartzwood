@@ -52,7 +52,7 @@ export default function Header() {
 
     return (
         <header className="relative flex items-center gap-2 bg-header p-4 text-sm text-header-fg">
-            <Link to="/" className="shrink-0 text-lg font-bold hover:text-header-hover">
+            <Link to="/" className="shrink-0 font-display text-xl font-semibold tracking-tight hover:text-header-hover">
                 Quartzwood
             </Link>
 

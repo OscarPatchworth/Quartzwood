@@ -16,7 +16,7 @@ export function CardDetails({card: card}: CardDetailsProps) {
             <div className="p-1">
                 <div className="rounded-lg border border-warning-line bg-warning-soft/70 p-4 shadow-[0_2px_8px_rgba(120,53,15,0.12)]">
                     <div className="mb-3 border-b border-warning-line pb-3">
-                        <p className="text-lg font-bold uppercase tracking-wide text-fg">{card.name}</p>
+                        <p className="font-display text-xl font-semibold text-fg">{card.name}</p>
                         <p className="text-sm text-fg-muted">{card.setNumber}-{card.setCode}</p>
                         {/* TCGplayer market price for this printing and finish (foil cards get the foil price) */}
                         <p className="mt-1 text-sm text-fg-muted" title="TCGplayer market price via Scryfall, updated daily">

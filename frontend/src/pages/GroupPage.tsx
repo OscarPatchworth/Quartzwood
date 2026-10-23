@@ -135,7 +135,7 @@ export default function GroupPage({ groupId }: GroupPageProps) {
 
             <div className='mb-4 flex flex-wrap items-start justify-between gap-2'>
                 {isRoot ? (
-                    <h1 className="mb-4 mt-3 text-2xl font-bold">My Collection</h1>
+                    <h1 className="mb-4 mt-3 text-title">My Collection</h1>
                 ) : (
                     <EditableTitle
                         name={activeGroup?.name ?? ''}

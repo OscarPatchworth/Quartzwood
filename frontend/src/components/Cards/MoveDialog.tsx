@@ -134,7 +134,7 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                 onSubmit={move}
                 className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-surface p-6 shadow-xl"
             >
-                <h2 id="move-title" className="mb-3 text-lg font-semibold text-fg">Move {countLabel} to...</h2>
+                <h2 id="move-title" className="mb-3 text-heading text-fg">Move {countLabel} to...</h2>
 
                 <SearchInput
                     id="move-box-search"
@@ -153,13 +153,13 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                     )}
                     {owned.length > 0 && (
                         <>
-                            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-fg-subtle">Your boxes</h3>
+                            <h3 className="mb-1 eyebrow text-xs text-fg-subtle">Your boxes</h3>
                             <ul className="flex flex-col gap-1.5">{owned.map(boxButton)}</ul>
                         </>
                     )}
                     {shared.length > 0 && (
                         <>
-                            <h3 className="mb-1 mt-4 text-xs font-semibold uppercase tracking-wide text-warning">Shared with you</h3>
+                            <h3 className="mb-1 mt-4 eyebrow text-xs text-warning">Shared with you</h3>
                             <ul className="flex flex-col gap-1.5">{shared.map(boxButton)}</ul>
                         </>
                     )}
@@ -167,7 +167,7 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
 
                 {target && (targetDividers === undefined || targetDividers.length > 0) && (
                     <fieldset className="mt-3 border-t border-line pt-3">
-                        <legend className="mb-1.5 truncate text-xs font-semibold uppercase tracking-wide text-fg-subtle">
+                        <legend className="mb-1.5 truncate eyebrow text-xs text-fg-subtle">
                             Where in {target.name}?
                         </legend>
                         {targetDividers === undefined ? (

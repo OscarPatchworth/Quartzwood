@@ -43,7 +43,7 @@ export function FinishTradeDialog({ draft, onClose, onFinished }: FinishTradeDia
             <div role="dialog" aria-modal="true" aria-labelledby="finish-title"
                 onMouseDown={event => event.stopPropagation()}
                 className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
-                <h2 id="finish-title" className="text-lg font-semibold text-fg">Finish this trade?</h2>
+                <h2 id="finish-title" className="text-heading text-fg">Finish this trade?</h2>
                 <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
                     {receiving > 0 && <li>Add <strong>{receiving}</strong> {receiving === 1 ? "card" : "cards"} to 'Cards from Trade' in your collection</li>}
                     {giving > 0 && <li>Remove <strong>{giving}</strong> {giving === 1 ? "card" : "cards"} you're giving from your collection</li>}

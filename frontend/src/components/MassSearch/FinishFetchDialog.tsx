@@ -95,7 +95,7 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
             <form role="dialog" aria-modal="true" aria-labelledby="finish-fetch-title" onSubmit={submit}
                 onMouseDown={event => event.stopPropagation()}
                 className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
-                <h2 id="finish-fetch-title" className="text-lg font-semibold text-fg">What should happen to the {countLabel}?</h2>
+                <h2 id="finish-fetch-title" className="text-heading text-fg">What should happen to the {countLabel}?</h2>
                 {untickedCount > 0 && (
                     <p className="mt-2 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning">
                         {untickedCount} {untickedCount === 1 ? "card isn't" : "cards aren't"} ticked: {untickedCount === 1 ? "it stays" : "they stay"} where {untickedCount === 1 ? "it is" : "they are"}.

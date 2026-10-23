@@ -25,11 +25,11 @@ export default function EditableTitle({
                 if (e.key === 'Enter') { e.preventDefault(); onSave() }
                 if (e.key === 'Escape') onCancel()
             }}
-            className={`${className} rounded border border-line-strong bg-surface px-2 py-1 text-2xl font-bold outline-none ring-2 ring-accent-line/40`}
+            className={`${className} rounded border border-line-strong bg-surface px-2 py-1 font-display text-title outline-none ring-2 ring-accent-line/40`}
         />
     ) : (
         <h1
-            className={`${className} text-2xl font-bold cursor-text`}
+            className={`${className} text-title cursor-text`}
             onDoubleClick={onStartEdit}
             title="Double-click to rename"
         >

@@ -82,7 +82,7 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                         onSubmit={runImport}
                         className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-surface p-6 shadow-xl"
                     >
-                        <h2 id="import-title" className="mb-4 text-lg font-semibold text-fg">Import cards into this box</h2>
+                        <h2 id="import-title" className="mb-4 text-heading text-fg">Import cards into this box</h2>
 
                         <div className="mb-2 flex items-center gap-3">
                             <label className="cursor-pointer rounded-md border border-line-strong px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-muted">

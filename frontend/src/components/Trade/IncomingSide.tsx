@@ -24,7 +24,7 @@ const selectClassName = "rounded border border-line-strong bg-surface px-1 py-0.
 export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteError, onAdd, onChange, onRemove }: IncomingSideProps) {
     return (
         <section aria-labelledby="incoming-title" className="rounded-lg border border-success-line bg-success-soft/40 p-4">
-            <h2 id="incoming-title" className="mb-3 flex items-baseline justify-between text-lg font-bold text-fg">
+            <h2 id="incoming-title" className="mb-3 flex items-baseline justify-between text-heading text-fg">
                 You receive
                 <span className={`text-success ${isPricing ? "opacity-50" : ""}`}>{formatPrice(total)}</span>
             </h2>

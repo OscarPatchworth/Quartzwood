@@ -63,7 +63,7 @@ export function AddDividerButton({ boxId, onCreated }: AddDividerButtonProps) {
                         onSubmit={create}
                         className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
                     >
-                        <h2 id="add-divider-title" className="mb-1 text-lg font-semibold text-fg">
+                        <h2 id="add-divider-title" className="mb-1 text-heading text-fg">
                             Add divider
                         </h2>
                         <p className="mb-4 text-sm text-fg-muted">It goes at the back of the box.</p>

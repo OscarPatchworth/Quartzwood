@@ -38,7 +38,7 @@ export default function LoginPage() {
     return (
         <div className="flex justify-center p-8">
             <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-line bg-surface p-6 shadow-sm">
-                <h1 className="mb-6 text-2xl font-bold text-fg">Log in</h1>
+                <h1 className="mb-6 text-title text-fg">Log in</h1>
 
                 <label htmlFor="login-email" className={labelClass}>Email</label>
                 <input

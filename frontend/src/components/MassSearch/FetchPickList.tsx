@@ -29,7 +29,7 @@ export function FetchPickList({ plan, collected, onToggle, onTickAll, onBack, on
     return (
         <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h2 className="mr-auto text-lg font-bold text-fg">Collect the cards</h2>
+                <h2 className="mr-auto text-heading text-fg">Collect the cards</h2>
                 <button type="button" onClick={onBack}
                     className="rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted">
                     Back to the results

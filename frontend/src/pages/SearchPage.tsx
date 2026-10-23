@@ -62,7 +62,7 @@ export default function SearchPage() {
 
     return (
         <div className="p-4 sm:p-8">
-            <h1 className="mb-4 text-2xl font-bold">Search your collection</h1>
+            <h1 className="mb-4 text-title">Search your collection</h1>
             <div role="tablist" aria-label="Search mode" className="mb-4 flex gap-1 border-b border-line">
                 {tabs.map(([value, label]) => (
                     <button key={value} type="button" role="tab" aria-selected={mode === value} onClick={() => changeMode(value)}
