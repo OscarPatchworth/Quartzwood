@@ -29,15 +29,15 @@ export function useCardSort() {
     const [searchParams, setSearchParams] = useSearchParams()
     const sortParam = searchParams.get("sort")
     const sort: CardSort = {
-        sort: isSortValue(sortParam) ? sortParam : "name",
+        sort: isSortValue(sortParam) ? sortParam : "manaValue",
         desc: searchParams.get("desc") === "true",
     }
 
     function setSort(next: CardSort) {
         setSearchParams(current => {
             const params = new URLSearchParams(current)
-            // The default (name, A-Z) leaves the URL clean
-            if (next.sort === "name") params.delete("sort")
+            // The default (manaValue, Desc) leaves the URL clean
+            if (next.sort === "manaValue") params.delete("sort")
             else params.set("sort", next.sort)
             if (next.desc) params.set("desc", "true")
             else params.delete("desc")
