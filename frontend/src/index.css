@@ -65,6 +65,7 @@
   /* Borders */
   --color-line: var(--qw-line);                     /* dividers, light borders */
   --color-line-strong: var(--qw-line-strong);       /* input and button borders */
+  --raduis-card-corner-crop: 1.05vw;
 
   /* Accent: primary buttons, links, selection */
   --color-accent: var(--qw-accent);                 /* primary button fill */

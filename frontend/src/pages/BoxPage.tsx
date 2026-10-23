@@ -221,7 +221,7 @@ export default function BoxPage() {
                 <img
                     src={c.scryfallId ? cardImageUrl(c.scryfallId) : undefined}
                     alt={c.name ?? ''}
-                    className={`w-full rounded-lg shadow transition ${
+                    className={`w-full rounded-(--raduis-card-corner-crop) shadow transition ${
                         isSelected ? "ring-4 ring-accent-line" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""
                     } ${selection.isSelecting ? "cursor-pointer" : ""}`}
                     onClick={() => clickCard(c)}
