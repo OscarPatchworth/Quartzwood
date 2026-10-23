@@ -269,11 +269,11 @@ export default function BoxPage() {
         
         <div >
             <div className='bg-slate-700 p-4 mb-5 '>
-                <div className='flex justify-between'>
-                    <div className='flex flex-col xl:flex-row xl:items-start xl:justify-between'>
-                        <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
-                        <div className='pt-5'>
-                            <EditableTitle
+                <div className='flex flex-wrap items-center justify-between gap-4'>
+                    {/* Back above the title, tight together: no taller than the two button rows beside it */}
+                    <div className='flex min-w-0 flex-col gap-1'>
+                        <button onClick={() => navigate(-1)} className="self-start text-sm text-link hover:underline">← Back</button>
+                        <EditableTitle
                             name={box?.name ?? ''}
                             draftName={draftName}
                             isEditing={isEditingName}
@@ -281,9 +281,8 @@ export default function BoxPage() {
                             onSave={() => void saveBoxName()}
                             onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
                             onStartEdit={() => setIsEditingName(true)}
-                            className="mb-3 mt-4 xl:mb-6"
-                            />
-                        </div>
+                            className="truncate"
+                        />
                     </div>
                     <div className='flex flex-col'>
                         <div className='flex flex-wrap items-start gap-2 pb-3 xl:flex-nowrap xl:justify-end'>
