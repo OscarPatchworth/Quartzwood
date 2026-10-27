@@ -83,7 +83,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
             </summary>
             <form
                 onSubmit={apply}
-                className="absolute right-0 z-40 mt-1 w-72 rounded-lg border border-line bg-surface p-4 shadow-lg"
+                className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-72 rounded-lg border border-line bg-surface p-4 shadow-lg"
             >
                 {FilterRanges.map(range => (
                     <fieldset key={range.label} className="mb-4">

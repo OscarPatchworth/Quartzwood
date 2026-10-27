@@ -33,7 +33,7 @@ export function SortMenu({ value, onChange }: SortMenuProps) {
                     </svg>
                     <span><span className="sr-only">Sort by </span>{current.label}</span>
                 </summary>
-                <ul className="absolute right-0 z-40 mt-1 w-44 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg">
+                <ul className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-44 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg">
                     {CardSortOptions.map(option => (
                         <li key={option.value}>
                             <button

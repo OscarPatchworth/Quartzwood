@@ -12,12 +12,14 @@ interface BulkActionBarProps {
     onChanged: () => Promise<void>
     // The box the page shows (it can't be picked as a move target); none on pages spanning several boxes
     currentBoxId?: string
+    // How far up from the bottom of the screen it floats, e.g. "bottom-20" to sit above a footer bar
+    bottomClassName?: string
 }
 
 const buttonClassName = "rounded-md px-3 py-1.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40"
 
 // Floats at the bottom of the screen while in select mode: "N cards selected" + the mass actions
-export function BulkActionBar({ selection, onChanged, currentBoxId }: BulkActionBarProps) {
+export function BulkActionBar({ selection, onChanged, currentBoxId, bottomClassName = "bottom-4" }: BulkActionBarProps) {
     // One value rather than a flag per dialog: only one can ever be open
     const [openDialog, setOpenDialog] = useState<"edit" | "move">()
     const [isDeleting, setIsDeleting] = useState(false)
@@ -60,7 +62,7 @@ export function BulkActionBar({ selection, onChanged, currentBoxId }: BulkAction
             <div
                 role="toolbar"
                 aria-label="Selected cards"
-                className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 shadow-lg"
+                className={`fixed inset-x-0 ${bottomClassName} z-40 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 shadow-lg`}
             >
                 <span className="min-w-28 text-sm font-semibold text-fg" aria-live="polite">
                     {count === 0 ? "Select cards" : `${countLabel} selected`}

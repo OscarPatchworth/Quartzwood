@@ -15,6 +15,10 @@
 /* dark: follows the chosen theme rather than only the operating system's setting */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* up: for dropdowns inside a bar at the BOTTOM of the screen (data-drop="up"), which must open upwards.
+   e.g. "mt-1 up:mt-0 up:bottom-full up:mb-1" */
+@custom-variant up (&:where([data-drop=up] *));
+
 /*
   Typography
   - Sen for everything you read and click; Inter is its fallback for characters Sen lacks (Sen only covers Latin)

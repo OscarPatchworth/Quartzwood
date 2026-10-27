@@ -26,6 +26,7 @@ import { ImportDialog } from '../components/ImportExport/ImportDialog'
 import { ExportMenu } from '../components/ImportExport/ExportMenu'
 import { BulkActionBar } from '../components/Cards/BulkActionBar'
 import { useCardSelection } from '../hooks/useCardSelection'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { TagList } from '../components/Tags/TagList'
 import { useCardSort } from '../hooks/useCardSort'
 import { SortMenu } from '../components/misc/SortMenu'
@@ -50,6 +51,25 @@ export default function BoxPage() {
     const [isSavingDividers, setIsSavingDividers] = useState(false)
     const [loading, setLoading] = useState(true)
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
+    // Wide screens: add bar in the top banner, buttons in the footer. Compact: the other way round
+    const isWide = useMediaQuery("(width >= 64rem)")
+    // Compact screens: the footer's add bar is in use, so it's raised to the top of the screen
+    const [isAddBarRaised, setIsAddBarRaised] = useState(false)
+
+    // Back down to the footer. Also takes focus out of the input, so tapping it again raises it again
+    function lowerAddBar() {
+        setIsAddBarRaised(false)
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+    }
+
+    // Escape lowers it too; and on a wide screen it lives in the top banner, so it's never raised
+    useEffect(() => {
+        if (isWide || !isAddBarRaised) return
+        const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') lowerAddBar() }
+        document.addEventListener('keydown', onKeyDown)
+        return () => document.removeEventListener('keydown', onKeyDown)
+    }, [isWide, isAddBarRaised])
+    if (isWide && isAddBarRaised) setIsAddBarRaised(false)
     const [isEditingName, setIsEditingName] = useState(false)
     const [draftName, setDraftName] = useState(box?.name ?? '')
     const navigate = useNavigate()
@@ -252,6 +272,36 @@ export default function BoxPage() {
 //#region Return
 //#endregion
 
+    // The view and edit buttons (two rows in the top banner, or one row in the footer) and the add bar.
+    // Each is made once and placed by screen size, so there's only ever one of each on the page
+    const viewButtons = box && (
+        <>
+            <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
+            <FilterMenu value={filter} onChange={setFilter} />
+            <SortMenu value={{ sort, desc }} onChange={setSort} />
+        </>
+    )
+    const editButtons = box && (
+        <>
+            <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
+            <ExportMenu kind="box" id={box.id} />
+            <button
+                type="button"
+                aria-pressed={selection.isSelecting}
+                disabled={cards.length === 0}
+                onClick={selection.isSelecting ? selection.stop : selection.start}
+                className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 ${
+                    selection.isSelecting
+                        ? "border-accent-line bg-accent-hover text-on-accent hover:bg-accent"
+                        : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
+                }`}
+            >
+                {selection.isSelecting ? "Done" : "Select"}
+            </button>
+        </>
+    )
+    const addBar = <AddNewCardTextBar onAdd={addToBox} />
+
     return loading ?
     (<LoadingIndicator />) : 
     (
@@ -284,50 +334,51 @@ export default function BoxPage() {
                             className="truncate"
                         />
                     </div>
-                    <div className='flex flex-col'>
-                        <div className='flex flex-wrap items-start gap-2 pb-3 xl:flex-nowrap xl:justify-end'>
-                            {box && (
-                                <>
-                                    <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
-                                    <FilterMenu value={filter} onChange={setFilter} />
-                                    <SortMenu value={{ sort, desc }} onChange={setSort} />
-                                </>
-                            )}
+                    {/* Wide screens: the add bar up here. Compact: the view/edit buttons, in two rows */}
+                    {isWide ? (
+                        <div className='w-full max-w-md'>{addBar}</div>
+                    ) : (
+                        <div className='flex flex-col gap-2'>
+                            <div className='flex flex-wrap items-start gap-2'>{viewButtons}</div>
+                            <div className='flex flex-wrap items-start gap-2'>{editButtons}</div>
                         </div>
-                        <div className='flex flex-wrap items-start gap-2 pb-5 mr-6 xl:flex-nowrap xl:justify-end'>
-                            {box && (
-                                <>
-                                    <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
-                                    <ExportMenu kind="box" id={box.id} />
-                                    <button
-                                        type="button"
-                                        aria-pressed={selection.isSelecting}
-                                        disabled={cards.length === 0}
-                                        onClick={selection.isSelecting ? selection.stop : selection.start}
-                                        className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 ${
-                                            selection.isSelecting
-                                                ? "border-accent-line bg-accent-hover text-on-accent hover:bg-accent"
-                                                : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
-                                        }`}
-                                    >
-                                        {selection.isSelecting ? "Done" : "Select"}
-                                    </button>
-                                </>
-                             )}
-                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* The footer bar, fixed to the bottom of the screen: the view/edit buttons on wide screens (their
+                menus open upwards: data-drop="up"), the add bar on compact ones. While you use the add bar it
+                jumps to the TOP of the screen, over the header, so its suggestions have room to open below it */}
+            {isWide ? (
+                <div data-drop="up" className="fixed inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 bg-slate-800 px-4 py-2 sm:px-8">
+                    {viewButtons}
+                    <span className="mx-1 h-6 w-px bg-line-strong" aria-hidden="true" />
+                    {editButtons}
+                </div>
+            ) : (
+                <>
+                    {isAddBarRaised && <div className="fixed inset-0 z-40 bg-overlay" onClick={lowerAddBar} aria-hidden="true" />}
+                    <div
+                        className={`fixed inset-x-0 flex items-center gap-2 bg-slate-800 p-2 ${isAddBarRaised ? "top-0 z-50 shadow-lg" : "bottom-0 z-10"}`}
+                        onFocus={() => setIsAddBarRaised(true)}
+                        // Tabbing out of it lowers it too (clicks elsewhere are handled by the dimmed backdrop)
+                        onBlur={event => {
+                            if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setIsAddBarRaised(false)
+                        }}
+                    >
+                        <div className="min-w-0 flex-1">{addBar}</div>
+                        {isAddBarRaised && (
+                            <button type="button" onClick={lowerAddBar}
+                                className="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-header-fg hover:bg-header-muted/30">
+                                Done
+                            </button>
+                        )}
                     </div>
-                </div>
-            </div>
+                </>
+            )}
 
-            <div className="fixed inset-x-0 bottom-0 z-10 flex justify-end bg-slate-800 p-2">
-                <div className="w-full sm:w-96">
-                    <AddNewCardTextBar onAdd={addToBox} />
-                </div>
-            </div>
-
-
-            {/* Extra bottom padding in select mode so the floating bar never covers the last row */}
-            <div className={`@container sm:pl-8 ${selection.isSelecting ? "pb-24" : ""}`}>
+            {/* Bottom padding so the footer bar (and select mode's floating bar above it) never covers the last row */}
+            <div className={`@container sm:pl-8 ${selection.isSelecting ? "pb-44" : "pb-24"}`}>
                 {cards.length === 0 && hasFilter(filter) && (
                     <p className="py-8 text-sm text-fg-muted">
                         No cards in this box match the filter.{' '}
@@ -373,7 +424,7 @@ export default function BoxPage() {
             </div>
         </div>
 
-        <BulkActionBar selection={selection} onChanged={refreshCardsAfterMutation} currentBoxId={box?.id} />
+        <BulkActionBar selection={selection} onChanged={refreshCardsAfterMutation} currentBoxId={box?.id} bottomClassName="bottom-20" />
         </>
     )
 }

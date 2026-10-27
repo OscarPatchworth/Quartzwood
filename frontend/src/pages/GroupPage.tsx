@@ -128,26 +128,30 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     const isRoot = activeGroup?.parentGroupId === null
 
     return (
-        <div className="p-4 sm:p-8">
-            {!isRoot && (
-                <button onClick={() => navigate(-1)} className="mb-4 text-link hover:underline">← Back</button>
-            )}
-
-            <div className='mb-4 flex flex-wrap items-start justify-between gap-2'>
-                {isRoot ? (
-                    <h1 className="mb-4 mt-3 text-title">My Collection</h1>
-                ) : (
-                    <EditableTitle
-                        name={activeGroup?.name ?? ''}
-                        draftName={draftName}
-                        isEditing={isEditingName}
-                        onDraftChange={setDraftName}
-                        onSave={() => void saveGroupName()}
-                        onCancel={() => { setIsEditingName(false); setDraftName(activeGroup?.name ?? '') }}
-                        onStartEdit={() => setIsEditingName(true)}
-                    />
-                )}
-                <div className="flex items-center gap-2">
+        <>
+        <div className='bg-violet-300 px-10 py-5 sm:px-8'>
+            <div className='flex flex-wrap items-center justify-between gap-4'>
+                {/* Back above the title, tight together (the collection itself has nothing to go back to) */}
+                <div className='flex min-w-0 flex-col gap-1'>
+                    {!isRoot && (
+                        <button onClick={() => navigate(-1)} className="self-start text-sm text-link hover:underline">← Back</button>
+                    )}
+                    {isRoot ? (
+                        <h1 className="truncate text-title">My Collection</h1>
+                    ) : (
+                        <EditableTitle
+                            name={activeGroup?.name ?? ''}
+                            draftName={draftName}
+                            isEditing={isEditingName}
+                            onDraftChange={setDraftName}
+                            onSave={() => void saveGroupName()}
+                            onCancel={() => { setIsEditingName(false); setDraftName(activeGroup?.name ?? '') }}
+                            onStartEdit={() => setIsEditingName(true)}
+                            className="truncate"
+                        />
+                    )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
                     {/* On the collection page this exports the whole collection */}
                     {id && <ExportMenu kind="group" id={id} />}
                     <AddBoxGroupController
@@ -157,9 +161,11 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                     />
                 </div>
             </div>
-
+        </div>
+            
+            <div className="p-4 sm:p-8">
             {deleteError && <p role="alert" className="mb-4 text-sm text-danger">{deleteError}</p>}
-
+            
             <div className='flex justify-center'>
                 <div className="grid w-full max-w-5xl gap-8 md:grid-cols-2 md:px-4">
                    
@@ -194,5 +200,6 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                 </div>
             </div>           
         </div>
+        </>
     )
 }

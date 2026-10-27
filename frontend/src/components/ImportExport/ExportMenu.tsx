@@ -28,7 +28,7 @@ export function ExportMenu({ kind, id }: ExportMenuProps) {
                     <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </summary>
-            <ul className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg">
+            <ul className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-56 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg">
                 {formats.length === 0 && <li className="px-3 py-2 text-sm text-fg-subtle">Loading formats...</li>}
                 {formats.map(format => (
                     <li key={format.key}>
