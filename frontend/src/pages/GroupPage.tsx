@@ -26,6 +26,8 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     const params = useParams<{ id: string }>()
     const id = groupId ?? params.id
     const [activeGroup, setActiveGroup] = useState<GroupDto>()
+    // The group this one sits inside (none for the collection itself)
+    const [parentGroup, setParentGroup] = useState<GroupDto>()
     const [groups, setGroups] = useState<GroupDto[]>([])
     const [boxes, setBoxes] = useState<BoxDto[]>([])
     const [loading, setLoading] = useState(true)
@@ -47,7 +49,11 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                 .then(res => setBoxes(res.data)),
 
             getApiGroupsById({ path: { id } })
-                .then(res => setActiveGroup(res.data)),
+                .then(async res => {
+                    setActiveGroup(res.data)
+                    const parentId = res.data.parentGroupId
+                    setParentGroup(parentId ? (await getApiGroupsById({ path: { id: parentId } })).data : undefined)
+                }),
 
             getApiGroupsByParentByParentId({ path: { parentId: id } })
                 .then(res => setGroups(res.data))
@@ -168,7 +174,24 @@ export default function GroupPage({ groupId }: GroupPageProps) {
             
             <div className='flex justify-center'>
                 <div className="grid w-full max-w-5xl gap-8 md:grid-cols-2 md:px-4">
-                   
+
+                    {/* Up one level: the group this one is inside, across both columns */}
+                    {parentGroup && (
+                        <button
+                            type="button"
+                            onClick={() => navigate(parentGroup.parentGroupId === null ? '/collection' : `/group/${parentGroup.id}`)}
+                            className="flex w-full items-center gap-3 rounded border border-dashed border-line-strong bg-surface-muted px-4 py-3 text-left transition hover:bg-surface-sunken md:col-span-2"
+                        >
+                            <span className="text-heading text-fg-subtle" aria-hidden="true">↰</span>
+                            <span className="min-w-0">
+                                <span className="block eyebrow text-xs text-fg-subtle">Inside</span>
+                                <span className="block truncate text-heading">
+                                    {parentGroup.parentGroupId === null ? 'My Collection' : parentGroup.name}
+                                </span>
+                            </span>
+                        </button>
+                    )}
+
                     <GroupBoxListCard
                         title="Groups"
                         items={groups}
