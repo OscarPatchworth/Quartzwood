@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getErrorMessage } from '../api/getErrorMessage'
 import {
@@ -16,6 +16,10 @@ import { AddBoxGroupController } from '../components/BoxGroup/AddBoxGroupControl
 import GroupBoxListCard from '../components/BoxGroup/GroupBoxListCard'
 import EditableTitle from '../components/misc/EditableTitle'
 import { ExportMenu } from '../components/ImportExport/ExportMenu'
+import { ParentGroupBanner } from '../components/BoxGroup/ParentGroupBanner'
+import { MoveToGroupDialog } from '../components/BoxGroup/MoveToGroupDialog'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { moveItem, onMoveElsewhere, type MovableItem } from '../utils/moveBoxGroup'
 
 interface GroupPageProps {
     // Set by CollectionPage to show the root group; otherwise the id comes from /group/:id
@@ -41,26 +45,51 @@ export default function GroupPage({ groupId }: GroupPageProps) {
         setDraftName(activeGroup?.name ?? '')
     }, [activeGroup?.name])
 
+    // Fetches the group, its parent, and what's inside it. Shared by the first load and reloads after a move
+    const loadGroup = useCallback((groupId: string) => Promise.all([
+        getApiBoxesByGroupByGroupId({ path: { groupId } })
+            .then(res => setBoxes(res.data)),
+
+        getApiGroupsById({ path: { id: groupId } })
+            .then(async res => {
+                setActiveGroup(res.data)
+                const parentId = res.data.parentGroupId
+                setParentGroup(parentId ? (await getApiGroupsById({ path: { id: parentId } })).data : undefined)
+            }),
+
+        getApiGroupsByParentByParentId({ path: { parentId: groupId } })
+            .then(res => setGroups(res.data))
+    ]), [])
+
     useEffect(() => {
         if (!id) return
         setLoading(true)
-        Promise.all([
-            getApiBoxesByGroupByGroupId({ path: { groupId: id } })
-                .then(res => setBoxes(res.data)),
+        loadGroup(id).finally(() => setLoading(false))
+    }, [id, loadGroup])
 
-            getApiGroupsById({ path: { id } })
-                .then(async res => {
-                    setActiveGroup(res.data)
-                    const parentId = res.data.parentGroupId
-                    setParentGroup(parentId ? (await getApiGroupsById({ path: { id: parentId } })).data : undefined)
-                }),
+    // Something moved in another tab/window: reload quietly (no spinner), it may have come or gone from here
+    useEffect(() => {
+        if (!id) return
+        return onMoveElsewhere(() => void loadGroup(id).catch(() => {}))
+    }, [id, loadGroup])
 
-            getApiGroupsByParentByParentId({ path: { parentId: id } })
-                .then(res => setGroups(res.data))
-        ])
-            .finally(() => setLoading(false))
+    // Drag-and-drop needs a mouse-sized screen; phones (and everyone else) get the Move button
+    const canDrag = useMediaQuery('(width >= 48rem)')
+    const [movingItem, setMovingItem] = useState<MovableItem>()
 
-    }, [id])
+    async function handleDrop(item: MovableItem, toGroupId: string) {
+        setDeleteError(undefined)
+        try {
+            await moveItem(item, toGroupId)
+        } catch (error) {
+            setDeleteError(getErrorMessage(error, `Unable to move ${item.name}.`))
+        }
+        // Reload either way: the counts on the target row change, and a failed move may be stale data
+        if (id) await loadGroup(id).catch(() => {})
+    }
+
+    const groupItem = (g: GroupDto): MovableItem => ({ kind: 'group', id: g.id, name: g.name, fromGroupId: id ?? '' })
+    const boxItem = (b: BoxDto): MovableItem => ({ kind: 'box', id: b.id, name: b.name, fromGroupId: id ?? '' })
 
     async function deleteBox(box: BoxDto) {
         if (!window.confirm(`Delete "${box.name}"? This cannot be undone.`)) return
@@ -177,19 +206,11 @@ export default function GroupPage({ groupId }: GroupPageProps) {
 
                     {/* Up one level: the group this one is inside, across both columns */}
                     {parentGroup && (
-                        <button
-                            type="button"
-                            onClick={() => navigate(parentGroup.parentGroupId === null ? '/collection' : `/group/${parentGroup.id}`)}
-                            className="flex w-full items-center gap-3 rounded border border-dashed border-line-strong bg-surface-muted px-4 py-3 text-left transition hover:bg-surface-sunken md:col-span-2"
-                        >
-                            <span className="text-heading text-fg-subtle" aria-hidden="true">↰</span>
-                            <span className="min-w-0">
-                                <span className="block eyebrow text-xs text-fg-subtle">Inside</span>
-                                <span className="block truncate text-heading">
-                                    {parentGroup.parentGroupId === null ? 'My Collection' : parentGroup.name}
-                                </span>
-                            </span>
-                        </button>
+                        <ParentGroupBanner
+                            parentGroup={parentGroup}
+                            onNavigate={() => navigate(parentGroup.parentGroupId === null ? '/collection' : `/group/${parentGroup.id}`)}
+                            onDropItem={canDrag ? handleDrop : undefined}
+                        />
                     )}
 
                     <GroupBoxListCard
@@ -206,6 +227,9 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                         onDelete={g => void deleteGroup(g)}
                         deletingId={deletingBoxId}
                         emptyMessage="No groups found."
+                        onMove={g => setMovingItem(groupItem(g))}
+                        getDragItem={canDrag ? groupItem : undefined}
+                        onDropItem={canDrag ? handleDrop : undefined}
                     />
 
                     <GroupBoxListCard
@@ -218,11 +242,22 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                         onDelete={b => void deleteBox(b)}
                         deletingId={deletingBoxId}
                         emptyMessage="No boxes found."
+                        onMove={b => setMovingItem(boxItem(b))}
+                        getDragItem={canDrag ? boxItem : undefined}
                     />
 
                 </div>
-            </div>           
+            </div>
         </div>
+
+        {movingItem && activeGroup && (
+            <MoveToGroupDialog
+                item={movingItem}
+                entityId={activeGroup.entityId}
+                onClose={() => setMovingItem(undefined)}
+                onMoved={() => { if (id) void loadGroup(id).catch(() => {}) }}
+            />
+        )}
         </>
     )
 }
