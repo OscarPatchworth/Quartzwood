@@ -1,50 +1,170 @@
 @import "tailwindcss";
 
-/*
-  Theme tokens: colours named by what they're FOR (a panel, body text, a border, a warning),
-  not what they look like. Components use bg-surface, text-fg-muted, border-line... and never palette
-  colours like bg-white or text-slate-700, so a theme only has to change the values below.
+/* =============================================================================
+   HOW THIS FILE WORKS
 
-  - Light values are on :root, dark values on [data-theme="dark"]. <html data-theme> is set by
-    src/theme/theme.ts (and a small script in index.html, so the page never flashes the wrong theme)
-  - A future colour scheme setting can override any --qw-* value at runtime with
-    document.documentElement.style.setProperty("--qw-accent", "...")
-  - Opacity still works: bg-surface/80, ring-accent-line/30
-*/
+   1. Every "--color-NAME" in @theme makes Tailwind classes with that name:
+        --color-surface  ->  bg-surface, text-surface, border-surface, ring-surface ...
+      Change the hex value and everything using that class changes.
+      Opacity works like any Tailwind colour: bg-surface/80
 
-/* dark: follows the chosen theme rather than only the operating system's setting */
+   2. Dark mode: the [data-theme="dark"] block further down gives the SAME names
+      different values. The theme button in the header switches between them.
+
+   3. "--font-NAME" makes font-NAME classes, "--text-NAME" makes text-NAME classes.
+
+   Tailwind's own colours (bg-slate-700, text-red-500 ...) still work too,
+   but they look the same in light and dark mode.
+   ============================================================================= */
+
+
+/* dark: classes follow the theme button (e.g. dark:bg-black) */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/* up: for dropdowns inside a bar at the BOTTOM of the screen (data-drop="up"), which must open upwards.
-   e.g. "mt-1 up:mt-0 up:bottom-full up:mb-1" */
+/* up: classes apply inside a bottom bar marked data-drop="up", so its dropdowns open upwards */
 @custom-variant up (&:where([data-drop=up] *));
 
-/*
-  Typography
-  - Sen for everything you read and click; Inter is its fallback for characters Sen lacks (Sen only covers Latin)
-  - Amaranth, a rounded humanist sans, for headings: page titles, section headings, card names, the logo.
-    h1/h2/h3 use it automatically; anything else can opt in with font-display
-  - Text styles by role, so changing one changes it everywhere:
-      text-title    page titles (grows a little with the screen: 26px on a phone, 34px on a wide screen)
-      text-heading  section and dialog headings
-      eyebrow       small uppercase labels ("GROUPS", "YOUR BOXES"); pair with a size: eyebrow text-xs
-  All fonts are installed from npm (@fontsource / @fontsource-variable) and imported in main.tsx
-*/
+
 @theme {
-  --font-sans: "Sen Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-display: "Amaranth", ui-sans-serif, system-ui, sans-serif;
+  /* ---------- Fonts (installed with npm, imported in main.tsx) ---------- */
+  --font-sans: "Sen Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;   /* all normal text */
+  --font-display: "Amaranth", ui-sans-serif, system-ui, sans-serif;                     /* headings: h1, h2, h3 */
 
-  --text-title: clamp(1.625rem, 1.3rem + 1.2vw, 2.125rem);
+  /* ---------- Text sizes ---------- */
+  --text-title: 2rem;                  /* text-title: page titles */
   --text-title--line-height: 1.15;
-  --text-title--letter-spacing: -0.015em;
-  --text-title--font-weight: 400;
-
-  --text-heading: 1.1875rem;
+  --text-heading: 1.1875rem;           /* text-heading: section and dialog headings */
   --text-heading--line-height: 1.3;
-  --text-heading--letter-spacing: -0.005em;
-  --text-heading--font-weight: 400;
+
+
+  /* ---------- Colours: LIGHT mode ---------- */
+
+  /* Backgrounds */
+  --color-page: #ffffff;               /* behind everything */
+  --color-surface: #ffffff;            /* cards, panels, inputs, dialogs */
+  --color-surface-muted: #f8fafc;      /* hovered rows, subtle panels */
+  --color-surface-sunken: #f1f5f9;     /* placeholders, wells */
+  --color-surface-strong: #e2e8f0;     /* pressed / stronger grey */
+  --color-overlay: #02061866;          /* dims the page behind dialogs and panels */
+
+  /* Text */
+  --color-fg: #0f172b;                 /* main text, headings */
+  --color-fg-muted: #314158;           /* secondary text, labels */
+  --color-fg-subtle: #62748e;          /* hints, placeholders, small print */
+
+  /* Borders */
+  --color-line: #e2e8f0;               /* light borders and dividers */
+  --color-line-strong: #cad5e2;        /* input and button borders */
+
+  /* Accent: main buttons, links, selected things */
+  --color-accent: #00598a;             /* main button background */
+  --color-accent-hover: #0069a8;
+  --color-on-accent: #ffffff;          /* text on any coloured button */
+  --color-link: #00598a;               /* links */
+  --color-accent-soft: #f0f9ff;        /* selected background */
+  --color-accent-ink: #024a70;         /* text on accent-soft */
+  --color-accent-line: #0069a8;        /* selected borders, focus rings */
+
+  /* Danger (delete, errors, cards you don't have) */
+  --color-danger: #c70036;             /* text */
+  --color-danger-soft: #fff1f2;        /* background */
+  --color-danger-soft-strong: #ffe4e6; /* stronger background (hover) */
+  --color-danger-line: #ffccd3;        /* border */
+  --color-danger-solid: #c70036;       /* delete button */
+  --color-danger-hover: #ec003f;
+
+  /* Warning (not enough copies, unticked cards) */
+  --color-warning: #7b3306;
+  --color-warning-soft: #fffbeb;
+  --color-warning-soft-strong: #fee685;
+  --color-warning-line: #fee685;
+  --color-warning-solid: #fe9a00;
+
+  /* Success (done, collected, trade receive side) */
+  --color-success: #006045;
+  --color-success-soft: #ecfdf5;
+  --color-success-soft-strong: #d0fae5;
+  --color-success-line: #a4f4cf;
+  --color-success-solid: #007a55;
+  --color-success-hover: #009966;
+
+  /* The Add card button */
+  --color-special: #8a0194;
+  --color-special-hover: #a800b7;
+
+  /* Top bar */
+  --color-header: #1e2939;
+  --color-header-fg: #ffffff;
+  --color-header-muted: #6a7282;
+  --color-header-hover: #d1d5dc;
 }
 
+
+/* ---------- Colours: DARK mode (same names, in the same order) ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;   /* scrollbars, dropdowns and date pickers go dark too */
+
+  --color-page: #020618;
+  --color-surface: #0f172b;
+  --color-surface-muted: #1d293d99;
+  --color-surface-sunken: #1d293d;
+  --color-surface-strong: #314158;
+  --color-overlay: #00000099;
+
+  --color-fg: #f1f5f9;
+  --color-fg-muted: #cad5e2;
+  --color-fg-subtle: #90a1b9;
+
+  --color-line: #1d293d;
+  --color-line-strong: #45556c;
+
+  --color-accent: #0069a8;
+  --color-accent-hover: #0084d1;
+  --color-on-accent: #ffffff;
+  --color-link: #74d4ff;
+  --color-accent-soft: #052f4ab2;
+  --color-accent-ink: #dff2fe;
+  --color-accent-line: #00bcff;
+
+  --color-danger: #ffa1ad;
+  --color-danger-soft: #4d021880;
+  --color-danger-soft-strong: #8b083699;
+  --color-danger-line: #a50036;
+  --color-danger-solid: #c70036;
+  --color-danger-hover: #ec003f;
+
+  --color-warning: #fee685;
+  --color-warning-soft: #46190180;
+  --color-warning-soft-strong: #7b3306b2;
+  --color-warning-line: #7b3306;
+  --color-warning-solid: #ffb900;
+
+  --color-success: #5ee9b5;
+  --color-success-soft: #002c2280;
+  --color-success-soft-strong: #004f3b99;
+  --color-success-line: #006045;
+  --color-success-solid: #007a55;
+  --color-success-hover: #009966;
+
+  --color-special: #a800b7;
+  --color-special-hover: #c800de;
+
+  --color-header: #0f172b;
+  --color-header-fg: #f1f5f9;
+  --color-header-muted: #62748e;
+  --color-header-hover: #cad5e2;
+}
+
+
+/* ---------- Other values ---------- */
+:root {
+  --raduis-card-corner-crop: 1.05vw;   /* card image corners: rounded-(--raduis-card-corner-crop) */
+}
+
+
+/* ---------- Custom classes ---------- */
+
+/* eyebrow: small uppercase labels like "GROUPS". Add a size: eyebrow text-xs */
 @utility eyebrow {
   font-family: var(--font-sans);
   font-weight: 600;
@@ -52,197 +172,21 @@
   text-transform: uppercase;
 }
 
-@theme inline {
-  /* Backgrounds */
-  --color-page: var(--qw-page);                     /* behind everything */
-  --color-surface: var(--qw-surface);               /* panels, cards, inputs, dialogs */
-  --color-surface-muted: var(--qw-surface-muted);   /* hovered rows, subtle panels */
-  --color-surface-sunken: var(--qw-surface-sunken); /* placeholders, wells */
-  --color-surface-strong: var(--qw-surface-strong); /* pressed / strong neutral */
-  --color-overlay: var(--qw-overlay);               /* dimmed page behind dialogs and panels */
 
-  /* Text */
-  --color-fg: var(--qw-fg);                         /* headings, main text */
-  --color-fg-muted: var(--qw-fg-muted);             /* secondary text, labels */
-  --color-fg-subtle: var(--qw-fg-subtle);           /* hints, placeholders, metadata */
-
-  /* Borders */
-  --color-line: var(--qw-line);                     /* dividers, light borders */
-  --color-line-strong: var(--qw-line-strong);       /* input and button borders */
-  --raduis-card-corner-crop: 1.05vw;
-
-  /* Accent: primary buttons, links, selection */
-  --color-accent: var(--qw-accent);                 /* primary button fill */
-  --color-accent-hover: var(--qw-accent-hover);
-  --color-on-accent: var(--qw-on-accent);           /* text on any solid colour fill */
-  --color-link: var(--qw-link);                     /* links and text buttons */
-  --color-accent-ink: var(--qw-accent-ink);         /* text on accent-soft */
-  --color-accent-soft: var(--qw-accent-soft);       /* selected / highlighted background */
-  --color-accent-line: var(--qw-accent-line);       /* selected borders, focus rings */
-
-  /* Status: text, soft background, stronger soft background, border, solid fill (+ hover) */
-  --color-danger: var(--qw-danger);
-  --color-danger-soft: var(--qw-danger-soft);
-  --color-danger-soft-strong: var(--qw-danger-soft-strong);
-  --color-danger-line: var(--qw-danger-line);
-  --color-danger-solid: var(--qw-danger-solid);
-  --color-danger-hover: var(--qw-danger-hover);
-
-  --color-warning: var(--qw-warning);
-  --color-warning-soft: var(--qw-warning-soft);
-  --color-warning-soft-strong: var(--qw-warning-soft-strong);
-  --color-warning-line: var(--qw-warning-line);
-  --color-warning-solid: var(--qw-warning-solid);
-
-  --color-success: var(--qw-success);
-  --color-success-soft: var(--qw-success-soft);
-  --color-success-soft-strong: var(--qw-success-soft-strong);
-  --color-success-line: var(--qw-success-line);
-  --color-success-solid: var(--qw-success-solid);
-  --color-success-hover: var(--qw-success-hover);
-
-  /* The add-card button's own colour */
-  --color-special: var(--qw-special);
-  --color-special-hover: var(--qw-special-hover);
-
-  /* Top bar (dark in both themes) */
-  --color-header: var(--qw-header);
-  --color-header-fg: var(--qw-header-fg);
-  --color-header-muted: var(--qw-header-muted);
-  --color-header-hover: var(--qw-header-hover);
-}
-
-:root {
-  color-scheme: light;
-
-  --qw-page: var(--color-white);
-  --qw-surface: var(--color-white);
-  --qw-surface-muted: var(--color-slate-50);
-  --qw-surface-sunken: var(--color-slate-100);
-  --qw-surface-strong: var(--color-slate-200);
-  --qw-overlay: oklch(12.9% 0.042 264.695 / 0.4);
-
-  --qw-fg: var(--color-slate-900);
-  --qw-fg-muted: var(--color-slate-700);
-  --qw-fg-subtle: var(--color-slate-500);
-
-  --qw-line: var(--color-slate-200);
-  --qw-line-strong: var(--color-slate-300);
-
-  --qw-accent: var(--color-sky-800);
-  --qw-accent-hover: var(--color-sky-700);
-  --qw-on-accent: var(--color-white);
-  --qw-link: var(--color-sky-800);
-  --qw-accent-ink: var(--color-sky-900);
-  --qw-accent-soft: var(--color-sky-50);
-  --qw-accent-line: var(--color-sky-700);
-
-  --qw-danger: var(--color-rose-700);
-  --qw-danger-soft: var(--color-rose-50);
-  --qw-danger-soft-strong: var(--color-rose-100);
-  --qw-danger-line: var(--color-rose-200);
-  --qw-danger-solid: var(--color-rose-700);
-  --qw-danger-hover: var(--color-rose-600);
-
-  --qw-warning: var(--color-amber-900);
-  --qw-warning-soft: var(--color-amber-50);
-  --qw-warning-soft-strong: var(--color-amber-200);
-  --qw-warning-line: var(--color-amber-200);
-  --qw-warning-solid: var(--color-amber-500);
-
-  --qw-success: var(--color-emerald-800);
-  --qw-success-soft: var(--color-emerald-50);
-  --qw-success-soft-strong: var(--color-emerald-100);
-  --qw-success-line: var(--color-emerald-200);
-  --qw-success-solid: var(--color-emerald-700);
-  --qw-success-hover: var(--color-emerald-600);
-
-  --qw-special: var(--color-fuchsia-800);
-  --qw-special-hover: var(--color-fuchsia-700);
-
-  --qw-header: var(--color-gray-800);
-  --qw-header-fg: var(--color-white);
-  --qw-header-muted: var(--color-gray-500);
-  --qw-header-hover: var(--color-gray-300);
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;   /* native controls (scrollbars, selects, date pickers) go dark too */
-
-  --qw-page: var(--color-slate-950);
-  --qw-surface: var(--color-slate-900);
-  --qw-surface-muted: oklch(27.9% 0.041 260.031 / 0.6);  /* slate-800, 60% */
-  --qw-surface-sunken: var(--color-slate-800);
-  --qw-surface-strong: var(--color-slate-700);
-  --qw-overlay: oklch(0% 0 0 / 0.6);
-
-  --qw-fg: var(--color-slate-100);
-  --qw-fg-muted: var(--color-slate-300);
-  --qw-fg-subtle: var(--color-slate-400);
-
-  --qw-line: var(--color-slate-800);
-  --qw-line-strong: var(--color-slate-600);
-
-  --qw-accent: var(--color-sky-700);
-  --qw-accent-hover: var(--color-sky-600);
-  --qw-on-accent: var(--color-white);
-  --qw-link: var(--color-sky-300);
-  --qw-accent-ink: var(--color-sky-100);
-  --qw-accent-soft: oklch(29.3% 0.066 243.157 / 0.7);    /* sky-950, 70% */
-  --qw-accent-line: var(--color-sky-400);
-
-  --qw-danger: var(--color-rose-300);
-  --qw-danger-soft: oklch(27.1% 0.105 12.094 / 0.5);     /* rose-950, 50% */
-  --qw-danger-soft-strong: oklch(41% 0.159 10.272 / 0.6); /* rose-900, 60% */
-  --qw-danger-line: var(--color-rose-800);
-  --qw-danger-solid: var(--color-rose-700);
-  --qw-danger-hover: var(--color-rose-600);
-
-  --qw-warning: var(--color-amber-200);
-  --qw-warning-soft: oklch(27.9% 0.077 45.635 / 0.5);    /* amber-950, 50% */
-  --qw-warning-soft-strong: oklch(41.4% 0.112 45.904 / 0.7); /* amber-900, 70% */
-  --qw-warning-line: var(--color-amber-900);
-  --qw-warning-solid: var(--color-amber-400);
-
-  --qw-success: var(--color-emerald-300);
-  --qw-success-soft: oklch(26.2% 0.051 172.552 / 0.5);   /* emerald-950, 50% */
-  --qw-success-soft-strong: oklch(37.8% 0.077 168.94 / 0.6); /* emerald-900, 60% */
-  --qw-success-line: var(--color-emerald-800);
-  --qw-success-solid: var(--color-emerald-700);
-  --qw-success-hover: var(--color-emerald-600);
-
-  --qw-special: var(--color-fuchsia-700);
-  --qw-special-hover: var(--color-fuchsia-600);
-
-  --qw-header: var(--color-slate-900);
-  --qw-header-fg: var(--color-slate-100);
-  --qw-header-muted: var(--color-slate-500);
-  --qw-header-hover: var(--color-slate-300);
-}
-
+/* ---------- Page-wide defaults ---------- */
 @layer base {
-  /* A border with no colour class uses the line colour (Tailwind's own default is the text colour,
-     which would be bright white in dark mode) */
-  *, ::before, ::after, ::backdrop, ::file-selector-button {
-    border-color: var(--qw-line);
-  }
-
   body {
-    background-color: var(--qw-page);
-    color: var(--qw-fg);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* Every digit the same width, so prices, counts and quantities line up in lists */
-    font-variant-numeric: tabular-nums;
+    background-color: var(--color-page);
+    color: var(--color-fg);
   }
 
   h1, h2, h3 {
     font-family: var(--font-display);
-    font-variant-numeric: normal;
-    text-wrap: balance;   /* long headings break into even lines instead of leaving one word alone */
   }
 
-  p {
-    text-wrap: pretty;
+  /* A border with no colour class uses the line colour
+     (Tailwind's default is the text colour, which is bright white in dark mode) */
+  *, ::before, ::after {
+    border-color: var(--color-line);
   }
 }
