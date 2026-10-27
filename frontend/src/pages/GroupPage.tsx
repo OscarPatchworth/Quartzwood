@@ -164,7 +164,7 @@ export default function GroupPage({ groupId }: GroupPageProps) {
 
     return (
         <>
-        <div className='bg-violet-300 px-10 py-5 sm:px-8'>
+        <div className='bg-banner-group px-10 py-5 sm:px-8'>
             <div className='flex flex-wrap items-center justify-between gap-4'>
                 {/* Back above the title, tight together (the collection itself has nothing to go back to) */}
                 <div className='flex min-w-0 flex-col gap-1'>

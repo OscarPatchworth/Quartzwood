@@ -97,6 +97,14 @@
   --color-header-fg: #ffffff;
   --color-header-muted: #6a7282;
   --color-header-hover: #d1d5dc;
+
+  /* Page banners: the coloured band under the top bar with the page title */
+  --color-banner-box: #314158;         /* Box page */
+  --color-banner-group: #c4b4ff;       /* Group and Collection pages */
+
+  /* Footer bar: fixed to the bottom of the Box page (buttons, or the add bar on small screens) */
+  --color-footer: #1d293d;
+  --color-footer-fg: #ffffff;          /* text on it, e.g. the add bar's Done button */
 }
 
 
@@ -153,6 +161,12 @@
   --color-header-fg: #f1f5f9;
   --color-header-muted: #62748e;
   --color-header-hover: #cad5e2;
+
+  --color-banner-box: #314158;
+  --color-banner-group: #4d179a;       /* darker, so the light title text stays readable */
+
+  --color-footer: #1d293d;
+  --color-footer-fg: #f1f5f9;
 }
 
 

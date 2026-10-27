@@ -318,7 +318,7 @@ export default function BoxPage() {
         )}    
         
         <div >
-            <div className='bg-slate-700 p-4 mb-5 '>
+            <div className='bg-banner-box p-4 mb-5 '>
                 <div className='flex flex-wrap items-center justify-between gap-4'>
                     {/* Back above the title, tight together: no taller than the two button rows beside it */}
                     <div className='flex min-w-0 flex-col gap-1'>
@@ -350,7 +350,7 @@ export default function BoxPage() {
                 menus open upwards: data-drop="up"), the add bar on compact ones. While you use the add bar it
                 jumps to the TOP of the screen, over the header, so its suggestions have room to open below it */}
             {isWide ? (
-                <div data-drop="up" className="fixed inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 bg-slate-800 px-4 py-2 sm:px-8">
+                <div data-drop="up" className="fixed inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 bg-footer px-4 py-2 sm:px-8">
                     {viewButtons}
                     <span className="mx-1 h-6 w-px bg-line-strong" aria-hidden="true" />
                     {editButtons}
@@ -359,7 +359,7 @@ export default function BoxPage() {
                 <>
                     {isAddBarRaised && <div className="fixed inset-0 z-40 bg-overlay" onClick={lowerAddBar} aria-hidden="true" />}
                     <div
-                        className={`fixed inset-x-0 flex items-center gap-2 bg-slate-800 p-2 ${isAddBarRaised ? "top-0 z-50 shadow-lg" : "bottom-0 z-10"}`}
+                        className={`fixed inset-x-0 flex items-center gap-2 bg-footer p-2 ${isAddBarRaised ? "top-0 z-50 shadow-lg" : "bottom-0 z-10"}`}
                         onFocus={() => setIsAddBarRaised(true)}
                         // Tabbing out of it lowers it too (clicks elsewhere are handled by the dimmed backdrop)
                         onBlur={event => {
@@ -369,7 +369,7 @@ export default function BoxPage() {
                         <div className="min-w-0 flex-1">{addBar}</div>
                         {isAddBarRaised && (
                             <button type="button" onClick={lowerAddBar}
-                                className="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-header-fg hover:bg-header-muted/30">
+                                className="shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-footer-fg hover:bg-footer-fg/15">
                                 Done
                             </button>
                         )}
