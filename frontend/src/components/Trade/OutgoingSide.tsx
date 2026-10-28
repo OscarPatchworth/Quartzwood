@@ -12,7 +12,7 @@ interface OutgoingSideProps {
 export function OutgoingSide({ outgoing, total, onRemove }: OutgoingSideProps) {
     return (
         <section aria-labelledby="outgoing-title" className="rounded-lg border border-danger-line bg-danger-soft/40 p-4">
-            <h2 id="outgoing-title" className="mb-3 flex items-baseline justify-between text-heading text-fg">
+            <h2 id="outgoing-title" className="mb-3 flex items-baseline justify-between text-heading text-fg-heading">
                 You give
                 <span className="text-danger">{formatPrice(total)}</span>
             </h2>

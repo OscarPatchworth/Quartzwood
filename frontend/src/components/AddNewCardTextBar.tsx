@@ -188,7 +188,7 @@ export function AddNewCardTextBar({
             {showDropdown && (
                 // While a newer lookup runs, the old suggestions stay visible but dimmed and unclickable,
                 // so nothing flickers and you can't add a card for text you've already changed
-                <div className={`absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-lg border border-line bg-surface shadow-lg ${isSearching ? "pointer-events-none opacity-60" : ""}`}>
+                <div className={`absolute right-0 top-full z-50 mt-2 w-full overflow-hidden rounded-lg border border-line bg-panel shadow-lg ${isSearching ? "pointer-events-none opacity-60" : ""}`}>
                     {addError || lookupError ? (
                         <p role="alert" className="px-4 py-3 text-sm font-semibold text-danger">{addError ?? lookupError}</p>
                     ) : isAdding ? (

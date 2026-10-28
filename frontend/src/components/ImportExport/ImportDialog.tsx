@@ -64,7 +64,7 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
             <button
                 type="button"
                 onClick={open}
-                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted"
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-button-line bg-button px-4 py-2 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover"
             >
                 Import
             </button>
@@ -80,12 +80,12 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                         aria-labelledby="import-title"
                         onMouseDown={event => event.stopPropagation()}
                         onSubmit={runImport}
-                        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-surface p-6 shadow-xl"
+                        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-panel p-6 shadow-xl"
                     >
-                        <h2 id="import-title" className="mb-4 text-heading text-fg">Import cards into this box</h2>
+                        <h2 id="import-title" className="mb-4 text-heading text-fg-heading">Import cards into this box</h2>
 
                         <div className="mb-2 flex items-center gap-3">
-                            <label className="cursor-pointer rounded-md border border-line-strong px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-muted">
+                            <label className="cursor-pointer rounded-md border border-button-line bg-button px-3 py-1.5 text-sm font-medium text-button-fg hover:bg-button-hover">
                                 Choose file...
                                 <input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={chooseFile} className="sr-only" />
                             </label>
@@ -98,7 +98,7 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                             placeholder={PLACEHOLDER}
                             aria-label="Cards to import"
                             rows={10}
-                            className="w-full resize-y rounded-md border border-line-strong px-3 py-2 font-mono text-xs outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
+                            className="w-full resize-y rounded-md border border-input-line bg-input px-3 py-2 font-mono text-xs outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
                         />
 
                         {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
@@ -133,7 +133,7 @@ export function ImportDialog({ boxId, onImported }: ImportDialogProps) {
                                 type="button"
                                 disabled={isImporting}
                                 onClick={() => setIsOpen(false)}
-                                className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
+                                className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50"
                             >
                                 {result ? "Close" : "Cancel"}
                             </button>

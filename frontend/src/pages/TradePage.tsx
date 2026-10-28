@@ -122,7 +122,7 @@ function TradeWorkspace({ userId, personalEntityId }: { userId: string, personal
     // Finishing would fail on a card the server can't find, so it has to be fixed (or removed) first
     const problemCount = quote.items.filter(item => item.error).length
     const canConfirm = !isEmpty && !quote.isPricing && problemCount === 0
-    const secondaryButton = "rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted disabled:opacity-50"
+    const secondaryButton = "rounded-lg border border-button-line bg-button px-4 py-2 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover disabled:opacity-50"
     const primaryButton = "rounded-lg bg-success-solid px-4 py-2 text-sm font-semibold text-on-accent shadow-sm hover:bg-success-hover disabled:cursor-not-allowed disabled:opacity-50"
 
     if (finished) {

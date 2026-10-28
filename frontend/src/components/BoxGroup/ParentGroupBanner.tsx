@@ -23,12 +23,12 @@ export function ParentGroupBanner({ parentGroup, onNavigate, onDropItem }: Paren
             className={`flex w-full items-center gap-3 rounded border border-dashed px-4 py-3 text-left transition md:col-span-2 ${
                 isOver
                     ? "border-accent-line bg-accent-soft ring-2 ring-accent-line/30"
-                    : "border-line-strong bg-surface-muted hover:bg-surface-sunken"
+                    : "border-boxgroup-line bg-boxgroup-parent text-boxgroup-fg hover:bg-boxgroup-hover"
             }`}
         >
-            <span className="text-heading text-fg-subtle" aria-hidden="true">↰</span>
+            <span className="text-heading text-boxgroup-fg-muted" aria-hidden="true">↰</span>
             <span className="min-w-0">
-                <span className="block eyebrow text-xs text-fg-subtle">{isOver ? 'Move up into' : 'Inside'}</span>
+                <span className="block eyebrow text-xs text-boxgroup-fg-muted">{isOver ? 'Move up into' : 'Inside'}</span>
                 <span className="block truncate text-heading">{name}</span>
             </span>
         </button>

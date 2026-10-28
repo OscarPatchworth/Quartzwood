@@ -258,7 +258,7 @@ export default function BoxPage() {
                     />
                 )}
                 {Number(c.count) > 1 && (
-                    <span className="absolute top-2 left-2 bg-surface/70 text-fg text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                    <span className="absolute top-2 left-2 bg-panel/70 text-fg text-s font-bold w-6 h-6 rounded-full flex items-center justify-center">
                         {c.count}
                     </span>
                 )}
@@ -293,7 +293,7 @@ export default function BoxPage() {
                 className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm disabled:opacity-50 ${
                     selection.isSelecting
                         ? "border-accent-line bg-accent-hover text-on-accent hover:bg-accent"
-                        : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
+                        : "border-button-line bg-button text-button-fg hover:bg-button-hover"
                 }`}
             >
                 {selection.isSelecting ? "Done" : "Select"}

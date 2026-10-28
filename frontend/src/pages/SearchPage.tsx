@@ -187,7 +187,7 @@ function CollectionSearch() {
             </div>
 
             {results.length > 0 && (
-                <ul className={`mt-4 max-w-4xl divide-y divide-line rounded-lg border border-line bg-surface ${isSearching ? "opacity-60" : ""}`}>
+                <ul className={`mt-4 max-w-4xl divide-y divide-line rounded-lg border border-line bg-panel ${isSearching ? "opacity-60" : ""}`}>
                     {results.map(result => (
                         <SearchResultRow key={`${result.boxId}-${result.ids[0]}`} result={result} onOpen={() => setOpenCard(singleCard(result))} />
                     ))}

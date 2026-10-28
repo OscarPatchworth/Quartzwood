@@ -15,7 +15,7 @@ interface LocationPickerProps {
     onChange: (next: Location) => void
 }
 
-const selectClassName = "rounded-lg border border-line-strong bg-surface px-2 py-2 text-sm text-fg-muted shadow-sm"
+const selectClassName = "rounded-lg border border-input-line bg-input px-2 py-2 text-sm text-fg-muted shadow-sm"
 
 // Two dropdowns: a group (the whole tree, each group indented under its parent), then a box in that group
 export function LocationPicker({ entityId, value, onChange }: LocationPickerProps) {

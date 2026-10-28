@@ -17,14 +17,14 @@ interface IncomingSideProps {
     onRemove: (key: string) => void
 }
 
-const selectClassName = "rounded border border-line-strong bg-surface px-1 py-0.5 text-xs text-fg"
+const selectClassName = "rounded border border-input-line bg-input px-1 py-0.5 text-xs text-fg"
 
 // Side 1, "You receive": cards typed in with the add bar (same suggestions and syntax as adding to a box),
 // with condition / foil / quantity editable here, each priced for its finish
 export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteError, onAdd, onChange, onRemove }: IncomingSideProps) {
     return (
         <section aria-labelledby="incoming-title" className="rounded-lg border border-success-line bg-success-soft/40 p-4">
-            <h2 id="incoming-title" className="mb-3 flex items-baseline justify-between text-heading text-fg">
+            <h2 id="incoming-title" className="mb-3 flex items-baseline justify-between text-heading text-fg-heading">
                 You receive
                 <span className={`text-success ${isPricing ? "opacity-50" : ""}`}>{formatPrice(total)}</span>
             </h2>
@@ -72,7 +72,7 @@ export function IncomingSide({ incoming, quoteItems, total, isPricing, quoteErro
                                             ×
                                             <input type="number" min={1} max={1000} aria-label="Quantity" value={quantity}
                                                 onChange={event => onChange(item.key, { quantity: Math.max(1, Math.floor(Number(event.target.value) || 1)) })}
-                                                className="w-14 rounded border border-line-strong px-1 py-0.5 text-xs" />
+                                                className="w-14 rounded border border-input-line bg-input px-1 py-0.5 text-xs" />
                                         </label>
                                     </div>
                                 </div>

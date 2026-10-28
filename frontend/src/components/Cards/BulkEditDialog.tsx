@@ -16,7 +16,7 @@ interface BulkEditDialogProps {
 const LEAVE = ""
 type YesNo = typeof LEAVE | "yes" | "no"
 
-const selectClassName = "w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm text-fg focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/20"
+const selectClassName = "w-full rounded-md border border-input-line bg-input px-2 py-1.5 text-sm text-fg focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/20"
 
 // Mass edit: only fields that don't change WHICH printing a card is. Every field starts as
 // "Leave as is", and only the ones you change are sent, so e.g. setting Condition keeps each card's own foil
@@ -92,9 +92,9 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                 aria-labelledby="bulk-edit-title"
                 onMouseDown={event => event.stopPropagation()}
                 onSubmit={save}
-                className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
+                className="w-full max-w-md rounded-lg bg-panel p-6 shadow-xl"
             >
-                <h2 id="bulk-edit-title" className="text-heading text-fg">Edit {countLabel}</h2>
+                <h2 id="bulk-edit-title" className="text-heading text-fg-heading">Edit {countLabel}</h2>
                 <p className="mb-4 mt-1 text-sm text-fg-subtle">
                     Only the fields you change are updated. Set, number and name can't be mass edited.
                     Removing a tag removes it whoever added it.
@@ -161,7 +161,7 @@ export function BulkEditDialog({ cardIds, onClose, onSaved }: BulkEditDialogProp
                         type="button"
                         disabled={isSaving}
                         onClick={onClose}
-                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
+                        className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50"
                     >
                         Cancel
                     </button>

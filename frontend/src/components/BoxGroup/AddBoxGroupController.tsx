@@ -82,9 +82,9 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
                         aria-labelledby="create-item-title"
                         onMouseDown={event => event.stopPropagation()}
                         onSubmit={createItem}
-                        className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl"
+                        className="w-full max-w-md rounded-lg bg-panel p-6 shadow-xl"
                     >
-                        <h2 id="create-item-title" className="mb-4 text-heading text-fg">
+                        <h2 id="create-item-title" className="mb-4 text-heading text-fg-heading">
                             Add {createType}
                         </h2>
                         <label htmlFor="create-item-name" className="mb-1 block text-sm font-medium text-fg-muted">
@@ -95,7 +95,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
                             autoFocus
                             value={name}
                             onChange={event => setName(event.target.value)}
-                            className="w-full rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
+                            className="w-full rounded-md border border-input-line bg-input px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
                         />
                         {errorMessage && <p role="alert" className="mt-3 text-sm text-danger">{errorMessage}</p>}
                         <div className="mt-6 flex justify-end gap-2">
@@ -103,7 +103,7 @@ export function AddBoxGroupController({ groupId, onBoxCreated, onGroupCreated }:
                                 type="button"
                                 disabled={isSaving}
                                 onClick={() => setCreateType(undefined)}
-                                className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
+                                className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50"
                             >
                                 Cancel
                             </button>

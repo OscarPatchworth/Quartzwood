@@ -45,9 +45,9 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
     const ordered = [...rows.filter(x => !x.isOver), ...rows.filter(x => x.isOver)]
 
     return (
-        <section aria-labelledby="options-title" className="@container rounded-lg border border-line bg-surface p-4">
+        <section aria-labelledby="options-title" className="@container rounded-lg border border-line bg-panel p-4">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h2 id="options-title" className="mr-auto text-heading text-fg">Trade options</h2>
+                <h2 id="options-title" className="mr-auto text-heading text-fg-heading">Trade options</h2>
                 <LocationPicker entityId={personalEntityId} value={location} onChange={setLocation} />
                 <FilterMenu value={filter} onChange={setFilter} />
                 <SortMenu value={{ sort, desc }} onChange={setSort} />
@@ -80,7 +80,7 @@ export function TradeOptions({ personalEntityId, pickedIds, remaining, onPick }:
                                 <div className="flex aspect-[5/7] w-full items-center justify-center rounded-lg bg-surface-sunken text-sm text-fg-subtle">{row.name}</div>
                             )}
                             {availableIds.length > 1 && (
-                                <span className="absolute left-2 top-9 flex h-6 min-w-6 items-center justify-center rounded-full bg-surface/80 px-1 text-sm font-bold text-fg">
+                                <span className="absolute left-2 top-9 flex h-6 min-w-6 items-center justify-center rounded-full bg-panel/80 px-1 text-sm font-bold text-fg">
                                     {availableIds.length}
                                 </span>
                             )}

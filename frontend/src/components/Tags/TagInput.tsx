@@ -57,7 +57,7 @@ export function TagInput({ id, label, value, onAdd, onRemove, suggestions, place
 
     return (
         <div className="relative">
-            <div className={`flex flex-wrap items-center gap-1 rounded-md border border-line-strong bg-surface px-2 py-1 focus-within:border-accent-line focus-within:ring-2 focus-within:ring-accent-line/20 ${disabled ? "opacity-60" : ""}`}>
+            <div className={`flex flex-wrap items-center gap-1 rounded-md border border-input-line bg-input px-2 py-1 focus-within:border-accent-line focus-within:ring-2 focus-within:ring-accent-line/20 ${disabled ? "opacity-60" : ""}`}>
                 {value.map(name => (
                     <span key={name} className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-ink">
                         {name}
@@ -91,7 +91,7 @@ export function TagInput({ id, label, value, onAdd, onRemove, suggestions, place
             </div>
 
             {isOpen && !disabled && (matches.length > 0 || isNew) && (
-                <ul role="listbox" className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto rounded-md border border-line bg-surface py-1 shadow-lg">
+                <ul role="listbox" className="absolute left-0 right-0 z-50 mt-1 max-h-56 overflow-y-auto rounded-md border border-line bg-panel py-1 shadow-lg">
                     {matches.map(name => (
                         <li key={name} role="option" aria-selected={false}>
                             <button

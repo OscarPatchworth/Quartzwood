@@ -69,9 +69,9 @@ export function MoveToGroupDialog({ item, entityId, onClose, onMoved }: MoveToGr
                 aria-labelledby="move-item-title"
                 onMouseDown={event => event.stopPropagation()}
                 onSubmit={move}
-                className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-surface p-6 shadow-xl"
+                className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-panel p-6 shadow-xl"
             >
-                <h2 id="move-item-title" className="mb-3 truncate text-heading text-fg">Move {item.name} to...</h2>
+                <h2 id="move-item-title" className="mb-3 truncate text-heading text-fg-heading">Move {item.name} to...</h2>
 
                 <ul className="min-h-40 overflow-y-auto pr-1">
                     {!groups && !errorMessage && <li className="py-6 text-center text-sm text-fg-subtle">Loading groups...</li>}
@@ -108,7 +108,7 @@ export function MoveToGroupDialog({ item, entityId, onClose, onMoved }: MoveToGr
                         type="button"
                         disabled={isMoving}
                         onClick={onClose}
-                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
+                        className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50"
                     >
                         Cancel
                     </button>

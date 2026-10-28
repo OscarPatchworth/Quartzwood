@@ -47,10 +47,10 @@ export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDe
                         if (e.key === "Escape") setIsEditing(false)
                     }}
                     aria-label="Divider name"
-                    className="rounded border border-line-strong bg-surface px-2 py-0.5 font-display text-heading outline-none ring-2 ring-accent-line/40"
+                    className="rounded border border-input-line bg-input px-2 py-0.5 font-display text-heading outline-none ring-2 ring-accent-line/40"
                 />
             ) : (
-                <h2 className="cursor-text text-heading text-fg" onDoubleClick={startEdit} title="Double-click to rename">
+                <h2 className="cursor-text text-heading text-fg-heading" onDoubleClick={startEdit} title="Double-click to rename">
                     {divider.name}
                 </h2>
             )}
@@ -63,7 +63,7 @@ export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDe
                     disabled={disabled || isFirst}
                     aria-label={`Move ${divider.name} towards the front`}
                     title="Move towards the front"
-                    className={`${iconButton} border-line-strong bg-surface hover:bg-surface-sunken`}
+                    className={`${iconButton} border-button-line bg-button hover:bg-button-hover`}
                 >
                     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                         <path d="M5 12l5-5 5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -75,7 +75,7 @@ export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDe
                     disabled={disabled || isLast}
                     aria-label={`Move ${divider.name} towards the back`}
                     title="Move towards the back"
-                    className={`${iconButton} border-line-strong bg-surface hover:bg-surface-sunken`}
+                    className={`${iconButton} border-button-line bg-button hover:bg-button-hover`}
                 >
                     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                         <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />

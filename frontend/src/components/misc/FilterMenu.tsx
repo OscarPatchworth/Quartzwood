@@ -11,7 +11,7 @@ interface FilterMenuProps {
 // What's typed but not applied yet, per range key; text, so a half-typed or empty box is allowed
 type Drafts = Record<Exclude<keyof CardFilter, "tags">, string>
 
-const inputClassName = "w-24 rounded-md border border-line-strong px-2 py-1.5 text-sm text-fg focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/20"
+const inputClassName = "w-24 rounded-md border border-input-line bg-input px-2 py-1.5 text-sm text-fg focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/20"
 
 // "Filter" button + dropdown with an "At least / At most" pair for each range (mana value, price).
 // Applied with the Apply button or Enter (not on every keystroke: typing "10" shouldn't load the cards for
@@ -73,7 +73,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                 className={`inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold shadow-sm ${
                     isActive
                         ? "border-accent-line bg-accent-soft text-accent-ink hover:bg-accent-soft"
-                        : "border-line-strong bg-surface text-fg-muted hover:bg-surface-muted"
+                        : "border-button-line bg-button text-button-fg hover:bg-button-hover"
                 }`}
             >
                 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
@@ -83,7 +83,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
             </summary>
             <form
                 onSubmit={apply}
-                className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-72 rounded-lg border border-line bg-surface p-4 shadow-lg"
+                className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-72 rounded-lg border border-line bg-panel p-4 shadow-lg"
             >
                 {FilterRanges.map(range => (
                     <fieldset key={range.label} className="mb-4">
@@ -134,7 +134,7 @@ export function FilterMenu({ value, onChange }: FilterMenuProps) {
                         <button
                             type="button"
                             onClick={clear}
-                            className="rounded-md border border-line-strong px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-muted"
+                            className="rounded-md border border-button-line bg-button px-3 py-1.5 text-sm font-medium text-button-fg hover:bg-button-hover"
                         >
                             Clear
                         </button>

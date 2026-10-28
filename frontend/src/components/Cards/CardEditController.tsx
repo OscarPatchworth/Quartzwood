@@ -205,7 +205,7 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
         <div className="relative mr-5 mt-2">
             <button
                 type="button"
-            className="absolute right-2 top-2 z-30 translate-x-1/2 -translate-y-1/2 rounded-xl border border-warning-line bg-warning-soft-strong px-4 py-2 text-sm font-semibold text-warning shadow-sm transition hover:bg-warning-soft-strong focus:outline-none focus:ring-2 focus:ring-warning-solid"
+            className="absolute right-2 top-2 z-30 translate-x-1/2 -translate-y-1/2 rounded-xl border border-cardinfo-edit-line bg-cardinfo-edit px-4 py-2 text-sm font-semibold text-cardinfo-edit-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-cardinfo-accent"
                 onClick={() => setEditMode(!editMode)}
             >
                 Edit
@@ -215,7 +215,7 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
                 <div className="absolute left-full top-12 z-10 flex -translate-x-2 flex-col gap-2">
                     <button
                         type="button"
-                        className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-accent-line/40 bg-accent-soft text-sm font-semibold text-accent-ink shadow-sm transition hover:bg-accent-soft focus:outline-none focus:ring-2 focus:ring-accent-line disabled:cursor-wait disabled:opacity-60"
+                        className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-cardinfo-update-line bg-cardinfo-update text-sm font-semibold text-cardinfo-update-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-cardinfo-update-fg disabled:cursor-wait disabled:opacity-60"
                         disabled={isSaving}
                         onClick={updateSelectedCards}
                     >
@@ -224,7 +224,7 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
 
                     <button
                         type="button"
-                        className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-danger-line bg-danger-soft-strong text-sm font-semibold text-danger shadow-sm transition hover:bg-danger-soft-strong focus:outline-none focus:ring-2 focus:ring-danger-solid disabled:cursor-wait disabled:opacity-60"
+                        className="flex h-16 w-9 items-center justify-center rounded-r-md border border-l-0 border-cardinfo-delete-line bg-cardinfo-delete text-sm font-semibold text-cardinfo-delete-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-cardinfo-delete-fg disabled:cursor-wait disabled:opacity-60"
                         disabled={isSaving}
                         onClick={deleteSelectedCards}
                     >
@@ -246,7 +246,7 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
                             value={displayCard.dividerId ?? ""}
                             disabled={isSaving}
                             onChange={e => void moveToDivider(e.target.value || null)}
-                            className="min-w-0 flex-1 rounded-md border border-line-strong bg-surface px-2 py-1 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20 disabled:opacity-60"
+                            className="min-w-0 flex-1 rounded-md border border-input-line bg-input px-2 py-1 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20 disabled:opacity-60"
                         >
                             <option value="">Not behind a divider</option>
                             {dividers.map(divider => <option key={divider.id} value={divider.id}>{divider.name}</option>)}
@@ -265,7 +265,7 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
                         type="button"
                         aria-label="Add a copy of this card"
                         title="Add a copy"
-                        className="absolute bottom-2 right-2 z-30 flex h-10 w-10 translate-x-1/2 translate-y-1/2 items-center justify-center rounded-xl border border-success-line bg-success-soft-strong text-2xl font-semibold leading-none text-success shadow-sm transition hover:bg-success-soft-strong focus:outline-none focus:ring-2 focus:ring-success-solid disabled:cursor-wait disabled:opacity-60"
+                        className="absolute bottom-2 right-2 z-30 flex h-10 w-10 translate-x-1/2 translate-y-1/2 items-center justify-center rounded-xl border border-cardinfo-add-line bg-cardinfo-add text-2xl font-semibold leading-none text-cardinfo-add-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-cardinfo-add-fg disabled:cursor-wait disabled:opacity-60"
                         disabled={isSaving}
                         onClick={addCardCopy}
                     >

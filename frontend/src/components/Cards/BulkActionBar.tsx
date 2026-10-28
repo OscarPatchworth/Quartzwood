@@ -62,7 +62,7 @@ export function BulkActionBar({ selection, onChanged, currentBoxId, bottomClassN
             <div
                 role="toolbar"
                 aria-label="Selected cards"
-                className={`fixed inset-x-0 ${bottomClassName} z-40 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 shadow-lg`}
+                className={`fixed inset-x-0 ${bottomClassName} z-40 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-xl border border-line bg-panel px-4 py-2 shadow-lg`}
             >
                 <span className="min-w-28 text-sm font-semibold text-fg" aria-live="polite">
                     {count === 0 ? "Select cards" : `${countLabel} selected`}

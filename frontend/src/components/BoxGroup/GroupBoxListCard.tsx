@@ -76,19 +76,19 @@ function ListRow({ id, name, subtitle, onNavigate, onDelete, isDeleting, onMove,
             className={`flex w-full items-center justify-between gap-3 rounded border p-4 shadow-sm transition cursor-pointer ${
                 isOver
                     ? "border-accent-line bg-accent-soft ring-2 ring-accent-line/30"
-                    : "border-line-strong bg-surface hover:bg-surface-sunken"
+                    : "border-boxgroup-line bg-boxgroup text-boxgroup-fg hover:bg-boxgroup-hover"
             } ${dragItem ? "active:cursor-grabbing" : ""} ${isDragging ? "opacity-50" : ""}`}
         >
             <div className="flex min-w-0 items-center gap-3">
                 {/* Grip dots: a hint that the row can be dragged */}
                 {dragItem && (
-                    <svg viewBox="0 0 10 16" aria-hidden="true" className="h-4 w-2.5 shrink-0 cursor-grab fill-fg-subtle">
+                    <svg viewBox="0 0 10 16" aria-hidden="true" className="h-4 w-2.5 shrink-0 cursor-grab fill-boxgroup-fg-muted">
                         {[2, 8, 14].flatMap(y => [<circle key={`a${y}`} cx="2" cy={y} r="1.5" />, <circle key={`b${y}`} cx="8" cy={y} r="1.5" />])}
                     </svg>
                 )}
                 <div className="min-w-0">
-                    <h2 className="truncate text-heading">{name}</h2>
-                    <p className="text-sm text-fg-subtle">{isOver ? `Move into ${name}` : subtitle}</p>
+                    <h2 className="truncate text-heading text-boxgroup-fg">{name}</h2>
+                    <p className="text-sm text-boxgroup-fg-muted">{isOver ? `Move into ${name}` : subtitle}</p>
                 </div>
             </div>
             <div className="flex shrink-0 self-stretch items-center gap-2">
@@ -97,7 +97,7 @@ function ListRow({ id, name, subtitle, onNavigate, onDelete, isDeleting, onMove,
                         type="button"
                         onClick={e => { e.stopPropagation(); onMove() }}
                         aria-label={`Move ${name}`}
-                        className="inline-flex h-9 items-center justify-center rounded border border-line-strong bg-surface px-3 text-sm font-semibold text-fg-muted transition hover:bg-surface-muted"
+                        className="inline-flex h-9 items-center justify-center rounded border border-button-line bg-button px-3 text-sm font-semibold text-button-fg transition hover:bg-button-hover"
                     >
                         Move
                     </button>

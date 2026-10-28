@@ -17,7 +17,7 @@ interface SearchInputProps {
 // The search box used by both the collection search page and the add-card bar, so they look and feel the same
 export function SearchInput({ id, value, onChange, placeholder, label, isSearching = false, autoFocus, children }: SearchInputProps) {
     return (
-        <div className="flex items-center gap-2 rounded-xl border border-line bg-surface p-2 shadow-sm transition focus-within:border-accent-line focus-within:ring-4 focus-within:ring-accent-line/10">
+        <div className="flex items-center gap-2 rounded-xl border border-line bg-input p-2 shadow-sm transition focus-within:border-accent-line focus-within:ring-4 focus-within:ring-accent-line/10">
             <span aria-hidden="true" className="pl-2 text-fg-subtle">
                 {isSearching ? (
                     <svg viewBox="0 0 20 20" className="size-4 animate-spin">

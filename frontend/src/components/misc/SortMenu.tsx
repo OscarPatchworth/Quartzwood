@@ -26,14 +26,14 @@ export function SortMenu({ value, onChange }: SortMenuProps) {
             <details ref={menu} className="relative">
                 <summary
                     title="Sort cards"
-                    className="inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-l-lg border border-line-strong bg-surface px-3 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted"
+                    className="inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-l-lg border border-button-line bg-button px-3 py-2 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover"
                 >
                     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                         <path d="M3 5h14M5 10h10M8 15h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                     </svg>
                     <span><span className="sr-only">Sort by </span>{current.label}</span>
                 </summary>
-                <ul className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-44 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg">
+                <ul className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-44 overflow-hidden rounded-lg border border-line bg-panel py-1 shadow-lg">
                     {CardSortOptions.map(option => (
                         <li key={option.value}>
                             <button
@@ -55,7 +55,7 @@ export function SortMenu({ value, onChange }: SortMenuProps) {
                 onClick={() => onChange({ ...value, desc: !value.desc })}
                 title={value.desc ? "Descending: click for ascending" : "Ascending: click for descending"}
                 aria-label={value.desc ? "Sorted descending, switch to ascending" : "Sorted ascending, switch to descending"}
-                className="-ml-px inline-flex min-h-10 items-center rounded-r-lg border border-line-strong bg-surface px-2.5 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted"
+                className="-ml-px inline-flex min-h-10 items-center rounded-r-lg border border-button-line bg-button px-2.5 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover"
             >
                 {value.desc ? "↓" : "↑"}
             </button>

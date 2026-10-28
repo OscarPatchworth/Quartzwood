@@ -7,7 +7,7 @@ interface CardEditFormProps {
     onChange: (updatedCard: CardDto) => void
 }
 
-const inputClassName = "w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm text-fg focus:border-warning-solid focus:outline-none focus:ring-2 focus:ring-warning-line"
+const inputClassName = "w-full rounded-md border border-input-line bg-input px-2 py-1.5 text-sm text-fg focus:border-cardinfo-accent focus:outline-none focus:ring-2 focus:ring-cardinfo-line"
 export function CardEditForm({ card, onChange }: CardEditFormProps) {
     if (!card) {
         return <LoadingIndicator />
@@ -19,35 +19,35 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
 
     return (
     <div className="p-1">
-        <div className="rounded-lg border border-warning-line bg-warning-soft/70 p-4 shadow-[0_2px_8px_rgba(120,53,15,0.12)]">
-            <div className="mb-3 border-b border-warning-line pb-3">
+        <div className="rounded-lg border border-cardinfo-line bg-cardinfo p-4 shadow-[0_2px_8px_rgba(120,53,15,0.12)]">
+            <div className="mb-3 border-b border-cardinfo-line pb-3">
                 <input
                     aria-label="Card name"
-                    className="w-full rounded-md border border-transparent bg-transparent px-1 py-1 font-display text-xl font-semibold text-fg focus:border-warning-line focus:bg-surface focus:outline-none focus:ring-2 focus:ring-warning-line"
+                    className="w-full rounded-md border border-transparent bg-transparent px-1 py-1 font-display text-xl font-semibold text-cardinfo-fg focus:border-cardinfo-line focus:bg-input focus:outline-none focus:ring-2 focus:ring-cardinfo-line"
                     value={card.name ?? ""}
                     onChange={event => updateField("name", event.target.value)}
                 />
-                <div className="mt-1 flex items-center gap-2 text-sm text-fg-muted">
+                <div className="mt-1 flex items-center gap-2 text-sm text-cardinfo-fg-muted">
                     <input
                         aria-label="Set number"
-                        className="w-10 rounded-md border border-transparent bg-transparent px-1 py-1 focus:border-warning-line focus:bg-surface focus:outline-none focus:ring-2 focus:ring-warning-line"
+                        className="w-10 rounded-md border border-transparent bg-transparent px-1 py-1 focus:border-cardinfo-line focus:bg-input focus:outline-none focus:ring-2 focus:ring-cardinfo-line"
                         value={card.setNumber ?? ""}
                         onChange={event => updateField("setNumber", event.target.value)}
                     />
                     <span>-</span>
                     <input
                         aria-label="Set code"
-                        className="w-10 rounded-md border border-transparent bg-transparent px-1 py-1 uppercase focus:border-warning-line focus:bg-surface focus:outline-none focus:ring-2 focus:ring-warning-line"
+                        className="w-10 rounded-md border border-transparent bg-transparent px-1 py-1 uppercase focus:border-cardinfo-line focus:bg-input focus:outline-none focus:ring-2 focus:ring-cardinfo-line"
                         value={card.setCode ?? ""}
                         onChange={event => updateField("setCode", event.target.value)}
                     />
                 </div>
             </div>
-            <table className="w-full border-collapse text-left text-sm text-fg-muted">
-                <tbody className="divide-y divide-warning-line
-                mb-3 border-b border-warning-line pb-3">
+            <table className="w-full border-collapse text-left text-sm text-cardinfo-fg-muted">
+                <tbody className="divide-y divide-cardinfo-line
+                mb-3 border-b border-cardinfo-line pb-3">
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Condition</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Condition</th>
                         <td className="px-3 py-2">
                             <select aria-label="Condition" className={inputClassName} value={card.condition} onChange={event => updateField("condition", event.target.value)}>
                                 {ConditionOptions.map(value => <option key={value}>{value}</option>)}
@@ -55,7 +55,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Foil</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Foil</th>
                         <td className="px-3 py-2">
                             <select aria-label="Foil type" className={inputClassName} value={card.foilType} onChange={event => updateField("foilType", event.target.value)}>
                                 {FoilTypeOptions.map(value => <option key={value}>{value}</option>)}
@@ -63,7 +63,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Stamp</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Stamp</th>
                         <td className="px-3 py-2">
                             <select aria-label="Stamp type" className={inputClassName} value={card.stampType} onChange={event => updateField("stampType", event.target.value)}>
                                 {StampTypeOptions.map(value => <option key={value}>{value}</option>)}
@@ -71,7 +71,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Language</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Language</th>
                         <td className="px-3 py-2">
                             <select aria-label="Language" className={inputClassName} value={card.language} onChange={event => updateField("language", event.target.value)}>
                                 {LanguageOptions.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}
@@ -79,39 +79,39 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         </td>
                     </tr>
                 </tbody>
-                <tbody className="divide-y divide-warning-line
-                mb-3 border-b border-warning-line pb-3">
+                <tbody className="divide-y divide-cardinfo-line
+                mb-3 border-b border-cardinfo-line pb-3">
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Proxy</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Proxy</th>
                         <td className="px-3 py-2">
                             <input
                                 aria-label="Proxy"
                                 type="checkbox"
-                                className="h-4 w-4 accent-warning-solid focus:ring-warning-solid"
+                                className="h-4 w-4 accent-cardinfo-accent focus:ring-cardinfo-accent"
                                 checked={card.isProxy}
                                 onChange={event => updateField("isProxy", event.target.checked)}
                             />
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">List</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">List</th>
                         <td className="px-3 py-2">
                             <input
                                 aria-label="List"
                                 type="checkbox"
-                                className="h-4 w-4 accent-warning-solid focus:ring-warning-solid"
+                                className="h-4 w-4 accent-cardinfo-accent focus:ring-cardinfo-accent"
                                 checked={card.isList}
                                 onChange={event => updateField("isList", event.target.checked)}
                             />
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Alter</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Alter</th>
                         <td className="px-3 py-2">
                             <input
                                 aria-label="Alter"
                                 type="checkbox"
-                                className="h-4 w-4 accent-warning-solid focus:ring-warning-solid"
+                                className="h-4 w-4 accent-cardinfo-accent focus:ring-cardinfo-accent"
                                 checked={Boolean(card.alterArtist)}
                                 onChange={event => updateField("alterArtist", event.target.checked ? card.alterArtist || "unknown" : null)}
                             />
@@ -119,7 +119,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                     </tr>
                     {card.alterArtist && (
                         <tr>
-                            <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Alter artist</th>
+                            <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Alter artist</th>
                             <td className="px-3 py-2">
                                 <input
                                     aria-label="Alter artist"
@@ -131,7 +131,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                         </tr>
                     )}
                     <tr>
-                        <th scope="row" className="px-3 py-2 font-semibold text-fg-muted">Notes</th>
+                        <th scope="row" className="px-3 py-2 font-semibold text-cardinfo-fg-muted">Notes</th>
                         <td className="px-3 py-2">
                             <textarea
                                 aria-label="Notes"

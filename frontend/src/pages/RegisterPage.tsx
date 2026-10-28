@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { getErrorMessage } from '../api/getErrorMessage'
 
-const inputClass = "w-full rounded-md border border-line-strong px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
+const inputClass = "w-full rounded-md border border-input-line bg-input px-3 py-2 text-sm outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
 const labelClass = "mb-1 block text-sm font-medium text-fg-muted"
 
 export default function RegisterPage() {
@@ -40,8 +40,8 @@ export default function RegisterPage() {
 
     return (
         <div className="flex justify-center p-8">
-            <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-line bg-surface p-6 shadow-sm">
-                <h1 className="mb-6 text-title text-fg">Create an account</h1>
+            <form onSubmit={submit} className="w-full max-w-sm rounded-lg border border-line bg-panel p-6 shadow-sm">
+                <h1 className="mb-6 text-title text-fg-heading">Create an account</h1>
 
                 <label htmlFor="register-name" className={labelClass}>Display name</label>
                 <input

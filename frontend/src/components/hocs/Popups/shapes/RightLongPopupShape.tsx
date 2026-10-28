@@ -7,7 +7,7 @@ interface PopupProps {
 // since there's no backdrop left to tap)
 export function RightLongPopupShape({ context, onClose }: PopupProps) {
     return (
-        <div role="dialog" aria-modal="true" className="fixed top-0 right-0 z-20 h-full w-[min(25rem,100vw)] overflow-y-auto bg-surface p-5 shadow-xl">
+        <div role="dialog" aria-modal="true" className="fixed top-0 right-0 z-20 h-full w-[min(25rem,100vw)] overflow-y-auto bg-cardpanel p-5 shadow-xl">
             <button
                 type="button"
                 onClick={onClose}

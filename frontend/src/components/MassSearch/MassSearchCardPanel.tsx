@@ -12,7 +12,7 @@ export function MassSearchCardPanel({ entry }: { entry: MassSearchEntryDto }) {
 
     return (
         <div>
-            <h2 className="mb-3 pr-6 text-heading text-fg">{entry.name}</h2>
+            <h2 className="mb-3 pr-6 text-heading text-fg-heading">{entry.name}</h2>
             {entry.scryfallId && (
                 <img src={cardImageUrl(entry.scryfallId)} alt="" className="mx-auto mb-3 w-56 rounded-lg shadow" />
             )}

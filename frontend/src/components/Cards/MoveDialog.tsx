@@ -104,7 +104,7 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                         isTarget
                             ? "border-accent-line bg-accent-soft ring-2 ring-accent-line/30"
                             : box.isOwned
-                                ? "border-line bg-surface hover:bg-surface-muted"
+                                ? "border-line bg-panel hover:bg-surface-muted"
                                 : "border-warning-line bg-warning-soft hover:bg-warning-soft-strong"
                     }`}
                 >
@@ -132,9 +132,9 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                 aria-labelledby="move-title"
                 onMouseDown={event => event.stopPropagation()}
                 onSubmit={move}
-                className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-surface p-6 shadow-xl"
+                className="flex max-h-[85vh] w-full max-w-md flex-col rounded-lg bg-panel p-6 shadow-xl"
             >
-                <h2 id="move-title" className="mb-3 text-heading text-fg">Move {countLabel} to...</h2>
+                <h2 id="move-title" className="mb-3 text-heading text-fg-heading">Move {countLabel} to...</h2>
 
                 <SearchInput
                     id="move-box-search"
@@ -206,7 +206,7 @@ export function MoveDialog({ cardIds, currentBoxId, onClose, onMoved }: MoveDial
                         type="button"
                         disabled={isMoving}
                         onClick={onClose}
-                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50"
+                        className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50"
                     >
                         Cancel
                     </button>

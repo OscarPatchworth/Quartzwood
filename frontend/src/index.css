@@ -4,9 +4,9 @@
    HOW THIS FILE WORKS
 
    1. Every "--color-NAME" in @theme makes Tailwind classes with that name:
-        --color-surface  ->  bg-surface, text-surface, border-surface, ring-surface ...
+        --color-panel  ->  bg-panel, text-panel, border-panel, ring-panel ...
       Change the hex value and everything using that class changes.
-      Opacity works like any Tailwind colour: bg-surface/80
+      Opacity works like any Tailwind colour: bg-panel/80
 
    2. Dark mode: the [data-theme="dark"] block further down gives the SAME names
       different values. The theme button in the header switches between them.
@@ -40,16 +40,27 @@
   /* ---------- Colours: LIGHT mode ---------- */
 
   /* Backgrounds */
-  --color-page: #ffffff;               /* behind everything */
-  --color-surface: #ffffff;            /* cards, panels, inputs, dialogs */
-  --color-surface-muted: #f8fafc;      /* hovered rows, subtle panels */
+  --color-page: #FFFBD3;               /* behind everything */
+  --color-panel: #FFFBD3;              /* dialogs, dropdown menus, side panels, result lists, login box */
+  --color-surface-muted: #D46A6A;      /* hovered rows, subtle panels */
   --color-surface-sunken: #f1f5f9;     /* placeholders, wells */
   --color-surface-strong: #e2e8f0;     /* pressed / stronger grey */
   --color-overlay: #02061866;          /* dims the page behind dialogs and panels */
 
+  /* Plain buttons: Cancel, Export, Import, Sort, Filter, Select, Move ...
+     (main buttons use the accent colours below) */
+  --color-button: #B00035;
+  --color-button-hover: #E40045;
+  --color-button-line: #cad5e2;        /* border */
+  --color-button-fg: #ffffff;          /* text */
+
+  /* Inputs: text boxes, dropdown selects, search bars, the tag box */
+  --color-input: #D0CB98;
+  --color-input-line: #cad5e2;         /* border (turns accent-line when typing in it) */
   /* Text */
-  --color-fg: #0f172b;                 /* main text, headings */
-  --color-fg-muted: #314158;           /* secondary text, labels */
+  --color-fg-heading: #AAA039;         /* headings: page titles, section and dialog headings (h1, h2, h3) */
+  --color-fg: #123652;                 /* body text */
+  --color-fg-muted: #983352;           /* secondary text, labels */
   --color-fg-subtle: #62748e;          /* hints, placeholders, small print */
 
   /* Borders */
@@ -89,22 +100,58 @@
   --color-success-hover: #009966;
 
   /* The Add card button */
-  --color-special: #8a0194;
-  --color-special-hover: #a800b7;
+  --color-special: #B00035;
+  --color-special-hover: #8A002A;
 
   /* Top bar */
-  --color-header: #1e2939;
-  --color-header-fg: #ffffff;
+  --color-header: #081C2C;
+  --color-header-fg: #AAA039;
   --color-header-muted: #6a7282;
   --color-header-hover: #d1d5dc;
 
   /* Page banners: the coloured band under the top bar with the page title */
-  --color-banner-box: #314158;         /* Box page */
-  --color-banner-group: #c4b4ff;       /* Group and Collection pages */
+  --color-banner-box: #132A3B;         /* Box page */
+  --color-banner-group: #132A3B;       /* Group and Collection pages */
 
   /* Footer bar: fixed to the bottom of the Box page (buttons, or the add bar on small screens) */
   --color-footer: #1d293d;
   --color-footer-fg: #ffffff;          /* text on it, e.g. the add bar's Done button */
+
+  /* Group page: the group and box rows in the Groups / Boxes lists */
+  --color-boxgroup: #AAA039;           /* background */
+  --color-boxgroup-hover: #807615;     /* background under the mouse */
+  --color-boxgroup-line: #cad5e2;      /* border */
+  --color-boxgroup-fg: #1C4462;        /* name */
+  --color-boxgroup-fg-muted: #324859;  /* "3 cards", "1 group, 2 boxes" */
+  --color-boxgroup-parent: #f8fafc;    /* the dashed "Inside ..." row above them */
+
+  /* Card side panel: opens when you click a card (Box and Search pages) */
+  --color-cardpanel: #FFFBD3;          /* the panel itself */
+  --color-cardinfo: #fffbebb3;         /* the details / edit box */
+  --color-cardinfo-line: #0B62A4;      /* its border and the lines between rows */
+  --color-cardinfo-fg: #AAA039;        /* card name */
+  --color-cardinfo-fg-muted: #9B8D00;  /* labels and values */
+  --color-cardinfo-accent: #E40045;    /* tick boxes, and the border of the field you're typing in */
+  --color-cardinfo-edit: #EBD502;      /* Edit button */
+  --color-cardinfo-edit-fg: #3E3900;
+  --color-cardinfo-edit-line: #3E3900;
+  --color-cardinfo-update: #356A92;    /* Update tab (edit mode) */
+  --color-cardinfo-update-fg: #021828;
+  --color-cardinfo-update-line: #021828;
+  --color-cardinfo-delete: #CB416B;    /* Delete tab (edit mode) */
+  --color-cardinfo-delete-fg: #380011;
+  --color-cardinfo-delete-line: #380011;
+  --color-cardinfo-add: #E3D548;       /* + (add a copy) button (edit mode) */
+  --color-cardinfo-add-fg: #6B6100;
+  --color-cardinfo-add-line: #6B6100;
+  /* The list of copies under it (when a box holds more than one) */
+  --color-cardcopy: #FFF7AA;
+  --color-cardcopy-hover: #807615;
+  --color-cardcopy-line: #718EA4;
+  --color-cardcopy-fg: #718EA4;
+  --color-cardcopy-selected: #AAA039;
+  --color-cardcopy-selected-fg: #721330;
+  --color-cardcopy-selected-line: #721330;
 }
 
 
@@ -112,27 +159,37 @@
 [data-theme="dark"] {
   color-scheme: dark;   /* scrollbars, dropdowns and date pickers go dark too */
 
-  --color-page: #020618;
-  --color-surface: #0f172b;
-  --color-surface-muted: #1d293d99;
-  --color-surface-sunken: #1d293d;
-  --color-surface-strong: #314158;
-  --color-overlay: #00000099;
+  /* Navy backgrounds (light mode's header/banner navy), cream text, gold headings, crimson buttons */
+  --color-page: #0D1B28;
+  --color-panel: #15283A;
+  --color-surface-muted: #6B2236;      /* crimson-tinted, like light mode's red hover rows */
+  --color-surface-sunken: #0A1520;
+  --color-surface-strong: #22384C;
+  --color-overlay: #000000a6;
 
-  --color-fg: #f1f5f9;
-  --color-fg-muted: #cad5e2;
-  --color-fg-subtle: #90a1b9;
+  --color-button: #9A002F;
+  --color-button-hover: #C2003B;
+  --color-button-line: #6E1A33;
+  --color-button-fg: #FFF3F6;
 
-  --color-line: #1d293d;
-  --color-line-strong: #45556c;
+  --color-input: #24301F;
+  --color-input-line: #5C5A2E;
 
-  --color-accent: #0069a8;
-  --color-accent-hover: #0084d1;
+  --color-fg-heading: #D4C95A;
+  --color-fg: #EDE8C8;
+  --color-fg-muted: #E58AA6;
+  --color-fg-subtle: #8FA3B8;
+
+  --color-line: #1F3448;
+  --color-line-strong: #35506A;
+
+  --color-accent: #0B62A4;
+  --color-accent-hover: #1474BD;
   --color-on-accent: #ffffff;
-  --color-link: #74d4ff;
-  --color-accent-soft: #052f4ab2;
-  --color-accent-ink: #dff2fe;
-  --color-accent-line: #00bcff;
+  --color-link: #6FB3E6;
+  --color-accent-soft: #0B62A433;
+  --color-accent-ink: #CFE6F7;
+  --color-accent-line: #4C9BD6;
 
   --color-danger: #ffa1ad;
   --color-danger-soft: #4d021880;
@@ -154,19 +211,52 @@
   --color-success-solid: #007a55;
   --color-success-hover: #009966;
 
-  --color-special: #a800b7;
-  --color-special-hover: #c800de;
+  --color-special: #C2003B;
+  --color-special-hover: #E40045;
 
-  --color-header: #0f172b;
-  --color-header-fg: #f1f5f9;
-  --color-header-muted: #62748e;
-  --color-header-hover: #cad5e2;
+  --color-header: #050E16;
+  --color-header-fg: #D4C95A;
+  --color-header-muted: #5E7184;
+  --color-header-hover: #F2EBB5;
 
-  --color-banner-box: #314158;
-  --color-banner-group: #4d179a;       /* darker, so the light title text stays readable */
+  --color-banner-box: #183247;
+  --color-banner-group: #183247;
 
-  --color-footer: #1d293d;
-  --color-footer-fg: #f1f5f9;
+  --color-footer: #081521;
+  --color-footer-fg: #EDE8C8;
+
+  --color-boxgroup: #5E5920;
+  --color-boxgroup-hover: #7A7329;
+  --color-boxgroup-line: #8F8840;
+  --color-boxgroup-fg: #FFF6C2;
+  --color-boxgroup-fg-muted: #D8D08A;
+  --color-boxgroup-parent: #12232F;
+
+  --color-cardpanel: #15283A;
+  --color-cardinfo: #0D1B28b3;
+  --color-cardinfo-line: #3C83BD;
+  --color-cardinfo-fg: #D4C95A;
+  --color-cardinfo-fg-muted: #C9BC45;
+  --color-cardinfo-accent: #FF3D73;
+  --color-cardinfo-edit: #CDB900;
+  --color-cardinfo-edit-fg: #2A2600;
+  --color-cardinfo-edit-line: #2A2600;
+  --color-cardinfo-update: #2C5A7D;
+  --color-cardinfo-update-fg: #E6F1FA;
+  --color-cardinfo-update-line: #6FA0C6;
+  --color-cardinfo-delete: #A3304F;
+  --color-cardinfo-delete-fg: #FFE6EE;
+  --color-cardinfo-delete-line: #E0708F;
+  --color-cardinfo-add: #BFB238;
+  --color-cardinfo-add-fg: #2E2900;
+  --color-cardinfo-add-line: #2E2900;
+  --color-cardcopy: #2A2812;
+  --color-cardcopy-hover: #4A4520;
+  --color-cardcopy-line: #5F7A90;
+  --color-cardcopy-fg: #A9C0D3;
+  --color-cardcopy-selected: #AAA039;
+  --color-cardcopy-selected-fg: #4A0C20;
+  --color-cardcopy-selected-line: #F08AA8;
 }
 
 
@@ -196,6 +286,7 @@
 
   h1, h2, h3 {
     font-family: var(--font-display);
+    color: var(--color-fg-heading);
   }
 
   /* A border with no colour class uses the line colour

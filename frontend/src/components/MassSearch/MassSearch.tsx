@@ -189,7 +189,7 @@ function ListInput({ text, onTextChange, onSearch, onBackToResults, isSearching,
                 rows={14}
                 spellCheck={false}
                 placeholder={"4 Lightning Bolt\n1 Sol Ring (C21) 263\nCounterspell\n\nPaste a deck list, or import a .txt / .csv export (Moxfield, ManaBox...)"}
-                className="w-full rounded-lg border border-line-strong bg-surface p-3 font-mono text-sm shadow-sm focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/30"
+                className="w-full rounded-lg border border-input-line bg-input p-3 font-mono text-sm shadow-sm focus:border-accent-line focus:outline-none focus:ring-2 focus:ring-accent-line/30"
             />
             <p className="mt-1 text-xs text-fg-subtle">
                 No number means 1 copy. Set codes and collector numbers are fine but ignored: any printing counts.
@@ -202,7 +202,7 @@ function ListInput({ text, onTextChange, onSearch, onBackToResults, isSearching,
                     className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-sm hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50">
                     {isSearching ? "Searching..." : "Find cards"}
                 </button>
-                <label className="cursor-pointer rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted focus-within:ring-2 focus-within:ring-accent-line/30">
+                <label className="cursor-pointer rounded-lg border border-button-line bg-button px-4 py-2 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover focus-within:ring-2 focus-within:ring-accent-line/30">
                     Import a file
                     <input type="file" accept=".txt,.csv,.dec,text/plain,text/csv" onChange={event => void importFile(event)} className="sr-only" />
                 </label>
@@ -242,7 +242,7 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOpti
     const shortCount = entries.filter(isShort).length
     const missingCount = entries.filter(entry => owned(entry) === 0).length
     const shown = show === "short" ? entries.filter(isShort) : entries
-    const secondaryButton = "rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted disabled:opacity-50"
+    const secondaryButton = "rounded-lg border border-button-line bg-button px-4 py-2 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover disabled:opacity-50"
 
     return (
         <div>
@@ -292,10 +292,10 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOpti
                 </details>
             )}
 
-            <div role="group" aria-label="Show" className="mb-2 inline-flex rounded-lg border border-line-strong bg-surface p-0.5 text-sm">
+            <div role="group" aria-label="Show" className="mb-2 inline-flex rounded-lg border border-button-line bg-button p-0.5 text-sm">
                 {([["all", `All (${entries.length})`], ["short", `Not enough (${shortCount})`]] as const).map(([value, label]) => (
                     <button key={value} type="button" aria-pressed={show === value} onClick={() => setShow(value)}
-                        className={`rounded-md px-3 py-1 font-medium ${show === value ? "bg-accent text-on-accent" : "text-fg-muted hover:bg-surface-muted"}`}>
+                        className={`rounded-md px-3 py-1 font-medium ${show === value ? "bg-accent text-on-accent" : "text-button-fg hover:bg-button-hover"}`}>
                         {label}
                     </button>
                 ))}
@@ -304,7 +304,7 @@ function Results({ draft, onWantedChange, onEdit, onSearchAgain, onClear, onOpti
             {shown.length === 0 ? (
                 <p className="text-sm text-fg-muted">You have enough copies of every card on the list.</p>
             ) : (
-                <ul className={`max-w-4xl divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface ${isSearching ? "opacity-60" : ""}`}>
+                <ul className={`max-w-4xl divide-y divide-line overflow-hidden rounded-lg border border-line bg-panel ${isSearching ? "opacity-60" : ""}`}>
                     {shown.map(entry => (
                         <EntryRow key={entry.name} entry={entry} wanted={wantedOf(draft, entry)}
                             onWantedChange={quantity => onWantedChange(entry.name, quantity)}
@@ -355,7 +355,7 @@ function EntryRow({ entry, wanted, onWantedChange, onOpen }: EntryRowProps) {
                 Want
                 <input type="number" min={0} max={1000} value={wanted}
                     onChange={event => onWantedChange(Math.max(0, Math.min(1000, Math.floor(Number(event.target.value) || 0))))}
-                    className="w-16 rounded-md border border-line-strong bg-surface px-2 py-1 text-right" />
+                    className="w-16 rounded-md border border-input-line bg-input px-2 py-1 text-right" />
             </label>
         </li>
     )

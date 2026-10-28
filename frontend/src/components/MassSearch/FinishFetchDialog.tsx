@@ -94,8 +94,8 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" onMouseDown={() => !isWorking && onClose()}>
             <form role="dialog" aria-modal="true" aria-labelledby="finish-fetch-title" onSubmit={submit}
                 onMouseDown={event => event.stopPropagation()}
-                className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
-                <h2 id="finish-fetch-title" className="text-heading text-fg">What should happen to the {countLabel}?</h2>
+                className="w-full max-w-md rounded-lg bg-panel p-6 shadow-xl">
+                <h2 id="finish-fetch-title" className="text-heading text-fg-heading">What should happen to the {countLabel}?</h2>
                 {untickedCount > 0 && (
                     <p className="mt-2 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning">
                         {untickedCount} {untickedCount === 1 ? "card isn't" : "cards aren't"} ticked: {untickedCount === 1 ? "it stays" : "they stay"} where {untickedCount === 1 ? "it is" : "they are"}.
@@ -111,12 +111,12 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
                                 Box name
                                 <input value={boxName} onChange={event => setBoxName(event.target.value)} maxLength={100} autoFocus
                                     placeholder="e.g. Deck: Mono Blue"
-                                    className="mt-1 block w-full rounded-md border border-line-strong px-2 py-1.5 text-sm" />
+                                    className="mt-1 block w-full rounded-md border border-input-line bg-input px-2 py-1.5 text-sm" />
                             </label>
                             <label className="block text-sm text-fg-muted">
                                 In
                                 <select value={groupId} onChange={event => setGroupId(event.target.value)}
-                                    className="mt-1 block w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm">
+                                    className="mt-1 block w-full rounded-md border border-input-line bg-input px-2 py-1.5 text-sm">
                                     {groups.length === 0 && <option value={rootGroupId}>Collection</option>}
                                     {groups.map(({ group, depth }) => (
                                         // Non-breaking spaces: normal spaces at the start of an <option> are collapsed
@@ -135,7 +135,7 @@ export function FinishFetchDialog({ cardIds, untickedCount, personalEntityId, ro
 
                 <div className="mt-6 flex justify-end gap-2">
                     <button type="button" disabled={isWorking} onClick={onClose}
-                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50">
+                        className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50">
                         Cancel
                     </button>
                     <button type="submit" disabled={!canSubmit}

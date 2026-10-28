@@ -42,8 +42,8 @@ export function FinishTradeDialog({ draft, onClose, onFinished }: FinishTradeDia
             onMouseDown={() => !isFinishing && onClose()}>
             <div role="dialog" aria-modal="true" aria-labelledby="finish-title"
                 onMouseDown={event => event.stopPropagation()}
-                className="w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
-                <h2 id="finish-title" className="text-heading text-fg">Finish this trade?</h2>
+                className="w-full max-w-md rounded-lg bg-panel p-6 shadow-xl">
+                <h2 id="finish-title" className="text-heading text-fg-heading">Finish this trade?</h2>
                 <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-fg-muted">
                     {receiving > 0 && <li>Add <strong>{receiving}</strong> {receiving === 1 ? "card" : "cards"} to 'Cards from Trade' in your collection</li>}
                     {giving > 0 && <li>Remove <strong>{giving}</strong> {giving === 1 ? "card" : "cards"} you're giving from your collection</li>}
@@ -59,7 +59,7 @@ export function FinishTradeDialog({ draft, onClose, onFinished }: FinishTradeDia
 
                 <div className="mt-6 flex justify-end gap-2">
                     <button type="button" disabled={isFinishing} onClick={onClose}
-                        className="rounded-md border border-line-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-muted disabled:opacity-50">
+                        className="rounded-md border border-button-line bg-button px-3 py-2 text-sm font-medium text-button-fg hover:bg-button-hover disabled:opacity-50">
                         Cancel
                     </button>
                     <button type="button" disabled={isFinishing} onClick={() => void finish()}

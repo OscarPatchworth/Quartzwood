@@ -22,13 +22,13 @@ export function ExportMenu({ kind, id }: ExportMenuProps) {
     return (
         // <details> gives an open/close dropdown without extra state
         <details ref={menu} className="relative">
-            <summary className="inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-muted">
+            <summary className="inline-flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-lg border border-button-line bg-button px-4 py-2 text-sm font-semibold text-button-fg shadow-sm hover:bg-button-hover">
                 Export
                 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                     <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
             </summary>
-            <ul className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-56 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg">
+            <ul className="absolute right-0 z-40 mt-1 up:bottom-full up:mt-0 up:mb-1 w-56 overflow-hidden rounded-lg border border-line bg-panel py-1 shadow-lg">
                 {formats.length === 0 && <li className="px-3 py-2 text-sm text-fg-subtle">Loading formats...</li>}
                 {formats.map(format => (
                     <li key={format.key}>

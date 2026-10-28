@@ -41,9 +41,9 @@ export function BoxPickList({ title, items, collected, onToggle, onTickAll, empt
     const allTicked = items.length > 0 && items.every(item => collected.has(item.key))
 
     return (
-        <section aria-label={title} className={`rounded-lg border bg-surface p-4 ${className}`}>
+        <section aria-label={title} className={`rounded-lg border bg-panel p-4 ${className}`}>
             <div className="mb-3 flex flex-wrap items-baseline gap-3">
-                <h2 className="mr-auto text-heading text-fg">{title}</h2>
+                <h2 className="mr-auto text-heading text-fg-heading">{title}</h2>
                 <span className="text-sm text-fg-muted" aria-live="polite">{collectedCount} of {total} collected</span>
                 {items.length > 0 && (
                     <button type="button" onClick={() => onTickAll(!allTicked)} className="text-sm font-semibold text-link hover:underline">
@@ -56,7 +56,7 @@ export function BoxPickList({ title, items, collected, onToggle, onTickAll, empt
 
             {byBox.map(({ boxId, boxName, path, items: boxItems }) => (
                 <div key={boxId} className="mb-4 last:mb-0">
-                    <h3 className="font-semibold text-fg">{boxName}</h3>
+                    <h3 className="font-semibold text-fg-heading">{boxName}</h3>
                     <p className="mb-1 text-xs text-fg-subtle">{path}</p>
                     <ul className="divide-y divide-line rounded-md border border-line">
                         {boxItems.map(item => {

@@ -58,10 +58,10 @@ export function CardDuplicateListSelect({ groupedCards, setSelectedCards }: Card
                     type="button"
                     aria-pressed={selectedCardIds.includes(c.id)}
                     onClick={() => toggleCard(c.id)}
-                    className={`flex w-2/3 items-center m-1 rounded-xl border px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-success-line ${
+                    className={`flex w-2/3 items-center m-1 rounded-xl border px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-cardcopy-selected-line ${
                         selectedCardIds.includes(c.id)
-                            ? "border-accent-line bg-accent-soft text-accent-ink shadow-sm"
-                            : "border-line-strong bg-surface-sunken text-fg hover:bg-surface-strong"
+                            ? "border-cardcopy-selected-line bg-cardcopy-selected text-cardcopy-selected-fg shadow-sm"
+                            : "border-cardcopy-line bg-cardcopy text-cardcopy-fg hover:bg-cardcopy-hover"
                     }`}
                 >
                     <div className="text-center w-full">
