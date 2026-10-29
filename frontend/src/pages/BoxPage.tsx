@@ -34,6 +34,9 @@ import { FilterMenu } from '../components/misc/FilterMenu'
 import { useCardFilter, hasFilter } from '../hooks/useCardFilter'
 import { AddDividerButton } from '../components/Dividers/AddDividerButton'
 import { DividerHeader } from '../components/Dividers/DividerHeader'
+import { VisibilityControl } from '../components/BoxGroup/VisibilityControl'
+import { NotFoundMessage } from '../components/BoxGroup/NotFoundMessage'
+import { useAuth } from '../auth/useAuth'
 //#endregion
 //#region setup vars + funcs
 const CardDetailsPopup = withPopup(CardEditController, RightLongPopupShape)
@@ -50,6 +53,9 @@ export default function BoxPage() {
     const [dividerError, setDividerError] = useState<string>()
     const [isSavingDividers, setIsSavingDividers] = useState(false)
     const [loading, setLoading] = useState(true)
+    // Loading failed: a 404 (doesn't exist, or Private and you're not a member) or a server error
+    const [loadError, setLoadError] = useState<unknown>()
+    const { account } = useAuth()
     const [showRightPanel, setShowRightPanel] = useState<boolean>(false)
     // Wide screens: add bar in the top banner, buttons in the footer. Compact: the other way round
     const isWide = useMediaQuery("(width >= 64rem)")
@@ -212,10 +218,12 @@ export default function BoxPage() {
 
     useEffect(() => {
         if (!id) return
+        setLoadError(undefined)
         Promise.all([
             getApiBoxesById({ path: { id } }).then(res => setBox(res.data)),
             getApiDividersByBoxByBoxId({ path: { boxId: id } }).then(res => setDividers(res.data)),
         ])
+            .catch(error => setLoadError(error ?? 'error'))
             .finally(() => setLoading(false))
     }, [id])
 
@@ -227,6 +235,8 @@ export default function BoxPage() {
         let isCurrent = true
         getApiCardsByBoxByBoxIdGrouped({ path: { boxId: id }, query: { sort, desc, ...filter } })
             .then(res => { if (isCurrent) setCards(res.data) })
+            // A box you can't see: the page shows "Nothing to see here" from the box request instead
+            .catch(() => {})
         return () => { isCurrent = false }
     }, [id, sort, desc, filter])
 
@@ -272,11 +282,15 @@ export default function BoxPage() {
 //#region Return
 //#endregion
 
+    // Members can change things; anyone else is viewing an Unlisted/Public box (read-only: no add bar,
+    // no footer, just Filter and Sort)
+    const canEdit = box?.canEdit ?? false
+
     // The view and edit buttons (two rows in the top banner, or one row in the footer) and the add bar.
     // Each is made once and placed by screen size, so there's only ever one of each on the page
     const viewButtons = box && (
         <>
-            <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />
+            {canEdit && <AddDividerButton boxId={box.id} onCreated={divider => setDividers(current => [...current, divider])} />}
             <FilterMenu value={filter} onChange={setFilter} />
             <SortMenu value={{ sort, desc }} onChange={setSort} />
         </>
@@ -302,6 +316,8 @@ export default function BoxPage() {
     )
     const addBar = <AddNewCardTextBar onAdd={addToBox} />
 
+    if (!loading && (loadError !== undefined || !box)) return <NotFoundMessage isLoggedIn={!!account} kind="box" error={loadError} />
+
     return loading ?
     (<LoadingIndicator />) : 
     (
@@ -314,6 +330,7 @@ export default function BoxPage() {
                 onMutationComplete={refreshCardsAfterMutation}
                 onTagsChanged={reloadCards}
                 dividers={dividers}
+                readOnly={!canEdit}
             />
         )}    
         
@@ -323,19 +340,27 @@ export default function BoxPage() {
                     {/* Back above the title, tight together: no taller than the two button rows beside it */}
                     <div className='flex min-w-0 flex-col gap-1'>
                         <button onClick={() => navigate(-1)} className="self-start text-sm text-link hover:underline">← Back</button>
-                        <EditableTitle
-                            name={box?.name ?? ''}
-                            draftName={draftName}
-                            isEditing={isEditingName}
-                            onDraftChange={setDraftName}
-                            onSave={() => void saveBoxName()}
-                            onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
-                            onStartEdit={() => setIsEditingName(true)}
-                            className="truncate"
-                        />
+                        {canEdit ? (
+                            <EditableTitle
+                                name={box?.name ?? ''}
+                                draftName={draftName}
+                                isEditing={isEditingName}
+                                onDraftChange={setDraftName}
+                                onSave={() => void saveBoxName()}
+                                onCancel={() => { setIsEditingName(false); setDraftName(box?.name ?? '') }}
+                                onStartEdit={() => setIsEditingName(true)}
+                                className="truncate"
+                            />
+                        ) : (
+                            <h1 className="truncate text-title">{box?.name}</h1>
+                        )}
+                        {box && <VisibilityControl item={box} kind="box" onChanged={updated => setBox(updated)} />}
                     </div>
-                    {/* Wide screens: the add bar up here. Compact: the view/edit buttons, in two rows */}
-                    {isWide ? (
+                    {/* Wide screens: the add bar up here. Compact: the view/edit buttons, in two rows.
+                        Viewing someone else's box: just Filter and Sort, up here at every size */}
+                    {!canEdit ? (
+                        <div className='flex flex-wrap items-start gap-2'>{viewButtons}</div>
+                    ) : isWide ? (
                         <div className='w-full max-w-md'>{addBar}</div>
                     ) : (
                         <div className='flex flex-col gap-2'>
@@ -349,7 +374,7 @@ export default function BoxPage() {
             {/* The footer bar, fixed to the bottom of the screen: the view/edit buttons on wide screens (their
                 menus open upwards: data-drop="up"), the add bar on compact ones. While you use the add bar it
                 jumps to the TOP of the screen, over the header, so its suggestions have room to open below it */}
-            {isWide ? (
+            {!canEdit ? null : isWide ? (
                 <div data-drop="up" className="fixed inset-x-0 bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 bg-footer px-4 py-2 sm:px-8">
                     {viewButtons}
                     <span className="mx-1 h-6 w-px bg-line-strong" aria-hidden="true" />
@@ -408,6 +433,7 @@ export default function BoxPage() {
                                 onMove={direction => void moveDivider(index, direction)}
                                 onDelete={() => void deleteDivider(divider)}
                                 disabled={isSavingDividers}
+                                readOnly={!canEdit}
                             />
                             {dividerCards.length > 0 ? (
                                 <div className={cardGridClass}>{dividerCards.map(renderCard)}</div>
@@ -424,7 +450,7 @@ export default function BoxPage() {
             </div>
         </div>
 
-        <BulkActionBar selection={selection} onChanged={refreshCardsAfterMutation} currentBoxId={box?.id} bottomClassName="bottom-20" />
+        {canEdit && <BulkActionBar selection={selection} onChanged={refreshCardsAfterMutation} currentBoxId={box?.id} bottomClassName="bottom-20" />}
         </>
     )
 }

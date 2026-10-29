@@ -67,16 +67,18 @@ public class BoxQueryService : IBoxQueryService
         return boxes.Select(ToDto);
     }
 
-    public async Task<IEnumerable<BoxDto>> GetByGroupAsync(Guid groupId)
+    public async Task<IEnumerable<BoxDto>> GetByGroupAsync(Guid groupId, bool hidePrivate = false)
     {
         var boxes = await _boxes.GetByGroupAsync(groupId);
-        return boxes.Select(ToDto);
+        // For viewers who aren't members: inside a group they can see, only boxes set to Private themselves are hidden
+        return boxes.Where(b => !hidePrivate || b.Visibility != Visibility.Private).Select(ToDto);
     }
 
     private static BoxDto ToDto(Box b) => new(
         b.Id,
         b.Name,
         b.GroupId,
-        b.Cards.Count
+        b.Cards.Count,
+        Visibility: b.Visibility?.ToString()
     );
 }

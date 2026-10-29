@@ -84,12 +84,14 @@ public class CardsController : ControllerBase
 
     // Cards in Entities you're not a member of are reported as 404, same as ones that don't exist
 
+    // Viewable by anyone when its box is Unlisted/Public (see Visibility)
+    [AllowAnonymous]
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(CardDto), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(Guid id)
     {
-        if (!await _access.CanAccessCardAsync(id)) return NotFound();
+        if (!await _access.CanViewCardAsync(id)) return NotFound();
 
         var card = await _query.GetByIdAsync(id);
         return card is null ? NotFound() : Ok(card);
@@ -104,14 +106,16 @@ public class CardsController : ControllerBase
         return Ok(await _query.GetByBoxAsync(boxId));
     }
 
-    // Same sort and filter options as search (see CardListQuery)
+    // Same sort and filter options as search (see CardListQuery).
+    // Viewable by anyone when the box is Unlisted/Public (see Visibility)
+    [AllowAnonymous]
     [HttpGet("by-box/{boxId}/grouped")]
     [ProducesResponseType(typeof(IEnumerable<GroupedCardDto>), 200)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByBoxGrouped(Guid boxId, [FromQuery] CardListQuery list)
     {
-        if (!await _access.CanAccessBoxAsync(boxId)) return NotFound();
+        if (!await _access.CanViewBoxAsync(boxId)) return NotFound();
         if (list.Validate() is { } error) return BadRequest(error);
         return Ok(await _query.GetByBoxGroupedAsync(boxId, list.ToOptions()));
     }

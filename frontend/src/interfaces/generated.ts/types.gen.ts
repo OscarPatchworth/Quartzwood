@@ -60,6 +60,11 @@ export type BoxDto = {
     name: string;
     groupId: string;
     cardCount: number | string;
+    visibility?: null | string;
+    inheritedVisibility?: string;
+    effectiveVisibility?: string;
+    canEdit?: boolean;
+    canChangeVisibility?: boolean;
 };
 
 export type BoxSearchResultDto = {
@@ -239,6 +244,11 @@ export type GroupDto = {
     parentGroupId: null | string;
     childGroupNames: Array<string>;
     boxNames: Array<string>;
+    visibility?: null | string;
+    inheritedVisibility?: string;
+    effectiveVisibility?: string;
+    canEdit?: boolean;
+    canChangeVisibility?: boolean;
 };
 
 export type GroupedCardDto = {
@@ -369,6 +379,10 @@ export type ScryfallSearchResultDto = {
     setCode: string;
     setNumber: string;
     scryfallId: string;
+};
+
+export type SetVisibilityDto = {
+    visibility: null | string;
 };
 
 export type StringSegment = {
@@ -894,6 +908,41 @@ export type GetApiBoxesByGroupByGroupIdResponses = {
 };
 
 export type GetApiBoxesByGroupByGroupIdResponse = GetApiBoxesByGroupByGroupIdResponses[keyof GetApiBoxesByGroupByGroupIdResponses];
+
+export type PutApiBoxesByIdVisibilityData = {
+    body: SetVisibilityDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/boxes/{id}/visibility';
+};
+
+export type PutApiBoxesByIdVisibilityErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiBoxesByIdVisibilityError = PutApiBoxesByIdVisibilityErrors[keyof PutApiBoxesByIdVisibilityErrors];
+
+export type PutApiBoxesByIdVisibilityResponses = {
+    /**
+     * OK
+     */
+    200: BoxDto;
+};
+
+export type PutApiBoxesByIdVisibilityResponse = PutApiBoxesByIdVisibilityResponses[keyof PutApiBoxesByIdVisibilityResponses];
 
 export type PostApiBoxesData = {
     body: AddBoxDto;
@@ -1711,6 +1760,41 @@ export type GetApiGroupsByParentByParentIdResponses = {
 };
 
 export type GetApiGroupsByParentByParentIdResponse = GetApiGroupsByParentByParentIdResponses[keyof GetApiGroupsByParentByParentIdResponses];
+
+export type PutApiGroupsByIdVisibilityData = {
+    body: SetVisibilityDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/groups/{id}/visibility';
+};
+
+export type PutApiGroupsByIdVisibilityErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiGroupsByIdVisibilityError = PutApiGroupsByIdVisibilityErrors[keyof PutApiGroupsByIdVisibilityErrors];
+
+export type PutApiGroupsByIdVisibilityResponses = {
+    /**
+     * OK
+     */
+    200: GroupDto;
+};
+
+export type PutApiGroupsByIdVisibilityResponse = PutApiGroupsByIdVisibilityResponses[keyof PutApiGroupsByIdVisibilityResponses];
 
 export type PostApiGroupsData = {
     body: AddGroupDto;

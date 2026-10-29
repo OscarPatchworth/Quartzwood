@@ -8,7 +8,8 @@ interface EntityListProps<T> {
     getName: (item: T) => string
     getSubtitle: (item: T) => string
     onNavigate: (item: T) => void
-    onDelete: (item: T) => void
+    // Shows a × (delete) button on each row
+    onDelete?: (item: T) => void
     deletingId?: string
     emptyMessage?: string
     className?: string
@@ -18,12 +19,14 @@ interface EntityListProps<T> {
     getDragItem?: (item: T) => MovableItem
     // Rows are groups that things can be dropped into: called with what was dropped and the row's id
     onDropItem?: (dropped: MovableItem, toGroupId: string) => void
+    // A small label after the name, e.g. "Unlisted"
+    getBadge?: (item: T) => string | undefined
 }
 
 export default function GroupBoxListCard<T>({
     title, items, getId, getName, getSubtitle,
     onNavigate, onDelete, deletingId, emptyMessage, className,
-    onMove, getDragItem, onDropItem
+    onMove, getDragItem, onDropItem, getBadge
 }: EntityListProps<T>) {
     return (
         <div className={`grid min-w-0 grid-cols-1 content-start gap-4 ${className ?? ''}`}>
@@ -37,11 +40,12 @@ export default function GroupBoxListCard<T>({
                             name={getName(item)}
                             subtitle={getSubtitle(item)}
                             onNavigate={() => onNavigate(item)}
-                            onDelete={() => onDelete(item)}
+                            onDelete={onDelete && (() => onDelete(item))}
                             isDeleting={deletingId === getId(item)}
                             onMove={onMove && (() => onMove(item))}
                             dragItem={getDragItem?.(item)}
                             onDropItem={onDropItem}
+                            badge={getBadge?.(item)}
                         />
                     ))}
                     {items.length === 0 && <p className="text-fg-subtle">{emptyMessage ?? 'No items found.'}</p>}
@@ -56,15 +60,16 @@ interface ListRowProps {
     name: string
     subtitle: string
     onNavigate: () => void
-    onDelete: () => void
+    onDelete?: () => void
     isDeleting: boolean
     onMove?: () => void
     dragItem?: MovableItem
     onDropItem?: (dropped: MovableItem, toGroupId: string) => void
+    badge?: string
 }
 
 // One row: click to open, drag to move (when allowed), drop onto (group rows), Move and Delete buttons
-function ListRow({ id, name, subtitle, onNavigate, onDelete, isDeleting, onMove, dragItem, onDropItem }: ListRowProps) {
+function ListRow({ id, name, subtitle, onNavigate, onDelete, isDeleting, onMove, dragItem, onDropItem, badge }: ListRowProps) {
     const { isDragging, dragProps } = useItemDrag(dragItem)
     const { isOver, dropProps } = useItemDrop(onDropItem && id, (dropped, toGroupId) => onDropItem?.(dropped, toGroupId))
 
@@ -87,7 +92,14 @@ function ListRow({ id, name, subtitle, onNavigate, onDelete, isDeleting, onMove,
                     </svg>
                 )}
                 <div className="min-w-0">
-                    <h2 className="truncate text-heading text-boxgroup-fg">{name}</h2>
+                    <div className="flex min-w-0 items-center gap-2">
+                        <h2 className="truncate text-heading text-boxgroup-fg">{name}</h2>
+                        {badge && (
+                            <span className="shrink-0 rounded-full border border-boxgroup-fg-muted/50 px-2 text-xs font-semibold text-boxgroup-fg-muted">
+                                {badge}
+                            </span>
+                        )}
+                    </div>
                     <p className="text-sm text-boxgroup-fg-muted">{isOver ? `Move into ${name}` : subtitle}</p>
                 </div>
             </div>
@@ -102,15 +114,17 @@ function ListRow({ id, name, subtitle, onNavigate, onDelete, isDeleting, onMove,
                         Move
                     </button>
                 )}
-                <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); onDelete() }}
-                    aria-label={`Delete ${name}`}
-                    disabled={isDeleting}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded border border-danger-line bg-danger-soft text-title leading-none text-danger transition hover:bg-danger-soft-strong hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    ×
-                </button>
+                {onDelete && (
+                    <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); onDelete() }}
+                        aria-label={`Delete ${name}`}
+                        disabled={isDeleting}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded border border-danger-line bg-danger-soft text-title leading-none text-danger transition hover:bg-danger-soft-strong hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        ×
+                    </button>
+                )}
             </div>
         </div>
     )

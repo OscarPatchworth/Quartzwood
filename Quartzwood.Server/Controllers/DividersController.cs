@@ -22,13 +22,14 @@ public class DividersController : ControllerBase
 
     // Dividers in boxes in Entities you're not a member of are reported as 404, same as ones that don't exist
 
-    // Front of the box first
+    // Front of the box first. Viewable by anyone when the box is Unlisted/Public (see Visibility)
+    [AllowAnonymous]
     [HttpGet("by-box/{boxId}")]
     [ProducesResponseType(typeof(List<DividerDto>), 200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetByBox(Guid boxId)
     {
-        if (!await _access.CanAccessBoxAsync(boxId)) return NotFound();
+        if (!await _access.CanViewBoxAsync(boxId)) return NotFound();
         return Ok(await _dividers.GetByBoxAsync(boxId));
     }
 

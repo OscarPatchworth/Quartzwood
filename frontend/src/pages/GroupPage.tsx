@@ -20,6 +20,9 @@ import { ParentGroupBanner } from '../components/BoxGroup/ParentGroupBanner'
 import { MoveToGroupDialog } from '../components/BoxGroup/MoveToGroupDialog'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { moveItem, onMoveElsewhere, type MovableItem } from '../utils/moveBoxGroup'
+import { VisibilityControl } from '../components/BoxGroup/VisibilityControl'
+import { NotFoundMessage } from '../components/BoxGroup/NotFoundMessage'
+import { useAuth } from '../auth/useAuth'
 
 interface GroupPageProps {
     // Set by CollectionPage to show the root group; otherwise the id comes from /group/:id
@@ -35,6 +38,9 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     const [groups, setGroups] = useState<GroupDto[]>([])
     const [boxes, setBoxes] = useState<BoxDto[]>([])
     const [loading, setLoading] = useState(true)
+    // Loading failed: a 404 (doesn't exist, or Private and you're not a member) or a server error
+    const [loadError, setLoadError] = useState<unknown>()
+    const { account } = useAuth()
     const [deletingBoxId, setDeletingBoxId] = useState<string>()
     const [deleteError, setDeleteError] = useState<string>()
     const [isEditingName, setIsEditingName] = useState(false)
@@ -54,7 +60,10 @@ export default function GroupPage({ groupId }: GroupPageProps) {
             .then(async res => {
                 setActiveGroup(res.data)
                 const parentId = res.data.parentGroupId
-                setParentGroup(parentId ? (await getApiGroupsById({ path: { id: parentId } })).data : undefined)
+                // A visitor may not be able to see the parent (a shared group inside a private one): no banner then
+                setParentGroup(parentId
+                    ? await getApiGroupsById({ path: { id: parentId } }).then(parent => parent.data, () => undefined)
+                    : undefined)
             }),
 
         getApiGroupsByParentByParentId({ path: { parentId: groupId } })
@@ -64,7 +73,10 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     useEffect(() => {
         if (!id) return
         setLoading(true)
-        loadGroup(id).finally(() => setLoading(false))
+        setLoadError(undefined)
+        loadGroup(id)
+            .catch(error => setLoadError(error ?? 'error'))
+            .finally(() => setLoading(false))
     }, [id, loadGroup])
 
     // Something moved in another tab/window: reload quietly (no spinner), it may have come or gone from here
@@ -158,9 +170,19 @@ export default function GroupPage({ groupId }: GroupPageProps) {
     }
 
     if (loading) return <LoadingIndicator />
+    if (loadError !== undefined || !activeGroup) return <NotFoundMessage isLoggedIn={!!account} error={loadError} />
 
-    // The root group (no parent) is the user's collection: fixed title, nothing above it to go back to
-    const isRoot = activeGroup?.parentGroupId === null
+    // The root group (no parent) is a collection: nothing above it to go back to
+    const isRoot = activeGroup.parentGroupId === null
+    // Members can change things; anyone else is viewing an Unlisted/Public group (read-only)
+    const canEdit = activeGroup.canEdit ?? false
+    // Your own collection is "My Collection" (a collection shared with you, or someone else's, shows its name)
+    const myCollectionName = (group: GroupDto) => group.id === account?.rootGroupId ? 'My Collection' : group.name
+    // Rows shared beyond the members get a label, so you can see at a glance what others can see
+    const sharedBadge = (item: GroupDto | BoxDto) => {
+        const effective = item.visibility ?? item.inheritedVisibility
+        return canEdit && effective && effective !== 'Private' ? effective : undefined
+    }
 
     return (
         <>
@@ -171,8 +193,8 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                     {!isRoot && (
                         <button onClick={() => navigate(-1)} className="self-start text-sm text-link hover:underline">← Back</button>
                     )}
-                    {isRoot ? (
-                        <h1 className="truncate text-title">My Collection</h1>
+                    {isRoot || !canEdit ? (
+                        <h1 className="truncate text-title">{myCollectionName(activeGroup)}</h1>
                     ) : (
                         <EditableTitle
                             name={activeGroup?.name ?? ''}
@@ -185,16 +207,28 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                             className="truncate"
                         />
                     )}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                    {/* On the collection page this exports the whole collection */}
-                    {id && <ExportMenu kind="group" id={id} />}
-                    <AddBoxGroupController
-                        groupId={id}
-                        onBoxCreated={handleBoxCreated}
-                        onGroupCreated={handleGroupCreated}
+                    <VisibilityControl
+                        item={activeGroup}
+                        kind="group"
+                        isRoot={isRoot}
+                        onChanged={updated => {
+                            setActiveGroup(updated)
+                            // The rows' "same as parent" now means something else: reload them for their badges
+                            if (id) void loadGroup(id).catch(() => {})
+                        }}
                     />
                 </div>
+                {canEdit && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* On the collection page this exports the whole collection */}
+                        {id && <ExportMenu kind="group" id={id} />}
+                        <AddBoxGroupController
+                            groupId={id}
+                            onBoxCreated={handleBoxCreated}
+                            onGroupCreated={handleGroupCreated}
+                        />
+                    </div>
+                )}
             </div>
         </div>
             
@@ -208,8 +242,9 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                     {parentGroup && (
                         <ParentGroupBanner
                             parentGroup={parentGroup}
-                            onNavigate={() => navigate(parentGroup.parentGroupId === null ? '/collection' : `/group/${parentGroup.id}`)}
-                            onDropItem={canDrag ? handleDrop : undefined}
+                            name={myCollectionName(parentGroup)}
+                            onNavigate={() => navigate(parentGroup.id === account?.rootGroupId ? '/collection' : `/group/${parentGroup.id}`)}
+                            onDropItem={canEdit && canDrag ? handleDrop : undefined}
                         />
                     )}
 
@@ -224,12 +259,13 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                             return `${groups} ${groups === 1 ? 'group' : 'groups'}, ${boxes} ${boxes === 1 ? 'box' : 'boxes'}`
                         }}
                         onNavigate={g => navigate(`/group/${g.id}`)}
-                        onDelete={g => void deleteGroup(g)}
+                        onDelete={canEdit ? g => void deleteGroup(g) : undefined}
                         deletingId={deletingBoxId}
                         emptyMessage="No groups found."
-                        onMove={g => setMovingItem(groupItem(g))}
-                        getDragItem={canDrag ? groupItem : undefined}
-                        onDropItem={canDrag ? handleDrop : undefined}
+                        onMove={canEdit ? g => setMovingItem(groupItem(g)) : undefined}
+                        getDragItem={canEdit && canDrag ? groupItem : undefined}
+                        onDropItem={canEdit && canDrag ? handleDrop : undefined}
+                        getBadge={sharedBadge}
                     />
 
                     <GroupBoxListCard
@@ -239,11 +275,12 @@ export default function GroupPage({ groupId }: GroupPageProps) {
                         getName={b => b.name}
                         getSubtitle={b => `${b.cardCount} cards`}
                         onNavigate={b => navigate(`/box/${b.id}`)}
-                        onDelete={b => void deleteBox(b)}
+                        onDelete={canEdit ? b => void deleteBox(b) : undefined}
                         deletingId={deletingBoxId}
                         emptyMessage="No boxes found."
-                        onMove={b => setMovingItem(boxItem(b))}
-                        getDragItem={canDrag ? boxItem : undefined}
+                        onMove={canEdit ? b => setMovingItem(boxItem(b)) : undefined}
+                        getDragItem={canEdit && canDrag ? boxItem : undefined}
+                        getBadge={sharedBadge}
                     />
 
                 </div>

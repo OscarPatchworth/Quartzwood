@@ -19,7 +19,10 @@ public class Group
     // null = root group of its Entity
     public Guid? ParentGroupId { get; set; }
     public Group? ParentGroup { get; set; }
-    
+
+    // null = same as the parent group (see Visibility)
+    public Visibility? Visibility { get; set; }
+
     // Navigation
     public ICollection<Group> ChildGroups { get; set; } = new List<Group>();
     public ICollection<Box> Boxes { get; set; } = new List<Box>();

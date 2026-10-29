@@ -16,6 +16,7 @@ import { CardDetails } from "./CardDetails"
 import { CardEditForm } from "./CardEditForm"
 import { CardDuplicateListSelect } from "./CardDuplicateListSelect.tsx"
 import { CardTagEditor } from "../Tags/CardTagEditor"
+import { TagList } from "../Tags/TagList"
 
 interface CECProps {
   cards?: GroupedCardDto
@@ -25,9 +26,11 @@ interface CECProps {
     // The card's box's dividers (front first): shows a "Divider" picker to move the card behind one.
     // Left out on pages that span several boxes
     dividers?: DividerDto[]
+    // Viewing someone else's Unlisted/Public box: details only, nothing to edit
+    readOnly?: boolean
 }
 
-export function CardEditController({cards, onMutationComplete, onTagsChanged, dividers}: CECProps){
+export function CardEditController({cards, onMutationComplete, onTagsChanged, dividers, readOnly = false}: CECProps){
 
     const [displayCard, setDisplayCard] = useState<CardDto>();
     const [editMode, setEditMode] = useState<boolean>(false);
@@ -203,15 +206,15 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
     return(
         <>
         <div className="relative mr-5 mt-2">
-            <button
+            {!readOnly && <button
                 type="button"
             className="absolute right-2 top-2 z-30 translate-x-1/2 -translate-y-1/2 rounded-xl border border-cardinfo-edit-line bg-cardinfo-edit px-4 py-2 text-sm font-semibold text-cardinfo-edit-fg shadow-sm transition focus:outline-none focus:ring-2 focus:ring-cardinfo-accent"
                 onClick={() => setEditMode(!editMode)}
             >
                 Edit
-            </button>
+            </button>}
 
-            {editMode &&
+            {editMode && !readOnly &&
                 <div className="absolute left-full top-12 z-10 flex -translate-x-2 flex-col gap-2">
                     <button
                         type="button"
@@ -234,12 +237,12 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
             }
 
             <div className="relative z-20">
-                {editMode ?
+                {editMode && !readOnly ?
                     <CardEditForm card={displayCard} onChange={setDisplayCard} /> :
                     <CardDetails card={displayCard} />
                 }
                 {actionError && <p className="px-2 pb-2 text-sm text-danger" role="alert">{actionError}</p>}
-                {displayCard && dividers && dividers.length > 0 && (
+                {!readOnly && displayCard && dividers && dividers.length > 0 && (
                     <label className="flex flex-wrap items-center gap-2 px-2 pb-2 text-sm">
                         <span className="font-medium text-fg-muted">Divider</span>
                         <select
@@ -256,8 +259,9 @@ export function CardEditController({cards, onMutationComplete, onTagsChanged, di
                         )}
                     </label>
                 )}
-                {displayCard && (
-                    <CardTagEditor cardIds={tagCardIds} tags={displayCard.tags} onChanged={afterTagsChanged} />
+                {displayCard && (readOnly
+                    ? <TagList tags={displayCard.tags} className="px-2 pb-2" />
+                    : <CardTagEditor cardIds={tagCardIds} tags={displayCard.tags} onChanged={afterTagsChanged} />
                 )}
                 
                 {editMode &&

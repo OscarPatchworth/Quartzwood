@@ -32,9 +32,12 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/trade" element={<TradePage />} />
           <Route path="/entity/:id" element={<EntityPage />} />
-          <Route path="/group/:id" element={<GroupPage />} />
-          <Route path="/box/:id" element={<BoxPage />} />
         </Route>
+
+        {/* Open to anyone: Unlisted/Public groups and boxes can be viewed logged out (the pages go read-only),
+            and a Private one shows "Nothing to see here" with a Log in button */}
+        <Route path="/group/:id" element={<GroupPage />} />
+        <Route path="/box/:id" element={<BoxPage />} />
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

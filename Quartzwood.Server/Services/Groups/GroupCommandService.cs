@@ -34,6 +34,16 @@ public class GroupCommandService : IGroupCommandService
         return ToDto(created);
     }
 
+    // null = same as the parent group. Children still on "same as parent" follow it automatically
+    public async Task<bool> SetVisibilityAsync(Guid id, Visibility? visibility)
+    {
+        var group = await _groups.GetByIdAsync(id);
+        if (group is null) return false;
+        group.Visibility = visibility;
+        await _groups.UpdateAsync(group);
+        return true;
+    }
+
     public async Task<GroupDto?> UpdateAsync(Guid id, UpdateGroupDto dto)
     {
         var group = await _groups.GetByIdAsync(id);
@@ -102,6 +112,7 @@ public async Task<bool> DeleteAsync(Guid id)
         g.EntityId,
         g.ParentGroupId,
         g.ChildGroups.Select(c => c.Name),
-        g.Boxes.Select(b => b.Name)
+        g.Boxes.Select(b => b.Name),
+        Visibility: g.Visibility?.ToString()
     );
 }

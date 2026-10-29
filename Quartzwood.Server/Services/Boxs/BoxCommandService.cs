@@ -48,6 +48,16 @@ public class BoxCommandService : IBoxCommandService
         return ToDto(updated);
     }
 
+    // null = same as the group it's in
+    public async Task<bool> SetVisibilityAsync(Guid id, Visibility? visibility)
+    {
+        var box = await _boxes.GetByIdAsync(id);
+        if (box is null) return false;
+        box.Visibility = visibility;
+        await _boxes.UpdateAsync(box);
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         var box = await _boxes.GetByIdAsync(id);
@@ -60,6 +70,7 @@ public class BoxCommandService : IBoxCommandService
         b.Id,
         b.Name,
         b.GroupId,
-        b.Cards.Count
+        b.Cards.Count,
+        Visibility: b.Visibility?.ToString()
     );
 }

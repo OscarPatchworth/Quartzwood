@@ -4,16 +4,16 @@ import type { MovableItem } from '../../utils/moveBoxGroup'
 
 interface ParentGroupBannerProps {
     parentGroup: GroupDto
+    // What to call it (e.g. "My Collection" for your own collection); default: its name
+    name?: string
     onNavigate: () => void
     // Dropping a dragged group or box here moves it up into the parent (leave out to turn dropping off)
     onDropItem?: (dropped: MovableItem, toGroupId: string) => void
 }
 
 // "Inside <parent>": the row above a group's lists that goes up one level
-export function ParentGroupBanner({ parentGroup, onNavigate, onDropItem }: ParentGroupBannerProps) {
+export function ParentGroupBanner({ parentGroup, name = parentGroup.name, onNavigate, onDropItem }: ParentGroupBannerProps) {
     const { isOver, dropProps } = useItemDrop(onDropItem && parentGroup.id, (dropped, toGroupId) => onDropItem?.(dropped, toGroupId))
-    // The root group is the user's collection
-    const name = parentGroup.parentGroupId === null ? 'My Collection' : parentGroup.name
 
     return (
         <button

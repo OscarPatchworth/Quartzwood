@@ -10,12 +10,14 @@ interface DividerHeaderProps {
     onMove: (direction: -1 | 1) => void
     onDelete: () => void
     disabled?: boolean
+    // Viewing someone else's box: just the name and count, no rename/move/delete
+    readOnly?: boolean
 }
 
 const iconButton = "inline-flex size-8 items-center justify-center rounded border text-fg-muted transition disabled:cursor-not-allowed disabled:opacity-40"
 
 // The heading above a divider's cards: double-click the name to rename, arrows to move it, × to delete
-export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDelete, disabled }: DividerHeaderProps) {
+export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDelete, disabled, readOnly = false }: DividerHeaderProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [draftName, setDraftName] = useState(divider.name)
 
@@ -50,13 +52,17 @@ export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDe
                     className="rounded border border-input-line bg-input px-2 py-0.5 font-display text-heading outline-none ring-2 ring-accent-line/40"
                 />
             ) : (
-                <h2 className="cursor-text text-heading text-fg-heading" onDoubleClick={startEdit} title="Double-click to rename">
+                <h2
+                    className={`text-heading text-fg-heading ${readOnly ? "" : "cursor-text"}`}
+                    onDoubleClick={readOnly ? undefined : startEdit}
+                    title={readOnly ? undefined : "Double-click to rename"}
+                >
                     {divider.name}
                 </h2>
             )}
             <span className="text-sm text-fg-subtle">{count} {count === 1 ? "card" : "cards"}</span>
 
-            <div className="ml-auto flex items-center gap-1">
+            {!readOnly && <div className="ml-auto flex items-center gap-1">
                 <button
                     type="button"
                     onClick={() => onMove(-1)}
@@ -91,7 +97,7 @@ export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDe
                 >
                     ×
                 </button>
-            </div>
+            </div>}
         </div>
     )
 }

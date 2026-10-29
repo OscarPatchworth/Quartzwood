@@ -225,6 +225,9 @@ namespace Quartzwood.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("Visibility")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
@@ -406,6 +409,9 @@ namespace Quartzwood.Server.Migrations
 
                     b.Property<Guid?>("ParentGroupId")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("Visibility")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

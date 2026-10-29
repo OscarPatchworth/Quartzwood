@@ -86,7 +86,9 @@ public class ScryfallController : ControllerBase
 
     // A card's image, served from the on-disk image cache. The first time an image is asked for, it's
     // downloaded once from Scryfall's CDN (using the URL from the local data) and saved; after that it's
-    // served from disk, so it works offline and costs Scryfall nothing
+    // served from disk, so it works offline and costs Scryfall nothing.
+    // No login needed: logged-out visitors viewing an Unlisted/Public box see the card images too
+    [AllowAnonymous]
     [HttpGet("cards/{id}/image")]
     [ProducesResponseType(200)]
     [ProducesResponseType(302)]

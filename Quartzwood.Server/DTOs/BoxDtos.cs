@@ -4,7 +4,17 @@ public record BoxDto(
     Guid Id,
     string Name,
     Guid GroupId,
-    int CardCount
+    int CardCount,
+    // Its own setting: "Private", "Unlisted", "Public", or null = same as the group it's in
+    string? Visibility = null,
+    // What null means here: the parent group's effective visibility ("Private" for a root group)
+    string InheritedVisibility = "Private",
+    // Visibility ?? InheritedVisibility: who can actually see it
+    string EffectiveVisibility = "Private",
+    // You're a member of the Entity that owns it; false = viewing an Unlisted/Public one
+    bool CanEdit = false,
+    // Only the Entity's owner can change who can see it
+    bool CanChangeVisibility = false
 );
 
 public record AddBoxDto(
