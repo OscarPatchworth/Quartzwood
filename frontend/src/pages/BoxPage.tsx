@@ -80,14 +80,20 @@ export default function BoxPage() {
     const [draftName, setDraftName] = useState(box?.name ?? '')
     const navigate = useNavigate()
     const [selectedCards, setSelectedCards] = useState<GroupedCardDto>()
-    // Select mode for mass edit/delete: clicking a card ticks it instead of opening the edit panel
-    const selection = useCardSelection(cards)
+    // A card whose divider isn't in the list (just deleted, say) shows with the loose cards rather than vanishing
+    const dividerIds = new Set(dividers.map(d => d.id))
+    const looseCards = cards.filter(c => !c.dividerId || !dividerIds.has(c.dividerId))
+    // The cards in the order they're shown (loose ones, then each divider's), for shift-click ranges
+    const shownCards = [...looseCards, ...dividers.flatMap(divider => cards.filter(c => c.dividerId === divider.id))]
+    // Select mode for mass edit/delete: clicking a card ticks it instead of opening the edit panel.
+    // Shift-click ticks (or unticks) everything from the last card clicked
+    const selection = useCardSelection(shownCards)
     // Filtered and sorted by the server; both live in the URL (?sort=...&desc=true&mvMin=...&priceMax=...)
     const { sort, desc, setSort } = useCardSort()
     const { filter, setFilter } = useCardFilter()
 
-    function clickCard(groupedCard: GroupedCardDto) {
-        if (selection.isSelecting) selection.toggleStack(groupedCard)
+    function clickCard(groupedCard: GroupedCardDto, shiftKey: boolean) {
+        if (selection.isSelecting) selection.toggleStack(groupedCard, shiftKey)
         else selectCard(groupedCard)
     }
 
@@ -240,10 +246,6 @@ export default function BoxPage() {
         return () => { isCurrent = false }
     }, [id, sort, desc, filter])
 
-    // A card whose divider isn't in the list (just deleted, say) shows with the loose cards rather than vanishing
-    const dividerIds = new Set(dividers.map(d => d.id))
-    const looseCards = cards.filter(c => !c.dividerId || !dividerIds.has(c.dividerId))
-
     function renderCard(c: GroupedCardDto) {
         const isSelected = selection.isSelecting && selection.isStackSelected(c)
         return (
@@ -256,14 +258,17 @@ export default function BoxPage() {
                     className={`w-full rounded-(--raduis-card-corner-crop) shadow transition ${
                         isSelected ? "ring-4 ring-accent-line" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""
                     } ${selection.isSelecting ? "cursor-pointer" : ""}`}
-                    onClick={() => clickCard(c)}
+                    onClick={e => clickCard(c, e.shiftKey)}
+                    // Shift-click would otherwise highlight the card names in between as text
+                    onMouseDown={e => { if (selection.isSelecting && e.shiftKey) e.preventDefault() }}
                 />
                 {selection.isSelecting && (
                     <input
                         type="checkbox"
                         aria-label={`Select ${c.name ?? "card"}${Number(c.count) > 1 ? ` (${c.count} copies)` : ""}`}
                         checked={isSelected}
-                        onChange={() => selection.toggleStack(c)}
+                        // React fires a checkbox's onChange from the click, so the shift key is on the native event
+                        onChange={e => selection.toggleStack(c, (e.nativeEvent as MouseEvent).shiftKey)}
                         className="absolute right-2 top-2 size-5 cursor-pointer accent-accent-line"
                     />
                 )}
