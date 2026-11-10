@@ -39,6 +39,8 @@ public record GroupedCardDto(
     List<string> Tags,
     // Every card in the stack is behind this divider (different dividers = different stacks); null = none
     Guid? DividerId,
+    // Scryfall language code ("en", "ja", ...); a Japanese copy is its own stack, shown with the Japanese image
+    string Language,
     // Each card's price in USD for its foil type (CardPrice); null = no price
     decimal? Price = null
 );
@@ -110,6 +112,8 @@ public record CardSearchResultDto(
     // Root group first, the box's own group last
     List<LocationStepDto> GroupPath,
     List<string> Tags,
+    // Scryfall language code ("en", "ja", ...)
+    string Language,
     // Each card's price in USD for its foil type (CardPrice); null = no price
     decimal? Price = null
 );

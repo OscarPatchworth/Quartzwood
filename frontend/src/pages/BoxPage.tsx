@@ -253,7 +253,7 @@ export default function BoxPage() {
             // the same printing can differ by notes or stamp)
             <div key={c.ids[0]} className='relative flex flex-col items-center'>
                 <img
-                    src={c.scryfallId ? cardImageUrl(c.scryfallId) : undefined}
+                    src={c.scryfallId ? cardImageUrl(c.scryfallId, "normal", c.language) : undefined}
                     alt={c.name ?? ''}
                     className={`w-full rounded-(--raduis-card-corner-crop) shadow transition ${
                         isSelected ? "ring-4 ring-accent-line" : selection.isSelecting ? "opacity-70 hover:opacity-100" : ""

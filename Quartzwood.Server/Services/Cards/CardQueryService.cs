@@ -65,6 +65,7 @@ public class CardQueryService : ICardQueryService
                 c.FoilType,
                 c.StampType,
                 c.Notes,
+                c.Language,
                 Tags = TagNames.Key(c),
             })
             .Select(g =>
@@ -86,7 +87,8 @@ public class CardQueryService : ICardQueryService
                     divider?.Id,
                     divider?.Name,
                     paths.PathTo(box.GroupId),
-                    TagNames.Of(g.First())
+                    TagNames.Of(g.First()),
+                    g.Key.Language
                 );
                 return new CardStack<CardSearchResultDto>(row, g.Key.Name, g.Key.SetCode, g.Key.SetNumber,
                     g.Key.ScryfallId, g.Key.FoilType, g.Max(c => c.AddedAt), row.Tags);
@@ -266,6 +268,8 @@ public class CardQueryService : ICardQueryService
                 c.FoilType,
                 c.StampType,
                 c.Notes,
+                // English and Japanese copies look different, so they're separate stacks
+                c.Language,
                 // Tagging 1 of 4 Sol Rings "Trade" splits it into its own stack, so the tag is visible
                 Tags = TagNames.Key(c),
                 // The page shows each divider's cards under it
@@ -283,7 +287,8 @@ public class CardQueryService : ICardQueryService
                     g.Count(),
                     g.Select(c => c.Id.ToString()).ToList(),
                     TagNames.Of(g.First()),
-                    g.Key.DividerId
+                    g.Key.DividerId,
+                    g.Key.Language
                 ),
                 g.Key.Name, g.Key.SetCode, g.Key.SetNumber, g.Key.ScryfallId, g.Key.FoilType,
                 g.Max(c => c.AddedAt), TagNames.Of(g.First())

@@ -87,7 +87,10 @@ public class ScryfallController : ControllerBase
     // A card's image, served from the on-disk image cache. The first time an image is asked for, it's
     // downloaded once from Scryfall's CDN (using the URL from the local data) and saved; after that it's
     // served from disk, so it works offline and costs Scryfall nothing.
-    // No login needed: logged-out visitors viewing an Unlisted/Public box see the card images too
+    // No login needed: logged-out visitors viewing an Unlisted/Public box see the card images too.
+    // lang (a Scryfall language code, e.g. "ja"): the same printing's image in that language. The local data
+    // only has English printings, so that image comes from Scryfall's API (once, then from disk); if Scryfall
+    // has no printing in that language, or can't be reached, the English image is served instead
     [AllowAnonymous]
     [HttpGet("cards/{id}/image")]
     [ProducesResponseType(200)]
@@ -95,13 +98,32 @@ public class ScryfallController : ControllerBase
     [ProducesResponseType(304)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> GetImage(string id, [FromQuery] string size = "normal", CancellationToken ct = default)
+    public async Task<IActionResult> GetImage(string id, [FromQuery] string size = "normal", [FromQuery] string? lang = null,
+        CancellationToken ct = default)
     {
         // These two checks matter beyond tidiness: id and size become part of a file path on disk,
         // so only a real GUID and one of two known words are allowed through
         if (!Guid.TryParse(id, out var guid)) return BadRequest("Invalid card id.");
         if (size is not ("small" or "normal")) return BadRequest("Size must be small or normal.");
+        if (lang is not null && !System.Text.RegularExpressions.Regex.IsMatch(lang, "^[a-z]{2,3}$"))
+            return BadRequest("Invalid language.");
         id = guid.ToString();
+
+        if (lang is not (null or "en") && !_images.IsKnownMissing(id, size, lang))
+        {
+            var cachedInLang = _images.FindCached(id, size, lang);
+            if (cachedInLang is not null) return ServeImage(cachedInLang);
+
+            var printing = (await _scryfall.GetCardsByIdsAsync([id])).GetValueOrDefault(id);
+            if (printing is not null)
+            {
+                var langUrl = $"https://api.scryfall.com/cards/{Uri.EscapeDataString(printing.Set.ToLowerInvariant())}/"
+                    + $"{Uri.EscapeDataString(printing.CollectorNumber)}/{lang}?format=image&version={size}";
+                var downloadedInLang = await _images.DownloadAsync(id, size, langUrl, ct, lang);
+                if (downloadedInLang is not null) return ServeImage(downloadedInLang);
+            }
+            // No image in that language: the English one below
+        }
 
         // Already on disk: no database lookup, no internet needed
         var cached = _images.FindCached(id, size);

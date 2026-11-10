@@ -35,6 +35,7 @@ function singleCard(result: CardSearchResultDto): GroupedCardDto {
         tags: result.tags,
         // Search results don't say which divider they're behind, and the panel doesn't need it
         dividerId: null,
+        language: result.language,
     }
 }
 
@@ -206,7 +207,7 @@ function SearchResultRow({ result, onOpen }: { result: CardSearchResultDto, onOp
             <button type="button" onClick={onOpen} className="relative shrink-0 cursor-pointer" aria-label={`Show details of ${result.name ?? "this card"}`}>
                 {result.scryfallId ? (
                     <img
-                        src={cardImageUrl(result.scryfallId, "small")}
+                        src={cardImageUrl(result.scryfallId, "small", result.language)}
                         alt=""
                         loading="lazy"
                         className="h-16 w-auto rounded"

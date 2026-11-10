@@ -29,23 +29,32 @@ public class ScryfallImageCache
 
     // e.g. image-cache/normal/d8/d8a2e243-....jpg - the 2-character sub-folder stops one folder
     // ending up with tens of thousands of files in it, which some tools handle badly.
-    // Only call with a validated GUID id and size ("small"/"normal"): they become part of the path
-    private string PathFor(string scryfallId, string size)
-        => Path.Combine(_root, size, scryfallId[..2], $"{scryfallId}.jpg");
+    // Another language sits next to it: d8a2e243-....ja.jpg (lang null = the printing's own image).
+    // Only call with a validated GUID id, size ("small"/"normal") and lang (a few letters): they become part of the path
+    private string PathFor(string scryfallId, string size, string? lang = null)
+        => Path.Combine(_root, size, scryfallId[..2], lang is null ? $"{scryfallId}.jpg" : $"{scryfallId}.{lang}.jpg");
 
-    public string? FindCached(string scryfallId, string size)
+    // Scryfall has no printing of this card in that language: an empty marker file, so it isn't asked again every view
+    private string MissingPathFor(string scryfallId, string size, string lang)
+        => Path.ChangeExtension(PathFor(scryfallId, size, lang), ".missing");
+
+    public string? FindCached(string scryfallId, string size, string? lang = null)
     {
-        var path = PathFor(scryfallId, size);
+        var path = PathFor(scryfallId, size, lang);
         return File.Exists(path) ? path : null;
     }
 
-    // Downloads the image into the cache and returns its path; null if it couldn't be downloaded (e.g. offline)
-    public async Task<string?> DownloadAsync(string scryfallId, string size, string sourceUrl, CancellationToken ct)
+    public bool IsKnownMissing(string scryfallId, string size, string lang)
+        => File.Exists(MissingPathFor(scryfallId, size, lang));
+
+    // Downloads the image into the cache and returns its path; null if it couldn't be downloaded (e.g. offline,
+    // or there's no printing in that language, which is then remembered: see IsKnownMissing)
+    public async Task<string?> DownloadAsync(string scryfallId, string size, string sourceUrl, CancellationToken ct, string? lang = null)
     {
         if (!Uri.TryCreate(sourceUrl, UriKind.Absolute, out var uri) || !AllowedHosts.Contains(uri.Host))
             return null;
 
-        var path = PathFor(scryfallId, size);
+        var path = PathFor(scryfallId, size, lang);
         // Download to a temporary file first, then move it into place in one step: a half-finished
         // download (server stopped, connection dropped) can then never be served as if it were the image
         var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
@@ -53,6 +62,12 @@ public class ScryfallImageCache
         {
             var http = _httpFactory.CreateClient(HttpClientName);
             using var response = await http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct);
+            if (lang is not null && response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllBytes(MissingPathFor(scryfallId, size, lang), []);
+                return null;
+            }
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogWarning("Image download for {Id} ({Size}) failed: {Status}", scryfallId, size, response.StatusCode);

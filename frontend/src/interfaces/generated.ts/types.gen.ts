@@ -171,6 +171,7 @@ export type CardSearchResultDto = {
     dividerName: null | string;
     groupPath: Array<LocationStepDto>;
     tags: Array<string>;
+    language: string;
     price?: null | number | string;
 };
 
@@ -263,6 +264,7 @@ export type GroupedCardDto = {
     ids: Array<string>;
     tags: Array<string>;
     dividerId: null | string;
+    language: string;
     price?: null | number | string;
 };
 
@@ -2054,6 +2056,7 @@ export type GetApiScryfallCardsByIdImageData = {
     };
     query?: {
         size?: string;
+        lang?: string;
     };
     url: '/api/scryfall/cards/{id}/image';
 };
