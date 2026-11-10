@@ -13,6 +13,7 @@ import {
 import { cardImageUrl } from "../utils/cardImageUrl"
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch"
 import { SearchInput } from "./misc/SearchInput"
+import { ConditionOptions } from "../utils/Enum.tsx"
 
 // What the bar produces: a card as typed/picked, without a box (where it goes is up to the page)
 export type NewCard = Omit<AddCardDto, "boxId">
@@ -88,6 +89,8 @@ export function AddNewCardTextBar({
     const [addError, setAddError] = useState<string>()
     // "Added 4 × Sol Ring": confirmation after a successful add, cleared when typing again
     const [lastAdded, setLastAdded] = useState<string>()
+    // The condition new cards get. Kept between adds (entering a run of LP cards), back to NM on a reload
+    const [condition, setCondition] = useState<string>("NM")
 
     // Same search-as-you-type behaviour as the collection search page
     const { result: lookup, errorMessage: lookupError, isSearching, isTooShort } = useDebouncedSearch(text, lookUp)
@@ -107,7 +110,7 @@ export function AddNewCardTextBar({
             setCode,
             setNumber,
             name: printing?.name ?? parsed.name ?? null,
-            condition: "NM",
+            condition,
             foilType: parsed.foil ? "Traditional" : "None",
             stampType: "None",
             language: "en",
@@ -168,6 +171,16 @@ export function AddNewCardTextBar({
                     onChange={changeText}
                     isSearching={isSearching || isAdding}
                 >
+                    <label htmlFor={`${id}-condition`} className="sr-only">Condition</label>
+                    <select
+                        id={`${id}-condition`}
+                        value={condition}
+                        onChange={event => setCondition(event.target.value)}
+                        title="Condition of the cards you add"
+                        className="shrink-0 rounded-lg border border-input-line bg-input px-2 py-2 text-sm font-semibold text-fg outline-none focus:border-accent-line focus:ring-2 focus:ring-accent-line/20"
+                    >
+                        {ConditionOptions.map(value => <option key={value}>{value}</option>)}
+                    </select>
                     <button
                         type="submit"
                         disabled={isAdding}
