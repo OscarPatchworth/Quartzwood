@@ -25,12 +25,15 @@ public class CollectionTransferService
     private readonly AppDbContext _context;
     private readonly IScryfallService _scryfall;
     private readonly ICardCommandService _cards;
+    private readonly ICardQueryService _cardQueries;
 
-    public CollectionTransferService(AppDbContext context, IScryfallService scryfall, ICardCommandService cards)
+    public CollectionTransferService(AppDbContext context, IScryfallService scryfall, ICardCommandService cards,
+        ICardQueryService cardQueries)
     {
         _context = context;
         _scryfall = scryfall;
         _cards = cards;
+        _cardQueries = cardQueries;
     }
 
     public static ITransferFormat? FindFormat(string key)
@@ -125,8 +128,12 @@ public class CollectionTransferService
 
     // ---------- Import ----------
 
-    // Adds every line it can into the box; lines that can't be imported are returned with the reason
-    public async Task<ImportResultDto> ImportAsync(Guid boxId, string content)
+    // A line whose printing has been checked against Scryfall: ready to add, or to compare with the box
+    private record ResolvedLine(ParsedLine Line, TransferRow Row, string SetCode, string Number, ScryfallCard Printing);
+
+    // Reads the file and checks every line's printing. Shared by import and compare, so the compare view
+    // shows exactly the cards an import would add
+    private async Task<(string Format, List<ResolvedLine> Lines, List<ImportFailureDto> Failed)> ResolveAsync(string content)
     {
         var firstLine = content.Split('\n').Select(l => l.Trim()).FirstOrDefault(l => l.Length > 0) ?? string.Empty;
         var format = Formats.First(f => f.Matches(firstLine));
@@ -136,9 +143,8 @@ public class CollectionTransferService
         var printings = await _scryfall.GetCardsByIdsAsync(
             lines.Where(l => l.Row?.ScryfallId != null).Select(l => l.Row!.ScryfallId!));
 
+        var resolved = new List<ResolvedLine>();
         var failed = new List<ImportFailureDto>();
-        var cardsAdded = 0;
-        var linesAdded = 0;
 
         foreach (var line in lines)
         {
@@ -174,6 +180,22 @@ public class CollectionTransferService
                 continue;
             }
 
+            resolved.Add(new ResolvedLine(line, row, setCode.ToUpperInvariant(), number, scryfallCard));
+        }
+
+        return (format.DisplayName, resolved, failed);
+    }
+
+    // Adds every line it can into the box (behind dividerId, if given: one in this box, checked by the caller);
+    // lines that can't be imported are returned with the reason
+    public async Task<ImportResultDto> ImportAsync(Guid boxId, string content, Guid? dividerId = null)
+    {
+        var (format, lines, failed) = await ResolveAsync(content);
+        var cardsAdded = 0;
+        var linesAdded = 0;
+
+        foreach (var (line, row, setCode, number, _) in lines)
+        {
             try
             {
                 var remaining = row.Quantity;
@@ -181,7 +203,7 @@ public class CollectionTransferService
                 {
                     var copies = Math.Min(remaining, MaxCopiesPerAdd);
                     var added = await _cards.AddAsync(new AddCardDto(
-                        SetCode: setCode.ToUpperInvariant(),
+                        SetCode: setCode,
                         SetNumber: number,
                         Name: row.Name,
                         Condition: row.Condition.ToString(),
@@ -193,9 +215,10 @@ public class CollectionTransferService
                         // Files only say whether a card is altered, not by whom
                         AlterArtist: row.IsAltered ? "Unknown artist" : null,
                         PurchasePrice: row.PurchasePrice,
-                        Quantity: copies));
+                        Quantity: copies,
+                        DividerId: dividerId));
 
-                    if (added is null) throw new ArgumentException($"{setCode.ToUpperInvariant()} #{number} isn't on Scryfall.");
+                    if (added is null) throw new ArgumentException($"{setCode} #{number} isn't on Scryfall.");
                     cardsAdded += added.Count;
                     remaining -= copies;
                 }
@@ -207,8 +230,58 @@ public class CollectionTransferService
             }
         }
 
-        return new ImportResultDto(format.DisplayName, cardsAdded, linesAdded, failed);
+        return new ImportResultDto(format, cardsAdded, linesAdded, failed.OrderBy(f => f.Line).ToList());
     }
+
+    // What an import would add, next to what's already there (the whole box, or one divider's cards), without
+    // adding anything: one column per printing, in the chosen sort order, so you can see where each new card goes
+    // and which ones join cards you already have
+    public async Task<ImportCompareDto> CompareAsync(Guid boxId, string content, Guid? dividerId, CardSort sort, bool descending)
+    {
+        var (format, lines, failed) = await ResolveAsync(content);
+
+        var existing = (await _cardQueries.GetByBoxGroupedAsync(boxId, new CardListOptions()))
+            .Where(stack => dividerId is null || stack.DividerId == dividerId)
+            .ToList();
+
+        // The same printing, condition, finish and language in the file more than once: one stack
+        var incoming = lines
+            .GroupBy(l => (l.SetCode, l.Number, l.Row.Condition, l.Row.Foil, l.Row.Language))
+            .Select(g => new ImportIncomingStackDto(
+                g.First().Printing.Name, g.Key.SetCode, g.Key.Number, g.First().Printing.Id,
+                g.Key.Condition.ToString(), g.Key.Foil.ToString(), g.Key.Language, g.Sum(l => l.Row.Quantity)))
+            .ToList();
+
+        // A column per printing (set + number), whichever side it's on
+        static string PrintingKey(string? setCode, string? number, string? name)
+            => setCode is null || number is null ? $"?{name}" : $"{setCode.ToUpperInvariant()}|{number}";
+        var keys = existing.Select(s => PrintingKey(s.SetCode, s.SetNumber, s.Name))
+            .Concat(incoming.Select(s => PrintingKey(s.SetCode, s.SetNumber, s.Name)))
+            .Distinct();
+        var columns = keys.Select(key => new ImportCompareColumnDto(
+                existing.Where(s => PrintingKey(s.SetCode, s.SetNumber, s.Name) == key).ToList(),
+                incoming.Where(s => PrintingKey(s.SetCode, s.SetNumber, s.Name) == key).ToList()))
+            .ToList();
+
+        // Sorted with the same rules as the box page, using the column's printing
+        var gameplay = await _scryfall.GetGameplayByIdsAsync(columns.Select(ColumnScryfallId).OfType<string>());
+        var sorted = CardSorting.Sort(columns, column =>
+        {
+            var printing = ColumnScryfallId(column) is { } id ? gameplay.GetValueOrDefault(id) : null;
+            var first = column.Existing.FirstOrDefault();
+            var name = first?.Name ?? column.Incoming[0].Name;
+            return new CardSortFields(name, null, first?.SetCode ?? column.Incoming.FirstOrDefault()?.SetCode,
+                first?.SetNumber ?? column.Incoming.FirstOrDefault()?.SetNumber, printing, CardPrice.For(printing, FoilType.None));
+        }, sort, descending);
+
+        return new ImportCompareDto(format, sorted, incoming.Sum(s => s.Count), failed);
+    }
+
+    private static string? ColumnScryfallId(ImportCompareColumnDto column)
+        => column.Existing.Select(s => s.ScryfallId).FirstOrDefault(id => id != null) ?? column.Incoming.FirstOrDefault()?.ScryfallId;
+
+    public Task<bool> IsDividerInBoxAsync(Guid dividerId, Guid boxId)
+        => _context.Dividers.AnyAsync(d => d.Id == dividerId && d.BoxId == boxId);
 
     // "Delver of Secrets" matches "Delver of Secrets // Insectile Aberration": files may name either face
     private static bool NamesMatch(string fileName, string scryfallName)

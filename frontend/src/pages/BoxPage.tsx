@@ -23,6 +23,7 @@ import { AddNewCardTextBar, type NewCard } from '../components/AddNewCardTextBar
 import EditableTitle from '../components/misc/EditableTitle.tsx'
 import { cardImageUrl } from '../utils/cardImageUrl'
 import { ImportDialog } from '../components/ImportExport/ImportDialog'
+import { CompareImportDialog } from '../components/ImportExport/CompareImportDialog'
 import { ExportMenu } from '../components/ImportExport/ExportMenu'
 import { BulkActionBar } from '../components/Cards/BulkActionBar'
 import { useCardSelection } from '../hooks/useCardSelection'
@@ -177,11 +178,12 @@ export default function BoxPage() {
     }
 
     // Swaps the divider with its neighbour: shown straight away, put back if the server says no
-    async function moveDivider(index: number, direction: -1 | 1) {
+    async function moveDivider(index: number, direction: -1 | 1 | "last") {
         if (!id) return
         const previous = dividers
         const reordered = [...dividers]
-        ;[reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]]
+        if (direction === "last") reordered.push(...reordered.splice(index, 1))
+        else [reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]]
 
         setDividers(reordered)
         setDividerError(undefined)
@@ -303,6 +305,7 @@ export default function BoxPage() {
     const editButtons = box && (
         <>
             <ImportDialog boxId={box.id} onImported={refreshCardsAfterMutation} />
+            <CompareImportDialog boxId={box.id} boxName={box.name} dividers={dividers} onImported={refreshCardsAfterMutation} />
             <ExportMenu kind="box" id={box.id} />
             <button
                 type="button"

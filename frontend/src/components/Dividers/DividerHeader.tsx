@@ -7,7 +7,8 @@ interface DividerHeaderProps {
     isLast: boolean
     // Each resolves once the server has answered; the box page shows any error
     onRename: (name: string) => Promise<void>
-    onMove: (direction: -1 | 1) => void
+    // -1/1: one place towards the front/back; "last": to the back of the box
+    onMove: (direction: -1 | 1 | "last") => void
     onDelete: () => void
     disabled?: boolean
     // Viewing someone else's box: just the name and count, no rename/move/delete
@@ -85,6 +86,19 @@ export function DividerHeader({ divider, isFirst, isLast, onRename, onMove, onDe
                 >
                     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
                         <path d="M5 8l5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => onMove("last")}
+                    disabled={disabled || isLast}
+                    aria-label={`Move ${divider.name} to the back of the box`}
+                    title="Move to the back of the box"
+                    className={`${iconButton} border-button-line bg-button hover:bg-button-hover`}
+                >
+                    {/* Down arrow onto a line: all the way to the end */}
+                    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="size-4">
+                        <path d="M5 6l5 5 5-5M5 15h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
                 <button

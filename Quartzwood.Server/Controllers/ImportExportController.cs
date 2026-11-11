@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Quartzwood.Server.DTOs;
+using Quartzwood.Server.Services.Cards;
 using Quartzwood.Server.Services.Access;
 using Quartzwood.Server.Services.ImportExport;
 
@@ -68,7 +69,26 @@ public class ImportExportController : ControllerBase
         if (!await _access.CanAccessBoxAsync(id)) return NotFound();
         if (string.IsNullOrWhiteSpace(dto.Content)) return BadRequest("Nothing to import.");
         if (dto.Content.Length > MaxImportLength) return BadRequest("That file is too big to import in one go: split it up.");
+        if (dto.DividerId is { } dividerId && !await _transfer.IsDividerInBoxAsync(dividerId, id))
+            return BadRequest("That divider isn't in this box.");
 
-        return Ok(await _transfer.ImportAsync(id, dto.Content));
+        return Ok(await _transfer.ImportAsync(id, dto.Content, dto.DividerId));
+    }
+
+    // What importing the file would add, next to the cards already in the box (or behind one divider).
+    // Adds nothing: Import does that once you're happy
+    [HttpPost("import/boxes/{id}/compare")]
+    [ProducesResponseType(typeof(ImportCompareDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> CompareWithBox(Guid id, ImportCompareRequestDto dto)
+    {
+        if (!await _access.CanAccessBoxAsync(id)) return NotFound();
+        if (string.IsNullOrWhiteSpace(dto.Content)) return BadRequest("Nothing to compare.");
+        if (dto.Content.Length > MaxImportLength) return BadRequest("That file is too big to import in one go: split it up.");
+        if (dto.DividerId is { } dividerId && !await _transfer.IsDividerInBoxAsync(dividerId, id))
+            return BadRequest("That divider isn't in this box.");
+
+        return Ok(await _transfer.CompareAsync(id, dto.Content, dto.DividerId, CardSorting.Parse(dto.Sort), dto.Descending));
     }
 }

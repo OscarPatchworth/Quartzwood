@@ -279,14 +279,45 @@ export type HttpValidationProblemDetails = {
     };
 };
 
+export type ImportCompareColumnDto = {
+    existing: Array<GroupedCardDto>;
+    incoming: Array<ImportIncomingStackDto>;
+};
+
+export type ImportCompareDto = {
+    format: string;
+    columns: Array<ImportCompareColumnDto>;
+    incomingCount: number | string;
+    failed: Array<ImportFailureDto>;
+};
+
+export type ImportCompareRequestDto = {
+    content: string;
+    dividerId?: null | string;
+    sort?: null | string;
+    descending?: boolean;
+};
+
 export type ImportFailureDto = {
     line: number | string;
     text: string;
     reason: string;
 };
 
+export type ImportIncomingStackDto = {
+    name: string;
+    setCode: string;
+    setNumber: string;
+    scryfallId: string;
+    condition: string;
+    foilType: string;
+    language: string;
+    count: number | string;
+};
+
 export type ImportRequestDto = {
     content: string;
+    dividerId?: null | string;
 };
 
 export type ImportResultDto = {
@@ -1935,6 +1966,37 @@ export type PostApiImportBoxesByIdResponses = {
 };
 
 export type PostApiImportBoxesByIdResponse = PostApiImportBoxesByIdResponses[keyof PostApiImportBoxesByIdResponses];
+
+export type PostApiImportBoxesByIdCompareData = {
+    body: ImportCompareRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/import/boxes/{id}/compare';
+};
+
+export type PostApiImportBoxesByIdCompareErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PostApiImportBoxesByIdCompareError = PostApiImportBoxesByIdCompareErrors[keyof PostApiImportBoxesByIdCompareErrors];
+
+export type PostApiImportBoxesByIdCompareResponses = {
+    /**
+     * OK
+     */
+    200: ImportCompareDto;
+};
+
+export type PostApiImportBoxesByIdCompareResponse = PostApiImportBoxesByIdCompareResponses[keyof PostApiImportBoxesByIdCompareResponses];
 
 export type GetApiScryfallAutocompleteData = {
     body?: never;
