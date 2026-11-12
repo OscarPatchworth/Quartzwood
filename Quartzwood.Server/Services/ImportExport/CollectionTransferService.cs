@@ -186,19 +186,95 @@ public class CollectionTransferService
         return (format.DisplayName, resolved, failed);
     }
 
-    // Adds every line it can into the box (behind dividerId, if given: one in this box, checked by the caller);
-    // lines that can't be imported are returned with the reason
-    public async Task<ImportResultDto> ImportAsync(Guid boxId, string content, Guid? dividerId = null)
+    // Some identical cards from the list, ready to add: what the file says, plus any changes made in the compare
+    // view (a ManaBox scan doesn't know a card is foil or Japanese, say)
+    private record IncomingCards(ResolvedLine Source, int Quantity, Condition Condition, FoilType Foil, StampType Stamp,
+        string Language, bool IsProxy, bool IsSigned, bool IsList, string? AlterArtist, string? Notes)
+    {
+        // Names a stack of these in an ImportEditDto: identical cards have the same key
+        public string Key => string.Join('|', Source.SetCode, Source.Number, Condition, Foil, Stamp, Language,
+            IsProxy, IsSigned, IsList, AlterArtist, Notes);
+    }
+
+    // The list's cards, with the edits applied in order. Edits take copies from the END of the list first
+    // (the last cards scanned), and the changed ones become separate cards, so "2 of these 6 are foil" works
+    private async Task<(string Format, List<IncomingCards> Cards, List<ImportFailureDto> Failed)> PrepareAsync(
+        string content, IReadOnlyList<ImportEditDto>? edits)
     {
         var (format, lines, failed) = await ResolveAsync(content);
-        var cardsAdded = 0;
-        var linesAdded = 0;
+        var cards = lines.Select(l => new IncomingCards(l, l.Row.Quantity, l.Row.Condition, l.Row.Foil, StampType.None,
+                l.Row.Language, l.Row.IsProxy, false, false,
+                // Files only say whether a card is altered, not by whom
+                l.Row.IsAltered ? "Unknown artist" : null, null))
+            .ToList();
 
-        foreach (var (line, row, setCode, number, _) in lines)
+        foreach (var edit in edits ?? [])
         {
+            if (edit.Count < 1) throw new ArgumentException("An edit must change at least one card.");
+            var remaining = edit.Count;
+            for (var i = cards.Count - 1; i >= 0 && remaining > 0; i--)
+            {
+                var card = cards[i];
+                if (card.Key != edit.Key) continue;
+
+                var taken = Math.Min(remaining, card.Quantity);
+                remaining -= taken;
+                var rest = card.Quantity - taken;
+                var changed = edit.Remove ? null : Apply(card with { Quantity = taken }, edit);
+
+                if (rest > 0)
+                {
+                    cards[i] = card with { Quantity = rest };
+                    if (changed is not null) cards.Insert(i + 1, changed);
+                }
+                else if (changed is not null) cards[i] = changed;
+                else cards.RemoveAt(i);
+            }
+            // Fewer than that left (the list changed since): the edit applies to the ones there are
+        }
+
+        return (format, cards, failed);
+    }
+
+    private static IncomingCards Apply(IncomingCards card, ImportEditDto edit)
+    {
+        static T Parse<T>(string? value, T current, string what) where T : struct, Enum
+            => value is null ? current
+                : Enum.TryParse<T>(value, true, out var parsed) ? parsed
+                : throw new ArgumentException($"Invalid {what}: {value}");
+
+        var language = edit.Language?.Trim();
+        if (language == "") throw new ArgumentException("Language can't be empty.");
+        return card with
+        {
+            Condition = Parse(edit.Condition, card.Condition, "condition"),
+            Foil = Parse(edit.FoilType, card.Foil, "foil type"),
+            Stamp = Parse(edit.StampType, card.Stamp, "stamp type"),
+            Language = language ?? card.Language,
+            IsProxy = edit.IsProxy,
+            IsSigned = edit.IsSigned,
+            IsList = edit.IsList,
+            AlterArtist = string.IsNullOrWhiteSpace(edit.AlterArtist) ? null : edit.AlterArtist.Trim(),
+            Notes = string.IsNullOrWhiteSpace(edit.Notes) ? null : edit.Notes,
+        };
+    }
+
+    // Adds every line it can into the box (behind dividerId, if given: one in this box, checked by the caller),
+    // with the compare view's edits; lines that can't be imported are returned with the reason
+    public async Task<ImportResultDto> ImportAsync(Guid boxId, string content, Guid? dividerId = null,
+        IReadOnlyList<ImportEditDto>? edits = null)
+    {
+        var (format, cards, failed) = await PrepareAsync(content, edits);
+        var cardsAdded = 0;
+        var addedLines = new HashSet<int>();
+        var failedLines = new HashSet<int>();
+
+        foreach (var card in cards)
+        {
+            var (line, row, setCode, number, _) = card.Source;
             try
             {
-                var remaining = row.Quantity;
+                var remaining = card.Quantity;
                 while (remaining > 0)
                 {
                     var copies = Math.Min(remaining, MaxCopiesPerAdd);
@@ -206,14 +282,16 @@ public class CollectionTransferService
                         SetCode: setCode,
                         SetNumber: number,
                         Name: row.Name,
-                        Condition: row.Condition.ToString(),
+                        Condition: card.Condition.ToString(),
                         BoxId: boxId,
-                        FoilType: row.Foil.ToString(),
-                        StampType: nameof(StampType.None),
-                        Language: row.Language,
-                        IsProxy: row.IsProxy,
-                        // Files only say whether a card is altered, not by whom
-                        AlterArtist: row.IsAltered ? "Unknown artist" : null,
+                        FoilType: card.Foil.ToString(),
+                        StampType: card.Stamp.ToString(),
+                        Language: card.Language,
+                        IsProxy: card.IsProxy,
+                        IsSigned: card.IsSigned,
+                        IsList: card.IsList,
+                        AlterArtist: card.AlterArtist,
+                        Notes: card.Notes,
                         PurchasePrice: row.PurchasePrice,
                         Quantity: copies,
                         DividerId: dividerId));
@@ -222,34 +300,40 @@ public class CollectionTransferService
                     cardsAdded += added.Count;
                     remaining -= copies;
                 }
-                linesAdded++;
+                addedLines.Add(line.LineNumber);
             }
             catch (ArgumentException ex)
             {
-                failed.Add(new ImportFailureDto(line.LineNumber, line.Text, ex.Message));
+                // An edited line is split in several: report it once
+                if (failedLines.Add(line.LineNumber)) failed.Add(new ImportFailureDto(line.LineNumber, line.Text, ex.Message));
             }
         }
 
-        return new ImportResultDto(format, cardsAdded, linesAdded, failed.OrderBy(f => f.Line).ToList());
+        return new ImportResultDto(format, cardsAdded, addedLines.Count, failed.OrderBy(f => f.Line).ToList());
     }
 
     // What an import would add, next to what's already there (the whole box, or one divider's cards), without
     // adding anything: one column per printing, in the chosen sort order, so you can see where each new card goes
     // and which ones join cards you already have
-    public async Task<ImportCompareDto> CompareAsync(Guid boxId, string content, Guid? dividerId, CardSort sort, bool descending)
+    public async Task<ImportCompareDto> CompareAsync(Guid boxId, string content, Guid? dividerId, CardSort sort, bool descending,
+        IReadOnlyList<ImportEditDto>? edits = null)
     {
-        var (format, lines, failed) = await ResolveAsync(content);
+        var (format, cards, failed) = await PrepareAsync(content, edits);
 
         var existing = (await _cardQueries.GetByBoxGroupedAsync(boxId, new CardListOptions()))
             .Where(stack => dividerId is null || stack.DividerId == dividerId)
             .ToList();
 
-        // The same printing, condition, finish and language in the file more than once: one stack
-        var incoming = lines
-            .GroupBy(l => (l.SetCode, l.Number, l.Row.Condition, l.Row.Foil, l.Row.Language))
-            .Select(g => new ImportIncomingStackDto(
-                g.First().Printing.Name, g.Key.SetCode, g.Key.Number, g.First().Printing.Id,
-                g.Key.Condition.ToString(), g.Key.Foil.ToString(), g.Key.Language, g.Sum(l => l.Row.Quantity)))
+        // Identical cards in the file more than once: one stack
+        var incoming = cards
+            .GroupBy(c => c.Key)
+            .Select(g =>
+            {
+                var c = g.First();
+                return new ImportIncomingStackDto(g.Key, c.Source.Printing.Name, c.Source.SetCode, c.Source.Number,
+                    c.Source.Printing.Id, c.Condition.ToString(), c.Foil.ToString(), c.Stamp.ToString(), c.Language,
+                    c.IsProxy, c.IsSigned, c.IsList, c.AlterArtist, c.Notes, g.Sum(x => x.Quantity));
+            })
             .ToList();
 
         // A column per printing (set + number), whichever side it's on

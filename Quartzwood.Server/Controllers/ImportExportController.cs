@@ -15,6 +15,8 @@ public class ImportExportController : ControllerBase
 {
     // ~2MB of text: tens of thousands of lines, enough for a big collection
     private const int MaxImportLength = 2_000_000;
+    // Changes made to a list in the compare view (each Update or Delete there is one)
+    private const int MaxEdits = 2_000;
 
     private readonly CollectionTransferService _transfer;
     private readonly IAccessService _access;
@@ -72,7 +74,16 @@ public class ImportExportController : ControllerBase
         if (dto.DividerId is { } dividerId && !await _transfer.IsDividerInBoxAsync(dividerId, id))
             return BadRequest("That divider isn't in this box.");
 
-        return Ok(await _transfer.ImportAsync(id, dto.Content, dto.DividerId));
+        if (dto.Edits?.Count > MaxEdits) return BadRequest("Too many changes to the list: add these, then edit the rest in the box.");
+
+        try
+        {
+            return Ok(await _transfer.ImportAsync(id, dto.Content, dto.DividerId, dto.Edits));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // What importing the file would add, next to the cards already in the box (or behind one divider).
@@ -89,6 +100,15 @@ public class ImportExportController : ControllerBase
         if (dto.DividerId is { } dividerId && !await _transfer.IsDividerInBoxAsync(dividerId, id))
             return BadRequest("That divider isn't in this box.");
 
-        return Ok(await _transfer.CompareAsync(id, dto.Content, dto.DividerId, CardSorting.Parse(dto.Sort), dto.Descending));
+        if (dto.Edits?.Count > MaxEdits) return BadRequest("Too many changes to the list: add these, then edit the rest in the box.");
+
+        try
+        {
+            return Ok(await _transfer.CompareAsync(id, dto.Content, dto.DividerId, CardSorting.Parse(dto.Sort), dto.Descending, dto.Edits));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

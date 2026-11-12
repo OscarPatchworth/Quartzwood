@@ -297,6 +297,22 @@ export type ImportCompareRequestDto = {
     dividerId?: null | string;
     sort?: null | string;
     descending?: boolean;
+    edits?: null | Array<ImportEditDto>;
+};
+
+export type ImportEditDto = {
+    key: string;
+    count: number | string;
+    remove?: boolean;
+    condition?: null | string;
+    foilType?: null | string;
+    stampType?: null | string;
+    language?: null | string;
+    isProxy?: boolean;
+    isSigned?: boolean;
+    isList?: boolean;
+    alterArtist?: null | string;
+    notes?: null | string;
 };
 
 export type ImportFailureDto = {
@@ -306,19 +322,27 @@ export type ImportFailureDto = {
 };
 
 export type ImportIncomingStackDto = {
+    key: string;
     name: string;
     setCode: string;
     setNumber: string;
     scryfallId: string;
     condition: string;
     foilType: string;
+    stampType: string;
     language: string;
+    isProxy: boolean;
+    isSigned: boolean;
+    isList: boolean;
+    alterArtist: null | string;
+    notes: null | string;
     count: number | string;
 };
 
 export type ImportRequestDto = {
     content: string;
     dividerId?: null | string;
+    edits?: null | Array<ImportEditDto>;
 };
 
 export type ImportResultDto = {

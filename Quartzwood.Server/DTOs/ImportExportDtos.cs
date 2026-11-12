@@ -4,7 +4,27 @@ namespace Quartzwood.Server.DTOs;
 // DividerId: add the cards behind this divider (one in the box); null = not behind one
 public record ImportRequestDto(
     string Content,
-    Guid? DividerId = null
+    Guid? DividerId = null,
+    // Changes made to the list's cards in the compare view, applied in order before adding
+    List<ImportEditDto>? Edits = null
+);
+
+// A change to some of the list's cards before they're added (the list isn't saved anywhere, so the changes
+// are sent with it each time). Key: the incoming stack's key, as the compare view last showed it.
+// Count: how many of its copies. Remove: take them off the list; otherwise they get the fields below
+public record ImportEditDto(
+    string Key,
+    int Count,
+    bool Remove = false,
+    string? Condition = null,
+    string? FoilType = null,
+    string? StampType = null,
+    string? Language = null,
+    bool IsProxy = false,
+    bool IsSigned = false,
+    bool IsList = false,
+    string? AlterArtist = null,
+    string? Notes = null
 );
 
 // Compare a file with what's in the box (or behind one of its dividers) before importing it.
@@ -13,18 +33,27 @@ public record ImportCompareRequestDto(
     string Content,
     Guid? DividerId = null,
     string? Sort = null,
-    bool Descending = false
+    bool Descending = false,
+    List<ImportEditDto>? Edits = null
 );
 
-// Cards in the file with the same printing, condition, finish and language
+// Identical cards in the file (after any edits): same printing, condition, finish, language and so on.
+// Key names the stack in an ImportEditDto
 public record ImportIncomingStackDto(
+    string Key,
     string Name,
     string SetCode,
     string SetNumber,
     string ScryfallId,
     string Condition,
     string FoilType,
+    string StampType,
     string Language,
+    bool IsProxy,
+    bool IsSigned,
+    bool IsList,
+    string? AlterArtist,
+    string? Notes,
     int Count
 );
 

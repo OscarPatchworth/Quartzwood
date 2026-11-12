@@ -5,10 +5,12 @@ import { ConditionOptions, FoilTypeOptions, LanguageOptions, StampTypeOptions } 
 interface CardEditFormProps {
     card?: CardDto
     onChange: (updatedCard: CardDto) => void
+    // The name and set/number shown as text, not editable (a card from an import list: its printing is fixed)
+    lockPrinting?: boolean
 }
 
 const inputClassName = "w-full rounded-md border border-input-line bg-input px-2 py-1.5 text-sm text-fg focus:border-cardinfo-accent focus:outline-none focus:ring-2 focus:ring-cardinfo-line"
-export function CardEditForm({ card, onChange }: CardEditFormProps) {
+export function CardEditForm({ card, onChange, lockPrinting = false }: CardEditFormProps) {
     if (!card) {
         return <LoadingIndicator />
     }
@@ -20,6 +22,12 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
     return (
     <div className="p-1">
         <div className="rounded-lg border border-cardinfo-line bg-cardinfo p-4 shadow-[0_2px_8px_rgba(120,53,15,0.12)]">
+            {lockPrinting ? (
+                <div className="mb-3 border-b border-cardinfo-line pb-3">
+                    <p className="font-display text-xl font-semibold text-cardinfo-fg">{card.name}</p>
+                    <p className="text-sm text-cardinfo-fg-muted">{card.setNumber}-{card.setCode}</p>
+                </div>
+            ) : (
             <div className="mb-3 border-b border-cardinfo-line pb-3">
                 <input
                     aria-label="Card name"
@@ -43,6 +51,7 @@ export function CardEditForm({ card, onChange }: CardEditFormProps) {
                     />
                 </div>
             </div>
+            )}
             <table className="w-full border-collapse text-left text-sm text-cardinfo-fg-muted">
                 <tbody className="divide-y divide-cardinfo-line
                 mb-3 border-b border-cardinfo-line pb-3">
