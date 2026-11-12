@@ -257,9 +257,14 @@ public class LocalScryfallService : IScryfallService
             _logger.LogInformation("Not in local Scryfall data, asking the API: {Lookup}", description);
             return await apiCall();
         }
+        catch (ScryfallPausedException)
+        {
+            // Already logged once by the pacer
+            return default;
+        }
         catch (HttpRequestException ex)
         {
-            _logger.LogWarning(ex, "Scryfall API unreachable for {Lookup}", description);
+            _logger.LogWarning("Scryfall API unreachable for {Lookup}: {Message}", description, ex.Message);
             return default;
         }
     }

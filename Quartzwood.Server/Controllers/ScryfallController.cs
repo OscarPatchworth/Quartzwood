@@ -94,10 +94,10 @@ public class ScryfallController : ControllerBase
     [AllowAnonymous]
     [HttpGet("cards/{id}/image")]
     [ProducesResponseType(200)]
-    [ProducesResponseType(302)]
     [ProducesResponseType(304)]
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
+    [ProducesResponseType(503)]
     public async Task<IActionResult> GetImage(string id, [FromQuery] string size = "normal", [FromQuery] string? lang = null,
         CancellationToken ct = default)
     {
@@ -133,8 +133,13 @@ public class ScryfallController : ControllerBase
         if (url is null) return NotFound();
 
         var downloaded = await _images.DownloadAsync(id, size, url, ct);
-        // Couldn't save it (e.g. offline right now): let the browser try Scryfall directly instead
-        return downloaded is not null ? ServeImage(downloaded) : Redirect(url);
+        if (downloaded is not null) return ServeImage(downloaded);
+
+        // Couldn't get it (Scryfall down or unreachable, or requests paused): say so rather than sending the
+        // browser to Scryfall itself, which would only add to the requests while it's struggling.
+        // The next time the page is opened it's asked for again
+        Response.Headers.RetryAfter = "120";
+        return StatusCode(StatusCodes.Status503ServiceUnavailable);
     }
 
     private PhysicalFileResult ServeImage(string path)

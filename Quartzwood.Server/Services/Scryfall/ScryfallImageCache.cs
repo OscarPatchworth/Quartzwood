@@ -83,9 +83,14 @@ public class ScryfallImageCache
             File.Move(tempPath, path, overwrite: true);
             return path;
         }
+        catch (ScryfallPausedException)
+        {
+            // Already logged once by the pacer, not once per image
+            return null;
+        }
         catch (HttpRequestException ex)
         {
-            _logger.LogWarning(ex, "Image download for {Id} ({Size}) failed", scryfallId, size);
+            _logger.LogWarning("Image download for {Id} ({Size}) failed: {Message}", scryfallId, size, ex.Message);
             return null;
         }
         finally

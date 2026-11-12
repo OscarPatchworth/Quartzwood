@@ -79,11 +79,14 @@ builder.Services.AddScoped<IAccessService, AccessService>();
 builder.Services.Configure<ScryfallOptions>(builder.Configuration.GetSection("Scryfall"));
 builder.Services.AddDbContext<ScryfallDbContext>(options =>
     options.UseSqlite("Data Source=scryfall.db"));
+// Every live API call and image download goes through the pacer: paced, limited, and paused when Scryfall struggles
+builder.Services.AddSingleton<ScryfallPacer>();
+builder.Services.AddTransient<ScryfallPacingHandler>();
 builder.Services.AddHttpClient<ScryfallApiService>(client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-});
+}).AddHttpMessageHandler<ScryfallPacingHandler>();
 builder.Services.AddHttpClient(ScryfallBulkImporter.HttpClientName, client =>
 {
     client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
@@ -99,7 +102,7 @@ builder.Services.AddHttpClient(ScryfallImageCache.HttpClientName, client =>
     client.DefaultRequestHeaders.UserAgent.ParseAdd("QuartzwoodApp/1.0");
     client.DefaultRequestHeaders.Accept.ParseAdd("image/*");
     client.Timeout = TimeSpan.FromSeconds(30);
-});
+}).AddHttpMessageHandler<ScryfallPacingHandler>();
 builder.Services.AddSingleton<ScryfallImageCache>();
 
 // Import/export in other apps' formats (plain text list, Moxfield/Deckbox CSV, ManaBox CSV)
