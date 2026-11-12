@@ -1,5 +1,5 @@
 //#region Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
     deleteApiDividersById,
@@ -77,6 +77,24 @@ export default function BoxPage() {
         return () => document.removeEventListener('keydown', onKeyDown)
     }, [isWide, isAddBarRaised])
     if (isWide && isAddBarRaised) setIsAddBarRaised(false)
+
+    // Wide screens: once the banner's add bar scrolls out of view, it floats at the top of the screen so it's
+    // still there further down the box. Its spot in the banner keeps its height, so the page doesn't jump.
+    // The same element either way (only its position changes), so a half-typed card isn't lost
+    const addBarSlot = useRef<HTMLDivElement>(null)
+    const [floatingAddBarHeight, setFloatingAddBarHeight] = useState<number>()
+    useEffect(() => {
+        const slot = addBarSlot.current
+        if (!slot) return
+        const observer = new IntersectionObserver(([entry]) => {
+            // Only when it's gone off the TOP (scrolled past), not below a short window
+            const scrolledPast = !entry.isIntersecting && entry.boundingClientRect.top < 0
+            setFloatingAddBarHeight(scrolledPast ? entry.boundingClientRect.height : undefined)
+        })
+        observer.observe(slot)
+        return () => observer.disconnect()
+    // The slot comes and goes with these: re-attach when it does
+    }, [isWide, loading, box?.canEdit])
     const [isEditingName, setIsEditingName] = useState(false)
     const [draftName, setDraftName] = useState(box?.name ?? '')
     const navigate = useNavigate()
@@ -369,7 +387,12 @@ export default function BoxPage() {
                     {!canEdit ? (
                         <div className='flex flex-wrap items-start gap-2'>{viewButtons}</div>
                     ) : isWide ? (
-                        <div className='w-full max-w-md'>{addBar}</div>
+                        <div ref={addBarSlot} className='w-full max-w-md' style={{ height: floatingAddBarHeight }}>
+                            <div className={floatingAddBarHeight === undefined ? '' :
+                                `fixed top-3 z-10 w-[min(28rem,calc(100vw-2rem))] rounded-xl shadow-lg ${showRightPanel ? 'right-[26rem]' : 'right-4 sm:right-8'}`}>
+                                {addBar}
+                            </div>
+                        </div>
                     ) : (
                         <div className='flex flex-col gap-2'>
                             <div className='flex flex-wrap items-start gap-2'>{viewButtons}</div>

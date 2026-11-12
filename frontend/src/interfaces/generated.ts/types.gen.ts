@@ -147,6 +147,7 @@ export type CardDto = {
     boxId: string;
     dividerId: null | string;
     tags: Array<string>;
+    addedAt: null | string;
     price?: null | number | string;
 };
 
@@ -2132,6 +2133,10 @@ export type GetApiScryfallCardsByIdImageErrors = {
      * Not Found
      */
     404: ProblemDetails;
+    /**
+     * Service Unavailable
+     */
+    503: unknown;
 };
 
 export type GetApiScryfallCardsByIdImageError = GetApiScryfallCardsByIdImageErrors[keyof GetApiScryfallCardsByIdImageErrors];

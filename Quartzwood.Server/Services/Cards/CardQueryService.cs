@@ -251,7 +251,8 @@ public class CardQueryService : ICardQueryService
         c.Notes,
         c.BoxId,
         c.DividerId,
-        TagNames.Of(c)
+        TagNames.Of(c),
+        c.AddedAt
     );
 
     public async Task<IEnumerable<GroupedCardDto>> GetByBoxGroupedAsync(Guid boxId, CardListOptions options)

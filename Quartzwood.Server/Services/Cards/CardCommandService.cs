@@ -247,6 +247,7 @@ public class CardCommandService : ICardCommandService
         c.Notes,
         c.BoxId,
         c.DividerId,
-        TagNames.Of(c)
+        TagNames.Of(c),
+        c.AddedAt
     );
 }

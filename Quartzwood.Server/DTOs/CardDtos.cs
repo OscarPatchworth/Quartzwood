@@ -20,6 +20,8 @@ public record CardDto(
     // null = not behind any divider
     Guid? DividerId,
     IEnumerable<string> Tags,
+    // When it was added to Quartzwood (UTC); null for cards from before that was recorded
+    DateTime? AddedAt,
     // In CardPrice.Currency (USD), for the card's foil type; null = no price. Only filled in by GET /api/cards/{id}
     decimal? Price = null
 );

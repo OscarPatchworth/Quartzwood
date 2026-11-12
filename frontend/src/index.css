@@ -144,14 +144,12 @@
   --color-cardinfo-add: #E3D548;       /* + (add a copy) button (edit mode) */
   --color-cardinfo-add-fg: #6B6100;
   --color-cardinfo-add-line: #6B6100;
-  /* The list of copies under it (when a box holds more than one) */
-  --color-cardcopy: #FFF7AA;
-  --color-cardcopy-hover: #807615;
-  --color-cardcopy-line: #718EA4;
-  --color-cardcopy-fg: #718EA4;
-  --color-cardcopy-selected: #AAA039;
-  --color-cardcopy-selected-fg: #721330;
-  --color-cardcopy-selected-line: #721330;
+  /* The copy-count wheel under it (when a box holds more than one copy) */
+  --color-copywheel: #FFF7AA;          /* the ring's empty part, and the number box */
+  --color-copywheel-line: #718EA4;     /* notches, number box border */
+  --color-copywheel-fill: #0069a8;     /* the picked part of the ring */
+  --color-copywheel-handle: #00598a;   /* the dot at the end of it */
+  --color-copywheel-fg: #721330;       /* the number, / max, % and the line underneath */
 }
 
 
@@ -250,13 +248,11 @@
   --color-cardinfo-add: #BFB238;
   --color-cardinfo-add-fg: #2E2900;
   --color-cardinfo-add-line: #2E2900;
-  --color-cardcopy: #2A2812;
-  --color-cardcopy-hover: #4A4520;
-  --color-cardcopy-line: #5F7A90;
-  --color-cardcopy-fg: #A9C0D3;
-  --color-cardcopy-selected: #AAA039;
-  --color-cardcopy-selected-fg: #4A0C20;
-  --color-cardcopy-selected-line: #F08AA8;
+  --color-copywheel: #2A2812;
+  --color-copywheel-line: #5F7A90;
+  --color-copywheel-fill: #4C9BD6;
+  --color-copywheel-handle: #0B62A4;
+  --color-copywheel-fg: #F0607E;
 }
 
 

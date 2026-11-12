@@ -1,29 +1,28 @@
 import { useState, useEffect } from "react"
 import { getApiCardsById, type GroupedCardDto, type CardDto } from "../../interfaces/generated.ts"
+import { CopyCountWheel } from "./CopyCountWheel"
 
 interface CardDuplicateListSelectProps {
     groupedCards: GroupedCardDto,
     setSelectedCards: (cardIds: string[]) => void,
 }
 
+// Newest first: picking 2 of 6 takes the 2 most recently added, which is what an over-scan just created.
+// Cards from before "added" was recorded count as oldest
+function newestFirst(a: CardDto, b: CardDto) {
+    return (b.addedAt ?? "").localeCompare(a.addedAt ?? "")
+}
+
+// How many of a stack's copies the card panel acts on (Update/Delete/Divider/tags). The copies are identical,
+// so it's a count, picked on a wheel, rather than a list of copies to tick
 export function CardDuplicateListSelect({ groupedCards, setSelectedCards }: CardDuplicateListSelectProps) {
 
     const [cards, setCards] = useState<CardDto[]>([])
-    const [selectedCardIds, setSelectedCardIds] = useState<string[]>([])
+    const [count, setCount] = useState(0)
 
-    function toggleCard(cardId: string) {
-        var updatedSelectedCardIds: string[]
-        if (selectedCardIds.includes(cardId)) {
-            updatedSelectedCardIds = selectedCardIds.length > 1
-                ? selectedCardIds.filter(id => id !== cardId)
-                : selectedCardIds
-        } else {
-            updatedSelectedCardIds = [...selectedCardIds, cardId]
-        }
-
-        setSelectedCardIds(updatedSelectedCardIds)
-        setSelectedCards(updatedSelectedCardIds)
-
+    function changeCount(next: number) {
+        setCount(next)
+        setSelectedCards(cards.slice(0, next).map(card => card.id))
     }
 
     useEffect(() => {
@@ -32,11 +31,11 @@ export function CardDuplicateListSelect({ groupedCards, setSelectedCards }: Card
         Promise.all(groupedCards.ids.map(cardId => getApiCardsById({ path: { id: cardId } })))
             .then(responses => {
                 if (isCurrent) {
-                    const loadedCards = responses.map(response => response.data)
-                    const loadedCardIds = loadedCards.map(card => card.id)
+                    const loadedCards = responses.map(response => response.data).sort(newestFirst)
+                    // Just the newest to start with: turn the wheel up for more
                     setCards(loadedCards)
-                    setSelectedCardIds(loadedCardIds)
-                    setSelectedCards(loadedCardIds)
+                    setCount(1)
+                    setSelectedCards(loadedCards.slice(0, 1).map(card => card.id))
                 }
             })
             .catch(() => {
@@ -51,25 +50,11 @@ export function CardDuplicateListSelect({ groupedCards, setSelectedCards }: Card
     return(
         <>
         {cards.length > 1 &&
-            <div className="flex flex-col items-center">
-                {cards.map(c => (
-                <button
-                    key={c.id}
-                    type="button"
-                    aria-pressed={selectedCardIds.includes(c.id)}
-                    onClick={() => toggleCard(c.id)}
-                    className={`flex w-2/3 items-center m-1 rounded-xl border px-3 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-cardcopy-selected-line ${
-                        selectedCardIds.includes(c.id)
-                            ? "border-cardcopy-selected-line bg-cardcopy-selected text-cardcopy-selected-fg shadow-sm"
-                            : "border-cardcopy-line bg-cardcopy text-cardcopy-fg hover:bg-cardcopy-hover"
-                    }`}
-                >
-                    <div className="text-center w-full">
-                        <p>{c.name}</p>
-                    </div>
-                    
-                </button>
-                ))}
+            <div className="flex flex-col items-center gap-1">
+                <CopyCountWheel value={count} max={cards.length} onChange={changeCount} label={`Copies of ${cards[0].name ?? "this card"}`} />
+                <p className="text-xs font-semibold text-copywheel-fg">
+                    {count === cards.length ? "All copies" : count === 1 ? "The newest copy" : `The ${count} newest copies`}
+                </p>
             </div>
         }
         </>
